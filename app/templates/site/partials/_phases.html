@@ -1,0 +1,101 @@
+{% from 'site/partials/_site_sub_items.html' import render_inverter, render_module %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for i in range(1, phase_count + 1) %}
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="card-title text-lg mb-2">第 {{ i }} 期</h3>
+            
+            <div class="form-control w-full mb-3">
+                <label class="label" for="phase_name{{ i }}">
+                    <span class="label-text">期數名稱</span>
+                </label>
+                <input type="text" 
+                       class="input input-bordered w-full" 
+                       id="phase_name{{ i }}" 
+                       name="phase_name{{ i }}" 
+                       value="{{ data.get('phase_name' ~ i, '') }}">
+                
+                <input type="hidden" 
+                       name="phase_uid{{ i }}" 
+                       value="{{ data.get('phase_uid' ~ i, '') }}">
+            </div>
+
+            <div class="divider text-xs text-base-content/50">逆變器與模組</div>
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h6 class="font-bold text-base-content/80"><i class="bi bi-lightning-charge-fill mr-1"></i> 逆變器</h6>
+                    <div class="join">
+                        <button type="button" class="btn btn-xs btn-success join-item text-white"
+                                hx-post="/site/partials/sub-items/inverter/{{ i }}/?op=add"
+                                hx-target="#inverter-area-{{ i }}"
+                                hx-include="#form"
+                                hx-swap="innerHTML">
+                            <i class="bi bi-plus"></i> 增
+                        </button>
+                        <button type="button" class="btn btn-xs btn-error join-item text-white"
+                                hx-post="/site/partials/sub-items/inverter/{{ i }}/?op=reduce"
+                                hx-target="#inverter-area-{{ i }}"
+                                hx-include="#form"
+                                hx-swap="innerHTML">
+                            <i class="bi bi-dash"></i> 減
+                        </button>
+                    </div>
+                </div>
+
+                <div id="inverter-area-{{ i }}" class="space-y-2">
+                    {% set ns = namespace(inv_count=0) %}
+                    {% for key in data.keys() %}
+                         {% if key.startswith('inverter_brand' ~ i ~ '_') %}
+                            {% set idx = key|replace('inverter_brand' ~ i ~ '_', '')|int %}
+                            {% if idx > ns.inv_count %}{% set ns.inv_count = idx %}{% endif %}
+                         {% endif %}
+                    {% endfor %}
+                    
+                    {% for j in range(1, ns.inv_count + 1) %}
+                        {{ render_inverter(i, j, data) }}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="divider my-2"></div>
+
+            <div class="mb-2">
+                <div class="flex justify-between items-center mb-2">
+                    <h6 class="font-bold text-base-content/80"><i class="bi bi-grid-3x3-gap-fill mr-1"></i> 模組</h6>
+                    <div class="join">
+                        <button type="button" class="btn btn-xs btn-success join-item text-white"
+                                hx-post="/site/partials/sub-items/module/{{ i }}/?op=add"
+                                hx-target="#module-area-{{ i }}"
+                                hx-include="#form"
+                                hx-swap="innerHTML">
+                            <i class="bi bi-plus"></i> 增
+                        </button>
+                        <button type="button" class="btn btn-xs btn-error join-item text-white"
+                                hx-post="/site/partials/sub-items/module/{{ i }}/?op=reduce"
+                                hx-target="#module-area-{{ i }}"
+                                hx-include="#form"
+                                hx-swap="innerHTML">
+                            <i class="bi bi-dash"></i> 減
+                        </button>
+                    </div>
+                </div>
+
+                <div id="module-area-{{ i }}" class="space-y-2">
+                    {% set ns_mod = namespace(mod_count=0) %}
+                    {% for key in data.keys() %}
+                         {% if key.startswith('module_brand' ~ i ~ '_') %}
+                            {% set idx = key|replace('module_brand' ~ i ~ '_', '')|int %}
+                            {% if idx > ns_mod.mod_count %}{% set ns_mod.mod_count = idx %}{% endif %}
+                         {% endif %}
+                    {% endfor %}
+
+                    {% for j in range(1, ns_mod.mod_count + 1) %}
+                        {{ render_module(i, j, data) }}
+                    {% endfor %}
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    {% endfor %}
+</div>

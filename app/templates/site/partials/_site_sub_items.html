@@ -1,0 +1,72 @@
+{% macro render_inverter(phase_idx, item_idx, data) %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 border p-3 rounded-lg bg-base-50 hover:bg-base-100 transition-colors">
+    <div class="form-control">
+        <label class="label" for="inverter_brand{{phase_idx}}_{{item_idx}}">
+            <span class="label-text">品牌</span>
+        </label>
+        <input type="text" class="input input-bordered input-sm w-full" 
+               id="inverter_brand{{phase_idx}}_{{item_idx}}" 
+               name="inverter_brand{{phase_idx}}_{{item_idx}}" 
+               value="{{ data.get('inverter_brand' ~ phase_idx ~ '_' ~ item_idx, '') }}">
+    </div>
+    <div class="form-control">
+        <label class="label" for="inverter_model{{phase_idx}}_{{item_idx}}">
+            <span class="label-text">型號</span>
+        </label>
+        <input type="text" class="input input-bordered input-sm w-full" 
+               id="inverter_model{{phase_idx}}_{{item_idx}}" 
+               name="inverter_model{{phase_idx}}_{{item_idx}}" 
+               value="{{ data.get('inverter_model' ~ phase_idx ~ '_' ~ item_idx, '') }}">
+        
+        <input type="hidden" 
+               name="inverter_uid{{phase_idx}}_{{item_idx}}" 
+               value="{{ data.get('inverter_uid' ~ phase_idx ~ '_' ~ item_idx, '') }}">
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_module(phase_idx, item_idx, data) %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3 border p-3 rounded-lg bg-base-50 hover:bg-base-100 transition-colors">
+    <div class="form-control">
+        <label class="label" for="module_brand{{phase_idx}}_{{item_idx}}">
+            <span class="label-text">品牌</span>
+        </label>
+        <input type="text" class="input input-bordered input-sm w-full" 
+               id="module_brand{{phase_idx}}_{{item_idx}}" 
+               name="module_brand{{phase_idx}}_{{item_idx}}" 
+               value="{{ data.get('module_brand' ~ phase_idx ~ '_' ~ item_idx, '') }}">
+    </div>
+    <div class="form-control">
+        <label class="label" for="module_model{{phase_idx}}_{{item_idx}}">
+            <span class="label-text">型號</span>
+        </label>
+        <input type="text" class="input input-bordered input-sm w-full" 
+               id="module_model{{phase_idx}}_{{item_idx}}" 
+               name="module_model{{phase_idx}}_{{item_idx}}" 
+               value="{{ data.get('module_model' ~ phase_idx ~ '_' ~ item_idx, '') }}">
+    </div>
+    <div class="form-control">
+        <label class="label" for="module_wattage{{phase_idx}}_{{item_idx}}">
+            <span class="label-text">瓦數</span>
+        </label>
+        <input type="text" class="input input-bordered input-sm w-full" 
+               id="module_wattage{{phase_idx}}_{{item_idx}}" 
+               name="module_wattage{{phase_idx}}_{{item_idx}}" 
+               value="{{ data.get('module_wattage' ~ phase_idx ~ '_' ~ item_idx, '') }}">
+        
+        <input type="hidden" 
+               name="module_uid{{phase_idx}}_{{item_idx}}" 
+               value="{{ data.get('module_uid' ~ phase_idx ~ '_' ~ item_idx, '') }}">
+    </div>
+</div>
+{% endmacro %}
+
+{% if item_type == 'inverter' %}
+    {% for j in range(1, count + 1) %}
+        {{ render_inverter(phase_idx, j, data) }}
+    {% endfor %}
+{% elif item_type == 'module' %}
+    {% for j in range(1, count + 1) %}
+        {{ render_module(phase_idx, j, data) }}
+    {% endfor %}
+{% endif %}

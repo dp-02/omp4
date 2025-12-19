@@ -1,0 +1,84 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+電廠{% if data.check_type == 1 %}檢測{% else %}維修{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8"
+    x-data 
+    @response-data.window="
+        Swal.fire({
+            title: $event.detail.title,
+            text: $event.detail.text,
+            icon: 'success',
+            confirmButtonText: 'OK',
+            timer: 2000
+        }).then(() => {
+            if ($event.detail.redirectUrl) {
+                window.location.href = $event.detail.redirectUrl;
+            }
+        });
+     ">
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-2xl mx-auto">
+        <div class="card-body">
+            
+            <h1 class="card-title text-3xl font-bold mb-6 border-b pb-4 border-base-200">
+                {% if act == 'create' %}新增{% else %}修改{% endif %}電廠{% if data.check_type == 1 %}檢測{% else %}維修{% endif %}檢查表
+            </h1>
+
+            <form id="form" 
+            hx-post="{% if act == 'create' %}/api/checklist/create{% else %}/api/checklist/update{% endif %}" 
+            hx-swap="none">
+                <input type="hidden" id="site_uid" name="site_uid" value="{{data.site_uid}}">
+                <input type="hidden" id="check_type" name="check_type" value="{{data.check_type}}">
+                <div class="form-control w-full mb-4">
+                    <label for="check_date" class="label">
+                        <span class="label-text font-semibold">檢測日期</span>
+                    </label>
+                    <input type="date" 
+                           class="input input-bordered w-full" 
+                           id="check_date" 
+                           name="check_date" 
+                           placeholder="請選擇日期">
+                </div>
+
+                <div class="form-control w-full mb-6">
+                    <label for="user_name" class="label">
+                        <span class="label-text font-semibold">檢測人員</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-base-content/50">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <input type="text" 
+                               class="input input-bordered w-full bg-base-200 pl-10 cursor-not-allowed text-base-content/70" 
+                               id="user_name" 
+                               name="user_name" 
+                               value="{{data.user_name}}" 
+                               readonly>
+                    </div>
+                </div>
+
+                <div class="card-actions flex items-center gap-4 mt-2">
+                    <button type="submit" class="btn btn-primary px-8 text-white shadow-md">
+                        <i class="bi bi-check-lg"></i>
+                        送出
+                    </button>
+                    
+                    <a class="btn btn-neutral btn-outline gap-2" 
+                       href="/checklist/{{data.site_uid}}/{{data.check_type}}/" 
+                       role="button">
+                        <i class="bi bi-arrow-return-left"></i> 
+                        返回
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>flatpickr("#check_date", {})</script>
+{% endblock %}

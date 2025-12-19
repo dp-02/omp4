@@ -1,0 +1,71 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+{% if act == 'create'%}新增{% else %}修改{% endif%}使用者
+{% endblock %}
+
+{% block content %}
+<div class="grid min-h-screen place-items-center bg-base-100"
+    x-data
+    @response-data.window="
+            Swal.fire({
+                title: $event.detail.title,
+                text: $event.detail.text,
+                icon: 'success',
+                confirmButtonText: 'OK',
+                timer: 2000
+            }).then(() => {
+                window.location.href = $event.detail.redirectUrl;
+            });
+        ">
+  <div class="card w-96 bg-base-100 shadow-xl">
+    <div class="card-body">
+        <h2 class="card-title mb-4">新增使用者</h2>
+        <div id="message-container"></div>
+        <form x-data 
+            hx-post="/api/adminDashboard/user/create" 
+            hx-swap="none">
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text">Line ID</span>
+                </label>
+                <input 
+                    type="text" 
+                    name="lineId" 
+                    placeholder="輸入 Line Id" 
+                    class="input input-bordered w-full" 
+                    required 
+                />
+            </div>
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text">使用者名稱</span>
+                </label>
+                <input 
+                    type="text" 
+                    name="name" 
+                    placeholder="請輸入姓名" 
+                    class="input input-bordered w-full" 
+                    required 
+                />
+            </div>
+            <div class="form-control mt-4">
+                <label class="label cursor-pointer justify-start gap-3">
+                    <input 
+                        type="checkbox" 
+                        name="admin" 
+                        class="checkbox checkbox-primary" 
+                    />
+                    <span class="label-text">設為管理員 (Admin)</span>
+                </label>
+            </div>
+            <div class="card-actions justify-end mt-6">
+                <button type="submit" class="btn btn-primary w-full">
+                    提交新增
+                </button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

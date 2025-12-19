@@ -1,0 +1,57 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+{{data.table_name}}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-4xl mx-auto">
+        <div class="card-body">
+            
+            <h1 class="card-title text-3xl font-bold mb-6 pb-2 border-b border-base-200 flex items-center gap-2">
+                <i class="bi bi-list-check text-primary"></i>
+                {{data.table_name}}
+            </h1>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                
+                {% for data_t in data.table %}
+                    <div>
+                        <a class="btn 
+                        {% if data_t.uid in data.checked%}btn-info{% else %}btn-error{% endif %}
+                        btn-outline w-full justify-start text-lg h-14 shadow-sm hover:scale-[1.01] transition-transform" 
+                           href="/checklist/{{data.site_uid}}/{{data.check_type}}/{{data.checklist_uid}}/{{data_t.uid}}/" 
+                           role="button">
+                            <span class="badge {% if data_t.uid in data.checked%}badge-info{% else %}badge-error{% endif %} badge-sm mr-2 text-white">{{ loop.index }}</span>
+                            {{data_t.name}}
+                        </a>
+                    </div>
+                {% endfor %}
+
+                {% if data.table %}
+                <div class="col-span-1 md:col-span-2 divider my-0">其他功能</div>
+                {% endif %}
+
+                <div class="col-span-1 md:col-span-2">
+                    <a class="btn btn-success w-full text-white text-lg shadow-md" 
+                       href="create_report_choose_option/" 
+                       role="button">
+                        <i class="bi bi-file-earmark-text-fill mr-2"></i>
+                        生成報告
+                    </a>
+                </div>
+
+            </div>
+
+            <div class="card-actions">
+                <a class="btn btn-neutral btn-ghost gap-2" href="/checklist/{{data.site_uid}}/{{data.check_type}}/" role="button">
+                    <i class="bi bi-arrow-return-left"></i> 
+                    返回
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

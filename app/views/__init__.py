@@ -1,0 +1,13 @@
+from flask import Flask
+from .adminDashboard import blueprint as adminDashboard
+from .checklist import blueprint as checklist
+from .construction import blueprint as construction
+from .home import blueprint as home
+from .site import blueprint as site
+
+def init(app:Flask):
+    app.register_blueprint(adminDashboard, url_prefix= '/adminDashboard')
+    app.register_blueprint(checklist, url_prefix= '/checklist')
+    app.register_blueprint(construction, url_prefix= '/construction')
+    app.register_blueprint(home)
+    app.register_blueprint(site, url_prefix= '/site')

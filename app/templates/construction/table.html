@@ -1,0 +1,120 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+{{data.table_name}}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8"
+    x-data 
+    @response-data.window="notyf.success($event.detail.title)">
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-4xl mx-auto">
+        <div class="card-body">
+            
+            <div class="border-b border-base-200 pb-4 mb-4">
+                <h1 class="card-title text-3xl font-bold flex items-center gap-2">
+                    <i class="bi bi-clipboard-check text-primary"></i>
+                    {{data.table_name}}
+                </h1>
+                <p class="text-base-content/60 mt-2 text-sm">請依據現場狀況勾選下列項目</p>
+            </div>
+
+            <form id="form"
+                  hx-post="/api/construction/save/{{data.site_uid}}"
+                  hx-swap="none">
+                
+                <div class="flex flex-col">
+                    {% for data_o in data.options %}
+                    {% set current_val = data.saved.get(data_o.uid) %}
+
+                    <div class="form-control py-4 border-b border-base-200 last:border-none hover:bg-base-[var(--b2,hex)] transition-colors px-2 rounded-lg">
+                        
+                        <div class="mb-3">
+                            <span class="font-bold text-lg text-base-content">
+                                <span class="badge badge-neutral mr-2">{{ loop.index }}</span>
+                                {{data_o.name}}
+                            </span>
+                        </div>
+
+                        <div class="flex flex-wrap gap-6 items-center pl-2 md:pl-10">
+                            
+                            <label class="label cursor-pointer justify-start gap-2 hover:opacity-80">
+                                <input type="radio" 
+                                       class="radio radio-success" 
+                                       name="{{ data_o.uid }}" 
+                                       id="{{ data_o.uid }}_1" 
+                                       value="正常"
+                                       {% if current_val == '正常' %}checked{% endif %}>
+                                <span class="label-text font-medium text-success-content/90">正常</span>
+                            </label>
+
+                            <label class="label cursor-pointer justify-start gap-2 hover:opacity-80">
+                                <input type="radio" 
+                                       class="radio radio-error" 
+                                       name="{{ data_o.uid }}" 
+                                       id="{{ data_o.uid }}_2" 
+                                       value="異常"
+                                       {% if current_val == '異常' %}checked{% endif %}>
+                                <span class="label-text font-medium text-error-content/90">異常</span>
+                            </label>
+
+                            <label class="label cursor-pointer justify-start gap-2 hover:opacity-80">
+                                <input type="radio" 
+                                       class="radio" 
+                                       name="{{ data_o.uid }}" 
+                                       id="{{ data_o.uid }}_3" 
+                                       value="無" 
+                                       {% if current_val == '無' or current_val is none %}checked{% endif %}>
+                                <span class="label-text text-base-content/70">無</span>
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="card-actions mt-8 flex items-center gap-4">
+                    <button type="submit" class="btn btn-primary px-8 text-white shadow-md">
+                        <span class="loading loading-spinner loading-sm htmx-indicator"></span>
+                        <i class="bi bi-send-fill"></i>
+                        送出
+                    </button>
+                    
+                    <a class="btn btn-neutral btn-outline gap-2" 
+                       href="/construction/{{data.site_uid}}/{{data.group_uid}}/" 
+                       role="button">
+                        <i class="bi bi-arrow-return-left"></i> 
+                        返回
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    window.notyf = new Notyf({
+        duration: 3000,
+        position: {
+            x: 'right',
+            y: 'bottom',
+        },
+        types: [
+            {
+                type: 'success',
+                background: '#28a745',
+                icon: {
+                    className: 'bi bi-check-circle',
+                    tagName: 'i',
+                    color: 'white'
+                }
+            },
+            {
+                type: 'error',
+                background: '#dc3545',
+                duration: 4000
+            }
+        ]
+    });
+</script>
+{% endblock %}

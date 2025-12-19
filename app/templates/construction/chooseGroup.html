@@ -1,0 +1,42 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+施工規範
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-3xl mx-auto">
+        <div class="card-body">
+            
+            <h1 class="card-title text-3xl font-bold mb-6 pb-2 border-b border-base-200">
+                <i class="bi bi-cone-striped mr-2 text-accent"></i> 施工規範
+            </h1>
+
+            <div class="flex flex-col gap-4 mb-8">
+                {% for data_g in data.group %}
+                    <a class="btn btn-accent btn-lg w-full text-white text-xl shadow-md hover:scale-[1.01] transition-transform duration-200 justify-between group" 
+                       href="/construction/{{data.site_uid}}/{{data_g.uid}}/" 
+                       role="button">
+                        <span>{{data_g.name}}</span>
+                        <i class="bi bi-chevron-right opacity-70 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <span>目前沒有相關的施工規範群組。</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="card-actions">
+                <a class="btn btn-neutral btn-outline gap-2" href="/site/{{data.site_uid}}/" role="button">
+                    <i class="bi bi-arrow-return-left"></i> 
+                    返回案場
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

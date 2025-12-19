@@ -1,0 +1,61 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+選擇地區
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body">
+            <h1 class="card-title text-3xl font-bold justify-center mb-6 text-base-content">
+                選擇地區
+            </h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-6">
+                
+                <div>
+                    <a class="btn btn-primary btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200" 
+                       href="/site/region/1" 
+                       role="button">
+                       北部
+                    </a>
+                </div>
+
+                <div>
+                    <a class="btn btn-secondary btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200" 
+                       href="/site/region/2" 
+                       role="button">
+                       中彰投
+                    </a>
+                </div>
+
+                <div>
+                    <a class="btn btn-accent btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200 text-white" 
+                       href="/site/region/3" 
+                       role="button">
+                       雲嘉南
+                    </a>
+                </div>
+
+                <div>
+                    <a class="btn btn-info btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200 text-white" 
+                       href="/site/region/4" 
+                       role="button">
+                       高屏
+                    </a>
+                </div>
+
+                <div>
+                    <a class="btn btn-success btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200 text-white" 
+                       href="/site/region/5" 
+                       role="button">
+                       東部
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

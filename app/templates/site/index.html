@@ -1,0 +1,108 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+案場表單管理
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body">
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-base-200 pb-4">
+                <div>
+                    <h2 class="card-title text-3xl mb-2">{{data.site.name}}</h2>
+                    <p class="text-base-content/70 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                        </svg>
+                        {{data.site.address}}
+                    </p>
+                </div>
+                <div class="mt-4 md:mt-0 badge badge-lg p-4 {% if not data.site.build_date or data.site.wait_cheack %}badge-warning{% else %}badge-neutral{% endif %}">
+                    掛表日期：{% if not data.site.build_date or data.site.wait_cheack %}待確認{% else %}{{data.site.build_date}}{% endif %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                
+                <div class="bg-base-200 rounded-box p-4">
+                    <h3 class="font-bold text-lg mb-3 flex justify-between">
+                        逆變器數量
+                        <span class="badge badge-primary">{{data.inverter | length}} 台</span>
+                    </h3>
+                    <div class="space-y-2">
+                        {% for item in data.inverter %}
+                        <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
+                            <div class="badge badge-outline">品牌</div> <span class="font-semibold">{{item.brand}}</span>
+                            <div class="divider divider-horizontal m-0 py-1"></div>
+                            <div class="badge badge-outline">型號</div> <span class="font-mono">{{item.model}}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="bg-base-200 rounded-box p-4">
+                    <h3 class="font-bold text-lg mb-3 flex justify-between">
+                        模組種類
+                        <span class="badge badge-secondary">{{data.module | length}} 種</span>
+                    </h3>
+                    <div class="space-y-2">
+                        {% for item in data.module %}
+                        <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
+                            <div class="badge badge-outline">品牌</div> <span class="font-semibold">{{item.brand}}</span>
+                            <div class="divider divider-horizontal m-0 py-1"></div>
+                            <div class="badge badge-outline">型號</div> <span class="font-mono">{{item.model}}</span>
+                            <div class="divider divider-horizontal m-0 py-1"></div>
+                            <div class="badge badge-ghost">瓦數</div><span class="font-mono">{{item.wattage}}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="divider"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-base-content/80 flex items-center gap-2">
+                        <i class="bi bi-tools"></i> 維護保養
+                    </h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <a class="btn btn-info btn-outline w-full justify-start text-lg h-14" href="/checklist/{{data.site.uid}}/1/">
+                            <i class="bi bi-clipboard-check mr-2"></i> 電廠檢測
+                        </a>
+                        <a class="btn btn-success btn-outline w-full justify-start text-lg h-14" href="/checklist/{{data.site.uid}}/2/">
+                            <i class="bi bi-wrench mr-2"></i> 電廠維修
+                        </a>
+                        <a class="btn btn-warning btn-outline w-full justify-start text-lg h-14" href="/handle/{{data.site.uid}}/">
+                            <i class="bi bi-exclamation-triangle mr-2"></i> 未處理事項
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-base-content/80 flex items-center gap-2">
+                        <i class="bi bi-building"></i> 工程規劃
+                    </h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <a class="btn btn-accent btn-outline w-full justify-start text-lg h-14" href="/construction/{{data.site.uid}}/">
+                            <i class="bi bi-cone-striped mr-2"></i> 施工規範
+                        </a>
+                        <a class="btn btn-secondary btn-outline w-full justify-start text-lg h-14" href="/design/{{data.site.uid}}/">
+                            <i class="bi bi-vector-pen mr-2"></i> 設計規範
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-actions mt-8 justify-end">
+                <a class="btn btn-neutral btn-ghost" href="/site/region/{{data.site.region}}/" role="button">
+                    <i class="bi bi-arrow-return-left"></i> 返回列表
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

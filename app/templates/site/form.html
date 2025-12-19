@@ -1,0 +1,126 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+{% if act == 'create' %}新增{% else %}修改{% endif %}案場
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8"
+    x-data 
+    @response-data.window="
+        Swal.fire({
+            title: $event.detail.title,
+            text: $event.detail.text,
+            icon: 'success',
+            confirmButtonText: 'OK',
+            timer: 2000
+        }).then(() => {
+            if ($event.detail.redirectUrl) {
+                window.location.href = $event.detail.redirectUrl;
+            }
+        });
+     ">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body max-w-4xl mx-auto w-full"> <h1 class="card-title text-3xl font-bold mb-6 border-b pb-4 border-base-200">
+                {% if act == 'create' %}新增{% else %}修改{% endif %}案場 
+                {% if act == 'create' %}<span class="text-primary ml-2">【{{region_name}}】</span>{% endif %}
+            </h1>
+            <form id="form" 
+            hx-post="{% if act == 'create' %}/api/site/create{% else %}/api/site/update{% endif %}" 
+            hx-swap="none">
+                <input type="hidden" id="site_uid" name="site_uid" value="{{data.uid}}">
+                <input type="hidden" id="region_index" name="region_index" value="{{region_index}}">
+
+                <div class="form-control w-full mb-4">
+                    <label for="name" class="label">
+                        <span class="label-text font-semibold">案場名稱</span>
+                    </label>
+                    <input type="text" class="input input-bordered w-full" id="name" name="name" placeholder="請輸入案場名稱" value="{{data.name if data.name}}">
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">案場的名稱</span>
+                    </label>
+                </div>
+
+                <div class="form-control w-full mb-4">
+                    <label for="address" class="label">
+                        <span class="label-text font-semibold">地址</span>
+                    </label>
+                    <input type="text" class="input input-bordered w-full" id="address" name="address" placeholder="請輸入地址" value="{{data.address if data.address}}">
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">案場的地址</span>
+                    </label>
+                </div>
+
+                <div class="form-control w-full mb-4">
+                    <label for="company" class="label">
+                        <span class="label-text font-semibold">公司名稱</span>
+                    </label>
+                    <input type="text" class="input input-bordered w-full" id="company" name="company" placeholder="請輸入業主公司名稱" value="{{data.company if data.company}}">
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">業主公司的實際名稱</span>
+                    </label>
+                </div>
+
+                <div class="form-control w-full mb-4">
+                    <label for="build_date" class="label">
+                        <span class="label-text font-semibold">掛表日</span>
+                    </label>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <input type="date" class="input input-bordered w-full sm:w-auto flex-grow" id="build_date" name="build_date" value="{{data.build_date}}">
+                        
+                        <label class="cursor-pointer label border rounded-lg px-4 py-2 hover:bg-base-200 transition-colors">
+                            <span class="label-text mr-3">待確認</span>
+                            <input type="checkbox" class="checkbox checkbox-primary" id="wait_cheack" name="wait_cheack" {% if data.wait_cheack %}checked{% endif %}>
+                        </label>
+                    </div>
+                    
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">掛表的日期</span>
+                    </label>
+                </div>
+                <div class="form-control w-full mb-4">
+                    <label for="phase" class="label"><span class="label-text font-semibold">期數</span></label>
+                    <input type="number" 
+                            id="phase" 
+                            name="phase" 
+                            value="{{data.phase if data.phase else 1}}" 
+                            min="1" max="10"
+                            {% if act == 'update' %}
+                                readonly
+                                class="input input-bordered w-full bg-base-200 text-base-content/60 pointer-events-none"
+                            {% else %}
+                                class="input input-bordered w-full"
+                                hx-get="/site/partials/phases/"
+                                hx-target="#phaseDisplay"
+                                hx-include="#form"
+                                hx-trigger="change, keyup delay:500ms changed"
+                                hx-swap="innerHTML"
+                            {% endif %}
+                            >
+                </div>
+                
+                <div id="phaseDisplay" class="mb-6 w-full">
+                    {% with phase_count = data.phase if data.phase else 1 %}
+                        {% include 'site/partials/_phases.html' %}
+                    {% endwith %}
+                </div>
+
+                <div class="card-actions flex items-center gap-4 mt-6">
+                    <button type="submit" class="btn btn-primary px-8">送出</button>
+                    <a class="btn btn-neutral btn-outline gap-2" 
+                       href="{% if region_index %}/site/region/{{region_index}}/{% else %}/site/{{data.uid}}/{% endif %}" 
+                       role="button">
+                        <i class="bi bi-arrow-return-left"></i> 
+                        返回
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>flatpickr("#build_date", {})</script>
+{% endblock %}

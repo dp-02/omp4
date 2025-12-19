@@ -1,0 +1,65 @@
+{% if data_s %}
+<div class="overflow-x-auto w-full">
+    <table class="table table-zebra bg-base-100 rounded-lg shadow-sm">
+        <thead>
+            <tr>
+                <th>名稱</th>
+                <th class="hidden md:table-cell">地址</th>
+                <th class="hidden md:table-cell">掛表日</th>
+                <th class="text-center">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data_s_s in data_s %}
+            <tr class="hover">
+                <td>
+                    <div class="font-bold">{{ data_s_s.name }}</div>
+                    <div class="text-xs opacity-50 md:hidden">{{ data_s_s.company }}</div>
+                </td>
+                <td class="hidden md:table-cell">{{ data_s_s.address }}</td>
+                <td class="hidden md:table-cell">{{ data_s_s.build_date }}</td>
+                <td class="text-center">
+                    <a href="/site/{{ data_s_s.uid }}" class="btn btn-sm btn-ghost text-success">
+                        <i class="bi bi-gear"></i> 管理
+                    </a>
+                    <a href="/site/update/{{ data_s_s.uid }}" class="btn btn-sm btn-ghost text-primary">
+                        <i class="bi bi-pencil-square"></i> 編輯
+                    </a>
+                    <button class="btn btn-sm btn-ghost text-error"
+                    hx-delete="/api/site/delete/{{ data_s_s.uid }}"
+                    hx-target="closest tr"
+                    hx-swap="outerHTML swap:1s"
+                    hx-on:htmx:confirm="
+                        const e = event;
+                        e.preventDefault();
+                        Swal.fire({
+                            title: '確定要刪除嗎？',
+                            text: '刪除後將無法復原 {{ data_s_s.name }} 的資料！',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: '是的，刪除它！',
+                            cancelButtonText: '取消'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                e.detail.issueRequest(true); 
+                            }
+                        });
+                    ">
+                        <i class="bi bi-trash"></i> 刪除
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<div class="flex flex-col items-center justify-center py-10 text-base-content/50">
+    <i class="bi bi-inbox text-4xl mb-2"></i>
+    <p>目前此區域尚無案場資料</p>
+    <p class="text-sm">點擊右上角「新增案場」建立第一筆資料</p>
+</div>
+{% endif %}

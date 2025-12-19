@@ -1,0 +1,21 @@
+# 上傳檔案與資料（避免照片、說明文字進入 Git）
+/uploads/
+
+# Python 編譯暫存檔
+__pycache__/
+*.pyc
+
+.vscode/
+
+# 環境變數檔（包含 Flask secret key 等機密）
+.env
+
+# 虛擬環境
+env/
+venv/
+
+# 如果 cloudflare 裡面是中繼連線或 local server log，也排除
+cloudflare/
+
+# Mac 的垃圾檔案
+.DS_Store
