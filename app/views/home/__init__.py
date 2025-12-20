@@ -12,17 +12,17 @@ def index():
     ''' 首頁 '''
     return render_template('home/index.html')
 
-@blueprint.route('/choose_region/')
-@login_required
+@blueprint.route('/choose_region/', methods=['POST'])
 def choose_region():
     ''' 選擇地區 '''
-    uid = request.form.get('uid')
+    uid = request.form.get('user_uid')
+    print(uid)
 
     with session_scope() as session:
         query = User.get(session, uid=uid)
-    if uid: 
-        flask_session['user_uid'] = uid
-        flask_session['user_name'] = query.name
-        print(f'使用者登入 uid：{uid} name:{query.name}')
+        if uid: 
+            flask_session['user_uid'] = uid
+            flask_session['user_name'] = query.name
+            print(f'使用者登入 uid：{uid} name:{query.name}')
 
     return render_template('home/choose_region.html')

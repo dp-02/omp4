@@ -50,6 +50,29 @@ def get_by_site(site_uid,check_type):
             
     return render_template('checklist/partials/_checklist_list_items.html', data_c=data_c, data = data)
 
+@blueprint.route('/update', methods=['POST'])
+def update():
+    ''' 更新檢查表 '''
+    response = make_response()
+    uid = request.form.get('uid')
+    check_date = request.form.get('check_date')
+    site_uid = request.form.get('site_uid')
+    check_type = request.form.get('check_type')
+
+    with session_scope() as session:
+        query1 = Checklist.update(session, uid = uid, check_date = check_date)
+
+    trigger_data = {
+            "response-data": {
+                "title": "更新成功！",
+                "text": f"檢查表已更新，即將轉跳...",
+                "redirectUrl": url_for('view_checklist.choose_checklist', site_uid = site_uid, check_type = check_type)
+        }
+    }
+    response.headers['HX-Trigger'] = json.dumps(trigger_data)
+    
+    return response
+
 @blueprint.route('/save/<int:checklist_uid>', methods=['POST'])
 def save_Checklist_data(checklist_uid):
     response = make_response()

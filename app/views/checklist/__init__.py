@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, abort
 from flask import session as flask_session
 from app.database import session_scope
 from app.auth import login_required
@@ -31,6 +31,23 @@ def create(site_uid, check_type):
         "user_name":flask_session['user_name']
     }
     return render_template('checklist/form.html', act="create", data = data)
+
+@blueprint.route('/<int:checklist_uid>/update/')
+@login_required
+def update(checklist_uid):
+    ''' 建立 '''
+    with session_scope() as session:
+        checklist_obj = Checklist.get(session, uid = checklist_uid)
+        if not checklist_obj:
+            return abort(404)
+        data = {
+            "uid":checklist_obj.uid,
+            "site_uid":checklist_obj.site_uid,
+            "check_type":checklist_obj.check_type,
+            "check_date":checklist_obj.check_date,
+            "user_name":flask_session['user_name']
+        }
+    return render_template('checklist/form.html', act="update", data = data)
 
 @blueprint.route('/<int:site_uid>/<int:check_type>/<int:checklist_uid>/')
 @login_required

@@ -30,6 +30,7 @@
             <form id="form" 
             hx-post="{% if act == 'create' %}/api/checklist/create{% else %}/api/checklist/update{% endif %}" 
             hx-swap="none">
+                <input type="hidden" id="uid" name="uid" value="{{data.uid if data.uid}}">
                 <input type="hidden" id="site_uid" name="site_uid" value="{{data.site_uid}}">
                 <input type="hidden" id="check_type" name="check_type" value="{{data.check_type}}">
                 <div class="form-control w-full mb-4">
@@ -40,7 +41,9 @@
                            class="input input-bordered w-full" 
                            id="check_date" 
                            name="check_date" 
-                           placeholder="請選擇日期">
+                           placeholder="請選擇日期"
+                           value="{{data.check_date if data.check_date}}"
+                           >
                 </div>
 
                 <div class="form-control w-full mb-6">
