@@ -5,17 +5,16 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class ConstructionTableOptionData(Base):
-    ''' 施工規範表格選項資料 '''
-    __tablename__ = 'construction_table_option_data'
+class ConstructionTableOptionDataAttachment(Base):
+    ''' 選項資料附件 '''
+    __tablename__ = 'construction_table_option_data_attachment'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    option_uid = Column(Integer, ForeignKey('construction_table_option.uid', ondelete='CASCADE'), nullable=False)
-    site_uid = Column(Integer, ForeignKey('site.uid', ondelete='CASCADE'), nullable=False)
-    value = Column(String(32))
+    construction_table_option_data_uid = Column(Integer, ForeignKey('construction_table_option_data.uid', ondelete='CASCADE'), nullable=False)
+    type = Column(String(32))
+
+    option_data = relationship("ConstructionTableOptionData", back_populates="attachments")
     
-    option = relationship("ConstructionTableOption", back_populates="datas")
-    attachments = relationship("ConstructionTableOptionDataAttachment", back_populates="option_data", cascade="all, delete-orphan", order_by="ConstructionTableOptionDataAttachment.uid")
     # region CRUD
 
     @classmethod
@@ -61,4 +60,4 @@ class ConstructionTableOptionData(Base):
         return result
     
     def __repr__(self):
-        return f'<construction_table_option_data {self.uid}>'
+        return f'<construction_table_option_data_attachment {self.uid}>'
