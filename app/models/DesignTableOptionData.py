@@ -16,6 +16,7 @@ class DesignTableOptionData(Base):
     
     option = relationship("DesignTableOption", back_populates="datas")
     design_checklist = relationship("DesignChecklist", back_populates="datas")
+    
     # region CRUD
 
     @classmethod
