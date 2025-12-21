@@ -1,0 +1,45 @@
+{% if options %}
+    {% for opt in options %}
+    <div class="flex items-center gap-2 p-1 border border-base-200 rounded hover:bg-base-200/50">
+        {% if opt.has_record %}
+            <span class="badge badge-success badge-sm gap-1">
+                <i class="bi bi-check"></i> 合格
+            </span>
+        {% else %}
+            <span class="badge badge-ghost badge-sm text-gray-400">未勾選</span>
+        {% endif %}
+        <span class="text-sm {{ 'text-base-content' if opt.checked else 'text-gray-400' }}">
+            {{ loop.index }}. {{ opt.name }}
+        </span>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="col-span-full text-center text-gray-400 py-2">此版本無檢查紀錄</div>
+{% endif %}
+
+
+<p id="historyNote" class="text-base-content/80 min-h-[2rem] mb-4" hx-swap-oob="true">
+    {{ designlist_data.note }}
+</p>
+
+<a id="download1" 
+   class="btn btn-primary btn-outline w-full shadow-sm {{ '' if designlist_data.file_path_cad else 'btn-disabled' }}" 
+   {% if designlist_data.file_path_cad %}
+       href="/download/{{ designlist_data.file_path_cad }}"
+   {% else %}
+       role="button" aria-disabled="true" tabindex="-1"
+   {% endif %}
+   hx-swap-oob="true">
+    <i class="bi bi-download"></i> 下載 CAD / SKETCHUP
+</a>
+
+<a id="download2" 
+   class="btn btn-success btn-outline w-full shadow-sm {{ '' if designlist_data.file_path_pdf else 'btn-disabled' }}" 
+   {% if designlist_data.file_path_pdf %}
+       href="/download/{{ designlist_data.file_path_pdf }}"
+   {% else %}
+       role="button" aria-disabled="true" tabindex="-1"
+   {% endif %}
+   hx-swap-oob="true">
+    <i class="bi bi-download"></i> 下載 PDF
+</a>

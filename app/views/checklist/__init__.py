@@ -6,7 +6,7 @@ from sqlalchemy import select
 from app.models import (
     Checklist,
     ChecklistTable,
-    ChecklistTableData,
+    ChecklistTableOptionData,
     ChecklistTableOption
 )
 blueprint = Blueprint('view_checklist', __name__)
@@ -69,8 +69,8 @@ def choose_table(site_uid, check_type, checklist_uid):
                 "name":data_t.name
             })
         stmt = select(ChecklistTableOption.table_uid).distinct().join(
-            ChecklistTableData, ChecklistTableOption.uid == ChecklistTableData.option_uid
-            ).where(ChecklistTableData.checklist_uid == checklist_uid)
+            ChecklistTableOptionData, ChecklistTableOption.uid == ChecklistTableOptionData.option_uid
+            ).where(ChecklistTableOptionData.checklist_uid == checklist_uid)
         query = session.execute(stmt).mappings().all()
         for data_t in query:
             data['checked'].append(data_t.table_uid)
@@ -98,7 +98,7 @@ def table(site_uid, check_type, checklist_uid, table_uid):
         stmt = select(ChecklistTable.name).where(ChecklistTable.uid == table_uid)
         query = session.execute(stmt).scalar()
         data['table_name'] = query
-        stmt = select(ChecklistTableData).where(ChecklistTableData.checklist_uid == checklist_uid)
+        stmt = select(ChecklistTableOptionData).where(ChecklistTableOptionData.checklist_uid == checklist_uid)
         results = session.execute(stmt).scalars().all()
         data['saved']  = {rec.option_uid: rec.value for rec in results}
     return render_template('Checklist/table.html', data = data)

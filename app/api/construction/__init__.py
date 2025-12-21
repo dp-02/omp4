@@ -3,7 +3,7 @@ from app.database import session_scope
 from sqlalchemy import select
 import json
 from app.models import (
-    ConstructionTableData,
+    ConstructionTableOptionData,
 )
 
 blueprint = Blueprint('api_construction', __name__)
@@ -15,16 +15,16 @@ def save_construction_data(site_uid):
         form_data = request.form
         for option_uid_str, value in form_data.items():
             option_uid = int(option_uid_str)
-            stmt = select(ConstructionTableData).where(
-                ConstructionTableData.site_uid == site_uid,
-                ConstructionTableData.option_uid == option_uid
+            stmt = select(ConstructionTableOptionData).where(
+                ConstructionTableOptionData.site_uid == site_uid,
+                ConstructionTableOptionData.option_uid == option_uid
             )
             record = session.execute(stmt).scalars().first()
             if record:
                 if record.value != value:
                     record.value = value
             else:
-                new_record = ConstructionTableData(
+                new_record = ConstructionTableOptionData(
                     site_uid=site_uid,
                     option_uid=option_uid,
                     value=value

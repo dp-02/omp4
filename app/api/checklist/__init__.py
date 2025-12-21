@@ -6,7 +6,7 @@ import json
 from app.models import (
     User,
     Checklist,
-    ChecklistTableData
+    ChecklistTableOptionData
 )
 
 blueprint = Blueprint('api_checklist', __name__)
@@ -80,16 +80,16 @@ def save_Checklist_data(checklist_uid):
         form_data = request.form
         for option_uid_str, value in form_data.items():
             option_uid = int(option_uid_str)
-            stmt = select(ChecklistTableData).where(
-                ChecklistTableData.checklist_uid == checklist_uid,
-                ChecklistTableData.option_uid == option_uid
+            stmt = select(ChecklistTableOptionData).where(
+                ChecklistTableOptionData.checklist_uid == checklist_uid,
+                ChecklistTableOptionData.option_uid == option_uid
             )
             record = session.execute(stmt).scalars().first()
             if record:
                 if record.value != value:
                     record.value = value
             else:
-                ChecklistTableData.create(
+                ChecklistTableOptionData.create(
                     session,
                     checklist_uid=checklist_uid,
                     option_uid=option_uid,

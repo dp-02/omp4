@@ -1,0 +1,177 @@
+{% extends 'global/base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-5xl mx-auto">
+        <div class="card-body">
+            
+            <h1 class="card-title text-3xl font-bold mb-6 pb-2 border-b border-base-200 flex items-center gap-2">
+                <i class="bi bi-ui-checks-grid text-primary"></i>
+                {{data.group_name}}
+            </h1>
+
+            <form id="form" 
+                  x-data="{ 
+                      updateCheckAll() { 
+                          let checkboxes = $el.querySelectorAll('.item-checkbox');
+                          let allChecked = checkboxes.length > 0 && [...checkboxes].every(c => c.checked);
+                          $refs.checkAllBox.checked = allChecked;
+                          $refs.checkAllBox.indeterminate = !allChecked && [...checkboxes].some(c => c.checked);
+                      },
+                      toggleAll(e) {
+                          let checkboxes = $el.querySelectorAll('.item-checkbox');
+                          checkboxes.forEach(c => c.checked = e.target.checked);
+                      }
+                  }"@change="updateCheckAll()"
+                    @htmx:before-request="isSubmitting = true"
+                    @htmx:after-request="isSubmitting = false"
+                    @response-data.window="
+                        Swal.fire({
+                            title: $event.detail.title,
+                            text: $event.detail.text,
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            timer: 2000
+                        }).then( ()=>{
+                            const selectEl = document.getElementById('tableUid');
+                            if (selectEl && selectEl.value) {
+                                htmx.trigger(selectEl, 'change'); 
+                            }
+                        });
+                    "
+                    hx-post="/api/design/create"
+                    hx-encoding="multipart/form-data"
+                    hx-swap="none">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <input type="hidden" id="siteUid" name="siteUid" value="{{data.site_uid}}">
+                    <input type="hidden" id="phase" name="phase" value="{{data.phase}}">
+                    
+                    <div class="col-span-full bg-base-200 rounded-box p-6">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i class="bi bi-list-task"></i> 檢查項目設定
+                        </h3>
+                        
+                        <div class="form-control w-full mb-4">
+                            <label class="label font-bold">選擇檢查項目</label>
+                            <select class="select select-bordered w-full" 
+                                    name="tableUid" 
+                                    id="tableUid"
+                                    hx-include="#siteUid"
+                                    hx-get="/api/design/get_table_details" 
+                                    hx-target="#option"
+                                    hx-swap="innerHTML"
+                                    hx-indicator="#loading-indicator">
+                                <option disabled selected>請選擇...</option>
+                                {% for table in data.group_table %}
+                                    <option value="{{ table.uid }}">
+                                        {{ loop.index }}. {{ table.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div id="loading-indicator" class="htmx-indicator progress w-full"></div>
+
+                        <div class="form-control">
+                            <label class="label font-bold">檢查規範確認：</label>
+                            
+                            <label class="label cursor-pointer justify-start gap-3 border-b border-base-300 pb-3 mb-3">
+                                <input type="checkbox" 
+                                       class="checkbox checkbox-primary" 
+                                       x-ref="checkAllBox"
+                                       @click="toggleAll($event)">
+                                <span class="label-text font-bold">全選 / 取消</span>
+                            </label>
+
+                            <div class="bg-base-100 rounded-lg p-4 border border-base-300 min-h-[100px]">
+                                    <div id="option" class="optionDisplay grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <div class="text-gray-400 text-sm p-2">請先選擇檢查項目...</div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 bg-base-200 rounded-box p-4">
+                        <label for="file_cad" class="label">
+                            <span class="label-text font-bold"><i class="bi bi-file-earmark-code mr-1"></i> CAD / SketchUp</span>
+                        </label>
+                        <input type="file" class="file-input file-input-bordered w-full" name="file_cad" id="file_cad">
+                    </div>
+
+                    <div class="col-span-1 bg-base-200 rounded-box p-4">
+                        <label for="file_pdf" class="label">
+                            <span class="label-text font-bold"><i class="bi bi-file-earmark-pdf mr-1"></i> PDF 規劃圖</span>
+                        </label>
+                        <input type="file" class="file-input file-input-bordered w-full" name="file_pdf" id="file_pdf">
+                    </div>
+                    
+                    <div class="col-span-full">
+                        <div class="form-control w-full">
+                            <label class="label font-bold">備註說明</label>
+                            <textarea class="textarea textarea-bordered h-24" id="note" name="note"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <button type="submit" class="btn btn-primary px-8 text-white shadow-md">
+                        <i class="bi bi-cloud-upload"></i> 送出資料
+                    </button>
+                </div>
+            </form>
+
+            <div class="divider">歷史紀錄與下載</div>
+
+            <div class="bg-base-200/50 rounded-box p-6 border border-base-200">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <div class="col-span-full">
+                        <label class="label font-bold text-lg"><i class="bi bi-clock-history mr-2"></i> 選擇版本</label>
+                        <select class="select select-bordered w-full max-w-xs" id="historySelect">
+                            <option disabled selected>請先選擇檢查項目</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <a class="btn btn-primary btn-outline w-full shadow-sm btn-disabled" id="download1" href="#">
+                            <i class="bi bi-download"></i> 下載 CAD / SKETCHUP 圖檔
+                        </a>
+                    </div>
+
+                    <div>
+                        <a class="btn btn-success btn-outline w-full shadow-sm btn-disabled" id="download2" href="#">
+                            <i class="bi bi-download"></i> 下載 PDF 規劃圖檔
+                        </a>
+                    </div>
+
+                    <div class="col-span-full card bg-base-100 border border-base-300 shadow-sm mt-4">
+                        <div class="card-body p-4">
+                            <h6 class="font-bold text-lg mb-2 border-b pb-2">說明</h6>
+                            <p id="historyNote" class="text-base-content/80 min-h-[2rem] mb-4" hx-swap-oob="true"></p>
+                        </div>
+                    </div>
+
+                    <div class="col-span-full card bg-base-100 border border-base-300 shadow-sm mt-4">
+                        <div class="card-body p-4">
+                            <h6 class="font-bold text-lg mb-2 border-b pb-2">檢查紀錄</h6>
+                            <div>
+                                <div id="historyOptions" class="historyOptionDisplay grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                     <span class="text-sm text-gray-400">尚無資料</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card-actions mt-6">
+                <a class="btn btn-neutral btn-ghost gap-2" href="/design/{{data.site_uid}}/" role="button">
+                    <i class="bi bi-arrow-return-left"></i> 返回
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

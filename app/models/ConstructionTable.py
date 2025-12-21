@@ -16,7 +16,7 @@ class ConstructionTable(Base):
     sort = Column(Integer)
     
     group = relationship("ConstructionTableGroup", back_populates="tables")
-    options = relationship("ConstructionTableOption", back_populates="tables", cascade="all, delete-orphan", order_by="ConstructionTableOption.uid")
+    options = relationship("ConstructionTableOption", back_populates="table", cascade="all, delete-orphan", order_by="ConstructionTableOption.uid")
     # region CRUD
 
     @classmethod

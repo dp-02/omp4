@@ -12,12 +12,10 @@ def index():
     ''' 首頁 '''
     return render_template('home/index.html')
 
-@blueprint.route('/choose_region/', methods=['POST'])
+@blueprint.route('/choose_region/', methods=['POST','GET'])
 def choose_region():
     ''' 選擇地區 '''
     uid = request.form.get('user_uid')
-    print(uid)
-
     with session_scope() as session:
         query = User.get(session, uid=uid)
         if uid: 

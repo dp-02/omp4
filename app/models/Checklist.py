@@ -15,7 +15,7 @@ class Checklist(Base):
     check_date = Column(Date)
     user_uid = Column(Integer)
 
-    datas =  relationship("ChecklistTableData", back_populates="checklist", cascade="all, delete-orphan", order_by="ChecklistTableData.uid")
+    datas =  relationship("ChecklistTableOptionData", back_populates="checklist", cascade="all, delete-orphan", order_by="ChecklistTableOptionData.uid")
     # region CRUD
 
     @classmethod

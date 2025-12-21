@@ -13,7 +13,7 @@ class Auth(Base):
     user_uid = Column(Integer)
     state = Column(Integer)
     admin = Column(Boolean)
-    at_createdtime = Column(DateTime)
+    at_createdtime = Column(DateTime, default=datetime.now)
     at_editedtime = Column(DateTime)
     at_deletedtime = Column(DateTime)
 

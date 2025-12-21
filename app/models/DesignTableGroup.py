@@ -1,20 +1,20 @@
 from app.database import Base
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class ConstructionTableData(Base):
-    ''' 施工規範表格資料 '''
-    __tablename__ = 'construction_table_data'
+class DesignTableGroup(Base):
+    ''' 設計規範表格群組 '''
+    __tablename__ = 'design_table_group'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    option_uid = Column(Integer, ForeignKey('construction_table_option.uid', ondelete='CASCADE'), nullable=False)
-    site_uid = Column(Integer, ForeignKey('site.uid', ondelete='CASCADE'), nullable=False)
-    value = Column(String(32))
+    name = Column(String(256))
+    sort = Column(Integer)
     
-    option = relationship("ConstructionTableOption", back_populates="datas")
+    tables = relationship("DesignTable", back_populates="group", cascade="all, delete-orphan", order_by="DesignTable.uid")
+    
     # region CRUD
 
     @classmethod
@@ -60,4 +60,4 @@ class ConstructionTableData(Base):
         return result
     
     def __repr__(self):
-        return f'<construction_table_data {self.uid}>'
+        return f'<design_table_group {self.uid}>'

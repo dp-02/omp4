@@ -1,0 +1,62 @@
+{% if options %}
+    {% for opt in options %}
+    <label class="label cursor-pointer justify-start gap-3 hover:bg-base-200 rounded p-1">
+        <input type="checkbox" class="checkbox checkbox-sm checkbox-secondary item-checkbox" name="option_uid" value="{{ opt.uid }}">
+        <span class="label-text">{{ loop.index }}. {{ opt.name }}</span>
+    </label>
+    {% endfor %}
+{% else %}
+    <div class="text-gray-400 text-sm p-2">此項目尚無檢查細項</div>
+{% endif %}
+
+<select id="historySelect" 
+        class="select select-bordered w-full max-w-xs" 
+        name="designlistUid"
+        hx-get="/api/design/get_history_details"
+        hx-target="#historyOptions"
+        hx-indicator="#history-loading"
+        hx-include="#tableUid"
+        hx-swap="innerHTML"
+        hx-swap-oob="true">
+    
+    <option disabled selected value="">請選擇歷史版本</option>
+    {% for h in histories %}
+        <option value="{{ h.uid }}" 
+                    {% if loop.first %}class="font-bold text-primary"{% endif %}
+                    {# 使用 Alpine 的 x-data 綁定並格式化 #}
+                    x-data="{ dateStr: '{{ h.at_createdtime }}' }"
+                    x-text="new Date(dateStr).toLocaleString('zh-TW', {
+                        year: 'numeric', 
+                        month: '2-digit', 
+                        day: '2-digit', 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    }) + ({% if loop.first %} ' (最新版)' {% else %} '' {% endif %})"
+            >
+                {{ h.at_createdtime }}
+        </option>
+    {% else %}
+        <option disabled>無歷史紀錄</option>
+    {% endfor %}
+</select>
+
+<a id="download1" class="btn btn-primary btn-outline w-full shadow-sm btn-disabled" role="button" aria-disabled="true" hx-swap-oob="true">
+    <i class="bi bi-download"></i> 下載 CAD / SKETCHUP 圖檔
+</a>
+
+<a id="download2" class="btn btn-success btn-outline w-full shadow-sm btn-disabled" role="button" aria-disabled="true" hx-swap-oob="true">
+    <i class="bi bi-download"></i> 下載 PDF 規劃圖檔
+</a>
+
+<div id="historyOptions" class="historyOptionDisplay grid grid-cols-1 sm:grid-cols-2 gap-2 relative" hx-swap-oob="true">
+    <div id="history-loading" class="htmx-indicator absolute inset-0 bg-base-100/80 flex justify-center items-center z-10">
+        <span class="loading loading-spinner text-primary"></span>
+    </div>
+    
+    <div class="col-span-full text-center text-sm text-gray-500 py-4">
+        <i class="bi bi-info-circle"></i> 請選擇上方歷史版本以查看詳細紀錄。
+    </div>
+</div>
+
+<p id="historyNote" class="text-base-content/80 min-h-[2rem] mb-4" hx-swap-oob="true"></p>

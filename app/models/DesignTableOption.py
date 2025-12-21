@@ -5,17 +5,18 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class ConstructionTableOption(Base):
-    ''' 施工規範表格選項 '''
-    __tablename__ = 'construction_table_option'
+class DesignTableOption(Base):
+    ''' 設計規範表格選項 '''
+    __tablename__ = 'design_table_option'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    table_uid = Column(Integer, ForeignKey('construction_table.uid', ondelete='CASCADE'), nullable=False)
+    table_uid = Column(Integer, ForeignKey('design_table.uid', ondelete='CASCADE'), nullable=False)
     name = Column(String(512))
     sort = Column(Integer)
     
-    table = relationship("ConstructionTable", back_populates="options")
-    datas = relationship("ConstructionTableOptionData", back_populates="option", cascade="all, delete-orphan", order_by="ConstructionTableOptionData.uid")
+    table = relationship("DesignTable", back_populates="options")
+    datas = relationship("DesignTableOptionData", back_populates="option", cascade="all, delete-orphan", order_by="DesignTableOptionData.uid")
+    
     # region CRUD
 
     @classmethod
@@ -61,4 +62,4 @@ class ConstructionTableOption(Base):
         return result
     
     def __repr__(self):
-        return f'<construction_table_option {self.uid}>'
+        return f'<design_table_option {self.uid}>'

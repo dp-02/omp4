@@ -6,7 +6,7 @@ from app.models import (
     ConstructionTable,
     ConstructionTableGroup,
     ConstructionTableOption,
-    ConstructionTableData,
+    ConstructionTableOptionData,
 )
 blueprint = Blueprint('view_construction', __name__)
 
@@ -19,12 +19,12 @@ def choose_group(site_uid):
         "group":[]
     }
     with session_scope() as session:
-        stmt = select(ConstructionTable.group_uid, ConstructionTableGroup.name).distinct().join(ConstructionTableGroup, ConstructionTableGroup.uid == ConstructionTable.group_uid)
-        query = session.execute(stmt).mappings().all()
+        stmt = select(ConstructionTableGroup.uid, ConstructionTableGroup.name)
+        query = session.execute(stmt).all()
         for data_g in query:
             data['group'].append({
-                "uid":data_g.group_uid,
-                "name":data_g.name
+                "uid":data_g[0],
+                "name":data_g[1]
             })
     return render_template('construction/chooseGroup.html', data = data)
 
@@ -71,7 +71,7 @@ def table(site_uid, group_uid, table_uid):
         stmt = select(ConstructionTable.name).where(ConstructionTable.uid == table_uid)
         query = session.execute(stmt).scalar()
         data['table_name'] = query
-        stmt = select(ConstructionTableData).where(ConstructionTableData.site_uid == site_uid)
+        stmt = select(ConstructionTableOptionData).where(ConstructionTableOptionData.site_uid == site_uid)
         results = session.execute(stmt).scalars().all()
         data['saved']  = {rec.option_uid: rec.value for rec in results}
     return render_template('construction/table.html', data = data)

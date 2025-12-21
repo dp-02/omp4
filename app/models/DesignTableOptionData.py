@@ -5,17 +5,17 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class ChecklistTableData(Base):
-    ''' 電廠檢測表格資料 '''
-    __tablename__ = 'checklist_table_data'
+class DesignTableOptionData(Base):
+    ''' 設計規範表格資料 '''
+    __tablename__ = 'design_table_option_data'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    option_uid = Column(Integer, ForeignKey('checklist_table_option.uid', ondelete='CASCADE'), nullable=False)
-    checklist_uid = Column(Integer, ForeignKey('checklist.uid', ondelete='CASCADE'), nullable=False)
+    option_uid = Column(Integer, ForeignKey('design_table_option.uid', ondelete='CASCADE'), nullable=False)
+    design_checklist_uid = Column(Integer, ForeignKey('design_checklist.uid', ondelete='CASCADE'), nullable=False)
     value = Column(String(32))
     
-    option = relationship("ChecklistTableOption", back_populates="datas")
-    checklist = relationship("Checklist", back_populates="datas")
+    option = relationship("DesignTableOption", back_populates="datas")
+    design_checklist = relationship("DesignChecklist", back_populates="datas")
     # region CRUD
 
     @classmethod
@@ -61,4 +61,4 @@ class ChecklistTableData(Base):
         return result
     
     def __repr__(self):
-        return f'<checklist_table_data {self.uid}>'
+        return f'<design_table_option_data {self.uid}>'

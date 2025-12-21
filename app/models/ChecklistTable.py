@@ -14,7 +14,7 @@ class ChecklistTable(Base):
     note = Column(String(256))
     sort = Column(Integer)
     
-    options = relationship("ChecklistTableOption", back_populates="tables", cascade="all, delete-orphan", order_by="ChecklistTableOption.uid")
+    options = relationship("ChecklistTableOption", back_populates="table", cascade="all, delete-orphan", order_by="ChecklistTableOption.uid")
     # region CRUD
 
     @classmethod

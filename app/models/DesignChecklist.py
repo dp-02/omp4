@@ -1,21 +1,25 @@
 from app.database import Base
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class ConstructionTableOption(Base):
-    ''' 施工規範表格選項 '''
-    __tablename__ = 'construction_table_option'
+class DesignChecklist(Base):
+    ''' 設計規範表格資料 '''
+    __tablename__ = 'design_checklist'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    table_uid = Column(Integer, ForeignKey('construction_table.uid', ondelete='CASCADE'), nullable=False)
-    name = Column(String(512))
-    sort = Column(Integer)
+    table_uid = Column(Integer, ForeignKey('design_table.uid', ondelete='CASCADE'), nullable=False)
+    site_uid = Column(Integer, ForeignKey('site.uid', ondelete='CASCADE'), nullable=False)
+    phase = Column(Integer)
+    note = Column(String(4096))
+    file_path_cad = Column(String(256))
+    file_path_pdf = Column(String(256))
+    at_createdtime = Column(DateTime, default=datetime.now)
     
-    table = relationship("ConstructionTable", back_populates="options")
-    datas = relationship("ConstructionTableOptionData", back_populates="option", cascade="all, delete-orphan", order_by="ConstructionTableOptionData.uid")
+    table = relationship("DesignTable", back_populates="datas")
+    datas =  relationship("DesignTableOptionData", back_populates="design_checklist", cascade="all, delete-orphan", order_by="DesignTableOptionData.uid")
     # region CRUD
 
     @classmethod
@@ -61,4 +65,4 @@ class ConstructionTableOption(Base):
         return result
     
     def __repr__(self):
-        return f'<construction_table_option {self.uid}>'
+        return f'<design_checklist {self.uid}>'
