@@ -1,20 +1,37 @@
 from app.database import Base
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, and_
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class ConstructionTableOptionDataAttachment(Base):
+class OptionDataAttachment(Base):
     ''' 選項資料附件 '''
-    __tablename__ = 'construction_table_option_data_attachment'
+    __tablename__ = 'option_data_attachment'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    construction_table_option_data_uid = Column(Integer, ForeignKey('construction_table_option_data.uid', ondelete='CASCADE'), nullable=False)
+    table_type = Column(String(32), nullable=False, index=True)
+    option_data_uid = Column(Integer, nullable=False, index=True)
     type = Column(String(32))
 
-    option_data = relationship("ConstructionTableOptionData", back_populates="attachments")
+    construction_option_data = relationship(
+        "ConstructionTableOptionData",
+        primaryjoin="and_(foreign(OptionDataAttachment.option_data_uid) == ConstructionTableOptionData.uid, "
+                    "OptionDataAttachment.table_type == 'construction')",
+        back_populates="attachments",
+        overlaps="checklist_option_data, attachments"
+    )
     
+    checklist_option_data = relationship(
+        "ChecklistTableOptionData",
+        primaryjoin="and_(foreign(OptionDataAttachment.option_data_uid) == ChecklistTableOptionData.uid, "
+                    "OptionDataAttachment.table_type == 'checklist')",
+        back_populates="attachments",
+        overlaps="construction_option_data, attachments"
+    )
+    
+    images = relationship("OptionDataAttachmentImage", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionDataAttachmentImage.uid")
+    notes = relationship("OptionDataAttachmentNote", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionDataAttachmentNote.uid")
     # region CRUD
 
     @classmethod
@@ -60,4 +77,4 @@ class ConstructionTableOptionDataAttachment(Base):
         return result
     
     def __repr__(self):
-        return f'<construction_table_option_data_attachment {self.uid}>'
+        return f'<option_data_attachment {self.uid}>'

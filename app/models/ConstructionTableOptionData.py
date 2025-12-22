@@ -1,5 +1,5 @@
 from app.database import Base
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, and_
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
@@ -15,7 +15,15 @@ class ConstructionTableOptionData(Base):
     value = Column(String(32))
     
     option = relationship("ConstructionTableOption", back_populates="datas")
-    attachments = relationship("ConstructionTableOptionDataAttachment", back_populates="option_data", cascade="all, delete-orphan", order_by="ConstructionTableOptionDataAttachment.uid")
+    attachments = relationship(
+        "OptionDataAttachment",
+        primaryjoin="and_(foreign(OptionDataAttachment.option_data_uid) == ConstructionTableOptionData.uid, "
+                    "OptionDataAttachment.table_type == 'construction_table_option_data')",
+        back_populates="construction_option_data",
+        cascade="all, delete-orphan",
+        order_by="OptionDataAttachment.uid",
+        overlaps="attachments"
+    )
     # region CRUD
 
     @classmethod
