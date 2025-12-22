@@ -6,8 +6,22 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8"
-    x-data 
-    @response-data.window="notyf.success($event.detail.title)">
+     x-data="{
+        isUploading: false,
+        handleUploadTrigger(event) {
+            console.log('基本資料儲存成功，開始上傳附件...');
+            this.isUploading = true;
+            htmx.ajax('POST', '/api/optionAttachment/save/image/construction', {
+                source: '#form',
+                swap: 'none'
+            }).then(() => {
+                this.isUploading = false;
+            });
+        }
+     }"
+     @start-attachment-upload.window="handleUploadTrigger($event)"
+     @response-data.window="notyf.success($event.detail.title)"
+     >
     <div class="card bg-base-100 shadow-xl border border-base-200 max-w-4xl mx-auto">
         <div class="card-body">
             
@@ -21,8 +35,9 @@
 
             <form id="form"
                   hx-post="/api/construction/save/{{data.site_uid}}"
-                  hx-swap="none">
-                
+                  hx-swap="none"
+                  hx-encoding="multipart/form-data"
+                  enctype="multipart/form-data">
                 <div class="flex flex-col">
                     {% for data_o in data.options %}
                     {% set current_val = data.saved.get(data_o.uid) %}
@@ -68,13 +83,16 @@
                                 <span class="label-text text-base-content/70">無</span>
                             </label>
                         </div>
+                        {% set table_type = 'construction' %}
+                        {% with uid=data_o.uid, saved_file=current_file %}
+                            {% include 'global/optionAttachment/_form_attachment.html' %}
+                        {% endwith %}
                     </div>
                     {% endfor %}
                 </div>
 
                 <div class="card-actions mt-8 flex items-center gap-4">
                     <button type="submit" class="btn btn-primary px-8 text-white shadow-md">
-                        <span class="loading loading-spinner loading-sm htmx-indicator"></span>
                         <i class="bi bi-send-fill"></i>
                         送出
                     </button>

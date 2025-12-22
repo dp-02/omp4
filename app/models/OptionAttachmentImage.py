@@ -5,15 +5,15 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class OptionDataAttachmentNote(Base):
-    ''' 選項資料附件說明 '''
-    __tablename__ = 'option_data_attachment_note'
+class OptionAttachmentImage(Base):
+    ''' 選項資料附件圖片 '''
+    __tablename__ = 'option_attachment_image'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    option_data_attachment_uid =  Column(Integer, ForeignKey('option_data_attachment.uid', ondelete='CASCADE'), nullable=False)
-    value = Column(String(4096))
+    option_attachment_uid =  Column(Integer, ForeignKey('option_attachment.uid', ondelete='CASCADE'), nullable=False)
+    file_path = Column(String(256))
     
-    attachment = relationship("OptionDataAttachment", back_populates="notes")
+    attachment = relationship("OptionAttachment", back_populates="images")
 
     # region CRUD
 
@@ -60,4 +60,4 @@ class OptionDataAttachmentNote(Base):
         return result
     
     def __repr__(self):
-        return f'<option_data_attachment_note {self.uid}>'
+        return f'<option_attachment_image {self.uid}>'

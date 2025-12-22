@@ -15,15 +15,6 @@ class ConstructionTableOptionData(Base):
     value = Column(String(32))
     
     option = relationship("ConstructionTableOption", back_populates="datas")
-    attachments = relationship(
-        "OptionDataAttachment",
-        primaryjoin="and_(foreign(OptionDataAttachment.option_data_uid) == ConstructionTableOptionData.uid, "
-                    "OptionDataAttachment.table_type == 'construction_table_option_data')",
-        back_populates="construction_option_data",
-        cascade="all, delete-orphan",
-        order_by="OptionDataAttachment.uid",
-        overlaps="attachments"
-    )
     # region CRUD
 
     @classmethod

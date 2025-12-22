@@ -5,33 +5,16 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class OptionDataAttachment(Base):
-    ''' 選項資料附件 '''
-    __tablename__ = 'option_data_attachment'
+class OptionAttachmentNote(Base):
+    ''' 選項資料附件說明 '''
+    __tablename__ = 'option_attachment_note'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    table_type = Column(String(32), nullable=False, index=True)
-    option_data_uid = Column(Integer, nullable=False, index=True)
-    type = Column(String(32))
+    option_attachment_uid =  Column(Integer, ForeignKey('option_attachment.uid', ondelete='CASCADE'), nullable=False)
+    value = Column(String(4096))
+    
+    attachment = relationship("OptionAttachment", back_populates="notes")
 
-    construction_option_data = relationship(
-        "ConstructionTableOptionData",
-        primaryjoin="and_(foreign(OptionDataAttachment.option_data_uid) == ConstructionTableOptionData.uid, "
-                    "OptionDataAttachment.table_type == 'construction')",
-        back_populates="attachments",
-        overlaps="checklist_option_data, attachments"
-    )
-    
-    checklist_option_data = relationship(
-        "ChecklistTableOptionData",
-        primaryjoin="and_(foreign(OptionDataAttachment.option_data_uid) == ChecklistTableOptionData.uid, "
-                    "OptionDataAttachment.table_type == 'checklist')",
-        back_populates="attachments",
-        overlaps="construction_option_data, attachments"
-    )
-    
-    images = relationship("OptionDataAttachmentImage", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionDataAttachmentImage.uid")
-    notes = relationship("OptionDataAttachmentNote", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionDataAttachmentNote.uid")
     # region CRUD
 
     @classmethod
@@ -77,4 +60,4 @@ class OptionDataAttachment(Base):
         return result
     
     def __repr__(self):
-        return f'<option_data_attachment {self.uid}>'
+        return f'<option_attachment_note {self.uid}>'

@@ -5,17 +5,16 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class ChecklistTableOptionData(Base):
-    ''' 電廠檢測表格資料 '''
-    __tablename__ = 'checklist_table_option_data'
+class OptionAttachmentState(Base):
+    ''' 選項資料附件進度 '''
+    __tablename__ = 'option_attachment_state'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    option_uid = Column(Integer, ForeignKey('checklist_table_option.uid', ondelete='CASCADE'), nullable=False)
-    checklist_uid = Column(Integer, ForeignKey('checklist.uid', ondelete='CASCADE'), nullable=False)
-    value = Column(String(32))
+    option_attachment_uid =  Column(Integer, ForeignKey('option_attachment.uid', ondelete='CASCADE'), nullable=False)
+    value = Column(String(4096))
     
-    option = relationship("ChecklistTableOption", back_populates="datas")
-    checklist = relationship("Checklist", back_populates="datas")
+    attachment = relationship("OptionAttachment", back_populates="notes")
+
     # region CRUD
 
     @classmethod
@@ -61,4 +60,4 @@ class ChecklistTableOptionData(Base):
         return result
     
     def __repr__(self):
-        return f'<checklist_table_data {self.uid}>'
+        return f'<option_attachment_state {self.uid}>'

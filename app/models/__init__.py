@@ -5,9 +5,10 @@ from .ChecklistTableOptionData import ChecklistTableOptionData
 from .ChecklistTableOption import ChecklistTableOption
 from .ConstructionTable import ConstructionTable
 from .ConstructionTableOptionData import ConstructionTableOptionData
-from .OptionDataAttachment import OptionDataAttachment
-from .OptionDataAttachmentImage import OptionDataAttachmentImage
-from .OptionDataAttachmentNote import OptionDataAttachmentNote
+from .OptionAttachment import OptionAttachment
+from .OptionAttachmentImage import OptionAttachmentImage
+from .OptionAttachmentNote import OptionAttachmentNote
+from .OptionAttachmentState import OptionAttachmentState
 from .ConstructionTableGroup import ConstructionTableGroup
 from .ConstructionTableOption import ConstructionTableOption
 from .DesignTable import DesignTable

@@ -5,16 +5,34 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class OptionDataAttachmentImage(Base):
-    ''' 選項資料附件圖片 '''
-    __tablename__ = 'option_data_attachment_image'
+class OptionAttachment(Base):
+    ''' 選項資料附件 '''
+    __tablename__ = 'option_attachment'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    option_data_attachment_uid =  Column(Integer, ForeignKey('option_data_attachment.uid', ondelete='CASCADE'), nullable=False)
-    file_path = Column(String(256))
-    
-    attachment = relationship("OptionDataAttachment", back_populates="images")
+    option_uid = Column(Integer, nullable=False, index=True)
+    table_type = Column(String(32), nullable=False, index=True)
+    type = Column(String(32))
 
+    construction_option = relationship(
+        "ConstructionTableOption",
+        primaryjoin="and_(foreign(OptionAttachment.option_uid) == ConstructionTableOption.uid, "
+                    "OptionAttachment.table_type == 'construction')",
+        back_populates="attachments",
+        overlaps="checklist_option, attachments"
+    )
+    
+    checklist_option = relationship(
+        "ChecklistTableOption",
+        primaryjoin="and_(foreign(OptionAttachment.option_uid) == ChecklistTableOption.uid, "
+                    "OptionAttachment.table_type == 'checklist')",
+        back_populates="attachments",
+        overlaps="construction_option, attachments"
+    )
+    
+    images = relationship("OptionAttachmentImage", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentImage.uid")
+    notes = relationship("OptionAttachmentNote", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentNote.uid")
+    notes = relationship("OptionAttachmentState", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentState.uid")
     # region CRUD
 
     @classmethod
@@ -60,4 +78,4 @@ class OptionDataAttachmentImage(Base):
         return result
     
     def __repr__(self):
-        return f'<option_data_attachment_image {self.uid}>'
+        return f'<option_attachment {self.uid}>'

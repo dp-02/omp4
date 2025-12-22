@@ -16,6 +16,15 @@ class ChecklistTableOption(Base):
     
     table = relationship("ChecklistTable", back_populates="options")
     datas = relationship("ChecklistTableOptionData", back_populates="option", cascade="all, delete-orphan", order_by="ChecklistTableOptionData.uid")
+    attachments = relationship(
+        "OptionAttachment",
+        primaryjoin="and_(foreign(OptionAttachment.option_uid) == ChecklistTableOption.uid, "
+                    "OptionAttachment.table_type == 'checklist')",
+        back_populates="checklist_option",
+        cascade="all, delete-orphan",
+        order_by="OptionAttachment.uid",
+        overlaps="attachments"
+    )
     # region CRUD
 
     @classmethod

@@ -13,8 +13,11 @@ def save_construction_data(site_uid):
     response = make_response()
     with session_scope() as session:
         form_data = request.form
-        for option_uid_str, value in form_data.items():
-            option_uid = int(option_uid_str)
+        for key, value in form_data.items():
+            # 如果 key 不是純數字 (例如 "desc_123_456")，就跳過不處理
+            if not key.isdigit():
+                continue
+            option_uid = int(key)
             stmt = select(ConstructionTableOptionData).where(
                 ConstructionTableOptionData.site_uid == site_uid,
                 ConstructionTableOptionData.option_uid == option_uid
@@ -31,10 +34,10 @@ def save_construction_data(site_uid):
                 )
                 session.add(new_record)
         trigger_data = {
-                "response-data": {
-                    "title": "資料已成功儲存！"
+                "start-attachment-upload": {
+                    "site_uid": site_uid 
+                }
             }
-        }
         response.headers['HX-Trigger'] = json.dumps(trigger_data)
         
         return response

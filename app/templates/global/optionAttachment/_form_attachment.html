@@ -1,0 +1,113 @@
+<div x-data="{
+        targetUid: {{ uid }}, 
+        targetTableType: '{{ table_type }}',
+        records: [],
+        isLoading: false,
+        isAddMenuOpen: false, // [新增] 控制折疊選單的開關狀態
+        async init() {
+            await this.loadData();
+        },
+        async loadData() {
+            this.isLoading = true;
+            try {
+                const url = `/api/optionAttachment/get_saved/image/${this.targetTableType}/${this.targetUid}`;
+                const response = await fetch(url);
+                if (response.ok) {
+                    const savedData = await response.json();
+                    this.records = savedData.map(item => ({
+                        id: item.id,            
+                        type: item.type,        
+                        desc: item.desc || '',  
+                        isSaved: true,          
+                        previews: item.images.map(img => ({
+                            uid: img.uid,       
+                            url: img.url,       
+                            name: img.name,
+                            isDoc: false,       
+                            isSaved: true       
+                        }))
+                    }));
+                }
+            } catch (error) {
+                console.error('載入附件失敗:', error);
+                notyf.error('載入附件失敗');
+            } finally {this.isLoading = false;}
+        },
+        
+        addRecord(type) {
+            this.records.push({
+                id: Date.now(),
+                type: type,
+                desc: '',
+                previews: [],
+                isSaved: false
+            });
+            // [新增] 點擊新增後，自動收起折疊選單
+            this.isAddMenuOpen = false;
+        },
+        
+        async removeRecord(record) {
+            if (!confirm('確定要刪除此筆紀錄嗎？')) return;
+            if (record.isSaved) {
+                try {
+                    const resp = await fetch(`/api/optionAttachment/delete/${record.id}`, { method: 'DELETE' });
+                    if (resp.ok) {
+                        this.records = this.records.filter(r => r.id !== record.id);
+                        notyf.success('紀錄已刪除');
+                    } else {notyf.error('刪除失敗');}
+                } catch (e) {console.error(e);}
+            } else {this.records = this.records.filter(r => r.id !== record.id);}
+        }
+     }"
+     @reload-attachments.window="loadData()"
+     class="mt-4 w-full">
+
+    <div class="flex flex-col gap-4 mb-4">
+        <template x-for="(record, index) in records" :key="record.id">
+            <div>
+                <template x-if="record.type === 'image'">
+                    {% include 'global/optionAttachment/partials/_uploadImage.html' %}
+                </template>
+
+                <template x-if="record.type === 'anomaly'">
+                    <div class="alert alert-warning">異常表單 (開發中)</div>
+                </template>
+            </div>
+        </template>
+    </div>
+
+    <div class="collapse collapse-arrow bg-base-200 border border-base-300 rounded-box">
+        
+        <input type="checkbox" x-model="isAddMenuOpen" /> 
+        
+        <div class="collapse-title text-base font-bold flex items-center gap-2">
+            <i class="bi bi-plus-circle-fill text-primary"></i>
+            新增紀錄
+        </div>
+        
+        <div class="collapse-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 pb-2">
+                <button type="button"
+                        @click="addRecord('image')"
+                        class="btn btn-outline btn-info border-dashed border-2 hover:bg-info hover:text-white gap-2 h-auto py-2">
+                    <i class="bi bi-camera-fill text-xl"></i>
+                    <div class="flex flex-col items-start">
+                        <span class="font-bold">新增照片說明</span>
+                        <span class="text-[10px] opacity-70 font-normal">一張說明 + 多張照片</span>
+                    </div>
+                </button>
+
+                <button type="button"
+                        @click="addRecord('anomaly')"
+                        class="btn btn-outline btn-warning border-dashed border-2 hover:bg-warning hover:text-white gap-2 h-auto py-2">
+                    <i class="bi bi-exclamation-triangle-fill text-xl"></i>
+                    <div class="flex flex-col items-start">
+                        <span class="font-bold">新增異常紀錄</span>
+                        <span class="text-[10px] opacity-70 font-normal">紀錄異常狀況與對策</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
