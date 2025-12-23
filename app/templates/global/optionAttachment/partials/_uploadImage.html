@@ -4,43 +4,58 @@
         currentRecord: null,  init() {
             this.currentRecord = record; 
         },
-
         get displayPreviews() {
             if (!this.currentRecord) return [];
             return this.currentRecord.previews || [];
         },
-
+        syncInputFiles() {
+            const inputEl = this.$refs.fileInput;
+            const dataTransfer = new DataTransfer();
+            this.currentRecord.previews.forEach(preview => {
+                if (!preview.isSaved && preview.fileObj) {
+                    dataTransfer.items.add(preview.fileObj);
+                }
+            });
+            inputEl.files = dataTransfer.files;
+        },
         handleFileChange(event) {
-            console.log('觸發檔案變更');
-            const files = event.target.files;
-            if (files && files.length > 0) {
-                Array.from(files).forEach(file => {
+            const newFiles = Array.from(event.target.files);
+            if (newFiles.length > 0) {
+                newFiles.forEach(file => {
                     if (this.currentRecord) {
                         this.currentRecord.previews.push({
                             url: URL.createObjectURL(file),
                             name: file.name,
                             isDoc: !file.type.startsWith('image/'),
                             isSaved: false,
-                            fileObj: file
+                            fileObj: file // 重要：必須保存原始 File 物件
                         });
                     }
                 });
+                this.syncInputFiles();
             }
         },
-
         async removeImage(imgIndex, imgItem) {
-            if (!this.currentRecord) return; // 防呆
-            if (imgItem.isSaved) {
-                if(!confirm('確定要刪除這張已存檔的照片嗎？')) return;
-                const resp = await fetch(`/api/optionAttachment/image/delete/${imgItem.uid}`, { method: 'DELETE' });
-                if(resp.ok) {
-                    this.currentRecord.previews.splice(imgIndex, 1);
-                    notyf.success('照片已刪除');
+                    if (!this.currentRecord) return;
+                    if (imgItem.isSaved) {
+                        if(!confirm('確定要刪除這張已存檔的照片嗎？')) return;
+                        const resp = await fetch(`/api/optionAttachment/image/delete/${imgItem.uid}`, { method: 'DELETE' });
+                        if(resp.ok) {
+                            this.currentRecord.previews.splice(imgIndex, 1);
+                            notyf.success('照片已刪除');
+                        }
+                    } 
+                    else {
+                        this.currentRecord.previews.splice(imgIndex, 1);
+                        const inputEl = this.$refs.fileInput; 
+                        const dataTransfer = new DataTransfer();
+                        this.currentRecord.previews.forEach(preview => {
+                            if (!preview.isSaved && preview.fileObj) {dataTransfer.items.add(preview.fileObj);}
+                        });
+                        inputEl.files = dataTransfer.files;
+                        this.syncInputFiles();
+                    }
                 }
-            } else {
-                this.currentRecord.previews.splice(imgIndex, 1);
-            }
-        }
      }">
      <button type="button" 
             @click="removeRecord(record)"
@@ -55,6 +70,9 @@
              :class="record.isSaved ? 'text-success' : 'text-info'">
             <i class="bi" :class="record.isSaved ? 'bi-check-circle-fill' : 'bi-camera-fill'"></i>
             <span x-text="record.isSaved ? '已存檔紀錄' : '新照片紀錄'"></span>
+            <span class="text-xs font-normal opacity-60 ml-auto" x-show="record.isSaved">
+                ID: <span x-text="record.id"></span>
+            </span>
         </div>
 
         <div class="form-control">
@@ -72,12 +90,13 @@
 
         <div class="form-control">
             <input type="file" 
-                   class="file-input file-input-bordered file-input-sm w-full" 
-                   :class="record.isSaved ? 'file-input-success' : 'file-input-info'"
-                   accept="image/*"
-                   multiple
-                   @change="handleFileChange($event, record)"
-                   :name="record.isSaved ? 'append_files_' + record.id + '[]' : 'files_' + '{{ uid }}_' + record.id + '[]'" />
+            x-ref="fileInput"
+            class="file-input file-input-bordered file-input-sm w-full" 
+            :class="record.isSaved ? 'file-input-success' : 'file-input-info'"
+            accept="image/*"
+            multiple
+            @change="handleFileChange($event)"
+            :name="record.isSaved ? 'append_files_' + record.id + '[]' : 'files_' + '{{ uid }}_' + record.id + '[]'" />
         </div>
 
         <div class="grid grid-cols-3 md:grid-cols-5 gap-2 mt-2" 
@@ -99,7 +118,7 @@
                     </template>
 
                     <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] text-center py-0.5 backdrop-blur-sm">
-                        <span x-text="img.isSaved ? '已存' : '未儲存'"></span>
+                        <span x-text="img.isSaved ? '已存' : '儲存'"></span>
                     </div>
 
                     <button type="button" 
@@ -107,7 +126,6 @@
                             class="absolute top-1 right-1 btn btn-circle btn-error btn-xs opacity-0 group-hover/img:opacity-100 transition-opacity scale-90">
                         <i class="bi bi-x"></i>
                     </button>
-
                 </div>
             </template>
         </div>

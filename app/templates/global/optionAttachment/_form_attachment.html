@@ -10,27 +10,27 @@
         async loadData() {
             this.isLoading = true;
             try {
-                const url = `/api/optionAttachment/get_saved/image/${this.targetTableType}/${this.targetUid}`;
+                const url = `/api/optionAttachment/get_saved/${this.targetTableType}/${this.targetUid}`;
                 const response = await fetch(url);
                 if (response.ok) {
                     const savedData = await response.json();
                     this.records = savedData.map(item => ({
                         id: item.id,            
                         type: item.type,        
-                        desc: item.desc || '',  
+                        desc: item.desc || '',
+                        status: item.status || '0', 
                         isSaved: true,          
                         previews: item.images.map(img => ({
                             uid: img.uid,       
                             url: img.url,       
                             name: img.name,
                             isDoc: false,       
-                            isSaved: true       
+                            isSaved: true,
+                            category: img.category || 'before' 
                         }))
                     }));
                 }
             } catch (error) {
-                console.error('載入附件失敗:', error);
-                notyf.error('載入附件失敗');
             } finally {this.isLoading = false;}
         },
         
@@ -70,7 +70,7 @@
                 </template>
 
                 <template x-if="record.type === 'anomaly'">
-                    <div class="alert alert-warning">異常表單 (開發中)</div>
+                    {% include 'global/optionAttachment/partials/_anomaly.html' %}
                 </template>
             </div>
         </template>

@@ -11,17 +11,50 @@
         handleUploadTrigger(event) {
             console.log('基本資料儲存成功，開始上傳附件...');
             this.isUploading = true;
-            htmx.ajax('POST', '/api/optionAttachment/save/image/construction', {
-                source: '#form',
-                swap: 'none'
-            }).then(() => {
+
+            const formElement = document.getElementById('form');
+            if (!formElement) {
+                console.error('找不到表單元素 #form');
+                notyf.error('系統錯誤：找不到表單');
                 this.isUploading = false;
+                return;
+            }
+            const formData = new FormData(formElement);
+
+            const uploadImage = fetch('/api/optionAttachment/save/image/construction', {
+                method: 'POST',
+                body: formData, // 瀏覽器會自動設定 multipart/form-data
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // 讓 Flask 知道這是 AJAX
+                }
             });
+
+            const uploadAnomaly = fetch('/api/optionAttachment/save/anomaly/construction', {
+                method: 'POST',
+                body: formData, // 重複使用同一個 formData (包含圖片與異常紀錄文字)
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            Promise.all([uploadImage, uploadAnomaly])
+                .then(async (responses) => {
+                    const allOk = responses.every(r => r.ok);
+                    if (!allOk) throw new Error('部分上傳失敗');
+                    
+                    this.isUploading = false;
+                    notyf.success('上傳成功！');
+                })
+                .catch((error) => {
+                    console.error('上傳過程中發生錯誤:', error);
+                    this.isUploading = false;
+                    notyf.error('部分資料儲存失敗，請檢查網路或稍後再試');
+                });
         }
      }"
      @start-attachment-upload.window="handleUploadTrigger($event)"
      @response-data.window="notyf.success($event.detail.title)"
-     >
+>
     <div class="card bg-base-100 shadow-xl border border-base-200 max-w-4xl mx-auto">
         <div class="card-body">
             

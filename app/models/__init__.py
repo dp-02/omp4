@@ -8,7 +8,8 @@ from .ConstructionTableOptionData import ConstructionTableOptionData
 from .OptionAttachment import OptionAttachment
 from .OptionAttachmentImage import OptionAttachmentImage
 from .OptionAttachmentNote import OptionAttachmentNote
-from .OptionAttachmentState import OptionAttachmentState
+from .OptionAttachmentAnomalyState import OptionAttachmentAnomalyState
+from .OptionAttachmentAnomalyImage import OptionAttachmentAnomalyImage
 from .ConstructionTableGroup import ConstructionTableGroup
 from .ConstructionTableOption import ConstructionTableOption
 from .DesignTable import DesignTable

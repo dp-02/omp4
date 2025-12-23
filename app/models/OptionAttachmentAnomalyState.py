@@ -5,15 +5,15 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class OptionAttachmentState(Base):
-    ''' 選項資料附件進度 '''
-    __tablename__ = 'option_attachment_state'
+class OptionAttachmentAnomalyState(Base):
+    ''' 選項資料附件處裡進度 '''
+    __tablename__ = 'option_attachment_anomaly_state'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
     option_attachment_uid =  Column(Integer, ForeignKey('option_attachment.uid', ondelete='CASCADE'), nullable=False)
     value = Column(String(4096))
     
-    attachment = relationship("OptionAttachment", back_populates="notes")
+    attachment = relationship("OptionAttachment", back_populates="anomaly_states")
 
     # region CRUD
 
@@ -60,4 +60,4 @@ class OptionAttachmentState(Base):
         return result
     
     def __repr__(self):
-        return f'<option_attachment_state {self.uid}>'
+        return f'<option_attachment_anomaly_state {self.uid}>'

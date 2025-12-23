@@ -5,35 +5,17 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class OptionAttachment(Base):
-    ''' 選項資料附件 '''
-    __tablename__ = 'option_attachment'
+class OptionAttachmentAnomalyImage(Base):
+    ''' 選項資料附件異常照片 '''
+    __tablename__ = 'option_attachment_anomaly_image'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    option_uid = Column(Integer, nullable=False, index=True)
-    table_type = Column(String(32), nullable=False, index=True)
+    option_attachment_uid =  Column(Integer, ForeignKey('option_attachment.uid', ondelete='CASCADE'), nullable=False)
+    file_path = Column(String(256))
     type = Column(String(32))
+    
+    attachment = relationship("OptionAttachment", back_populates="anomaly_images")
 
-    construction_option = relationship(
-        "ConstructionTableOption",
-        primaryjoin="and_(foreign(OptionAttachment.option_uid) == ConstructionTableOption.uid, "
-                    "OptionAttachment.table_type == 'construction')",
-        back_populates="attachments",
-        overlaps="checklist_option, attachments"
-    )
-    
-    checklist_option = relationship(
-        "ChecklistTableOption",
-        primaryjoin="and_(foreign(OptionAttachment.option_uid) == ChecklistTableOption.uid, "
-                    "OptionAttachment.table_type == 'checklist')",
-        back_populates="attachments",
-        overlaps="construction_option, attachments"
-    )
-    
-    images = relationship("OptionAttachmentImage", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentImage.uid")
-    notes = relationship("OptionAttachmentNote", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentNote.uid")
-    anomaly_states = relationship("OptionAttachmentAnomalyState", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyState.uid")
-    anomaly_images = relationship("OptionAttachmentAnomalyImage", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyImage.uid")
     # region CRUD
 
     @classmethod
@@ -79,4 +61,4 @@ class OptionAttachment(Base):
         return result
     
     def __repr__(self):
-        return f'<option_attachment {self.uid}>'
+        return f'<option_attachment_anomaly_image {self.uid}>'

@@ -1,0 +1,187 @@
+<div class="card bg-base-100 border shadow-sm relative group transition-all"
+     :class="record.isSaved ? 'border-success/30 bg-success/5' : 'border-warning/30 bg-warning/5'"
+     x-data="{ 
+        currentRecord: null, 
+        init() {
+            this.currentRecord = record;
+            if (!this.currentRecord.status) {this.currentRecord.status = '0';}
+            if (!this.currentRecord.previews) {this.currentRecord.previews = [];}
+        },
+        getPreviews(category) {
+            if (!this.currentRecord || !this.currentRecord.previews) return [];
+            return this.currentRecord.previews.filter(img => img.category === category);
+        },
+        syncFiles(category) {
+            const refName = category === 'before' ? 'inputBefore' : 'inputAfter';
+            const inputEl = this.$refs[refName];
+
+            if (!inputEl) {
+                console.error(`找不到 x-ref='${refName}' 的元素`);
+                return;
+            }
+
+            const dataTransfer = new DataTransfer();
+            this.currentRecord.previews.forEach(preview => {
+                if (preview.category === category && !preview.isSaved && preview.fileObj) {
+                    dataTransfer.items.add(preview.fileObj);
+                }
+            });
+            inputEl.files = dataTransfer.files;
+            console.log(`[${category}] Input 同步完成，目前有 ${inputEl.files.length} 個檔案`);
+        },
+        handleFileChange(event, category) {
+            const files = event.target.files;
+            if (files && files.length > 0) {
+                Array.from(files).forEach(file => {
+                    if (this.currentRecord) {
+                        this.currentRecord.previews.push({
+                            url: URL.createObjectURL(file),
+                            name: file.name,
+                            isDoc: !file.type.startsWith('image/'),
+                            isSaved: false,
+                            fileObj: file,
+                            category: category, // 標記是用於 before 還是 after
+                            uid: Date.now() + Math.random().toString(36).substr(2, 9) 
+                        });
+                    }
+                });
+                this.syncFiles(category);
+            }
+        },
+        async removeImage(imgItem) {
+            if (!this.currentRecord) return;
+            const realIndex = this.currentRecord.previews.indexOf(imgItem);
+            if (realIndex === -1) return;
+
+            if (imgItem.isSaved) {
+                if(!confirm('確定要刪除這張已存檔的照片嗎？')) return;
+                const resp = await fetch(`/api/optionAttachment/anomaly_image/delete/${imgItem.uid}`, { method: 'DELETE' });
+                if(resp.ok) {
+                    this.currentRecord.previews.splice(realIndex, 1);
+                    notyf.success('照片已刪除');
+                }
+            } 
+            else {
+                this.currentRecord.previews.splice(realIndex, 1);
+                this.syncFiles(imgItem.category);
+            }
+        }
+     }">
+
+    <button type="button" 
+            @click="removeRecord(record)"
+            class="btn btn-circle btn-ghost btn-xs absolute top-2 right-2 z-10"
+            :class="record.isSaved ? 'text-error hover:bg-error/10' : 'text-base-content/40 hover:text-error'">
+        <i class="bi bi-trash"></i>
+    </button>
+
+    <div class="card-body p-4 gap-4">
+        
+        <div class="flex items-center gap-2 text-sm font-bold border-b border-base-200 pb-2"
+             :class="record.isSaved ? 'text-success' : 'text-warning'">
+            <i class="bi" :class="record.isSaved ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+            <span x-text="record.isSaved ? '已存檔異常紀錄' : '新異常紀錄'"></span>
+        </div>
+
+        <div class="form-control">
+            <div class="label pb-1"><span class="label-text font-bold text-xs opacity-70">處理進度</span></div>
+            <div class="flex flex-wrap gap-4 px-1">
+                <label class="cursor-pointer flex items-center gap-2">
+                    <input type="radio" :name="'anomaly_status_' + (record.isSaved ? record.id : '{{ uid }}_' + record.id)" 
+                           class="radio radio-sm" :class="record.isSaved ? 'radio-success' : 'radio-warning'"
+                           value="0" x-model="record.status" />
+                    <span class="label-text">未處理</span>
+                </label>
+                <label class="cursor-pointer flex items-center gap-2">
+                    <input type="radio" :name="'anomaly_status_' + (record.isSaved ? record.id : '{{ uid }}_' + record.id)"
+                           class="radio radio-sm" :class="record.isSaved ? 'radio-success' : 'radio-warning'"
+                           value="1" x-model="record.status" />
+                    <span class="label-text">已處理</span>
+                </label>
+                <label class="cursor-pointer flex items-center gap-2">
+                    <input type="radio" :name="'anomaly_status_' + (record.isSaved ? record.id : '{{ uid }}_' + record.id)"
+                           class="radio radio-sm" :class="record.isSaved ? 'radio-success' : 'radio-warning'"
+                           value="2" x-model="record.status" />
+                    <span class="label-text">不可處理</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-control">
+            <div class="label pb-1"><span class="label-text font-bold text-xs opacity-70">說明</span></div>
+            <template x-if="record.isSaved">
+                <input type="hidden" :name="'record_id_' + '{{ uid }}'" :value="record.id">
+            </template>
+            <textarea class="textarea textarea-bordered textarea-sm w-full transition-all" 
+                    :class="record.isSaved ? 'focus:textarea-success' : 'focus:textarea-warning'"
+                    placeholder="請描述異常狀況或是後續處理對策..."
+                    rows="3"
+                    x-model="record.desc"
+                    :name="record.isSaved ? 'update_anomaly_desc_' + record.id : 'anomaly_desc_' + '{{ uid }}_' + record.id">
+            </textarea>
+        </div>
+
+        <div class="divider my-0 text-xs text-base-content/30">照片</div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <div class="bg-error/5 rounded-lg p-3 border border-error/20">
+                <div class="label pb-1 pt-0">
+                    <span class="label-text font-bold text-xs text-error flex items-center gap-1">
+                        <i class="bi bi-camera-video-off"></i> 處理前
+                    </span>
+                </div>
+                
+                <input type="file" 
+                       x-ref="inputBefore"
+                       class="file-input file-input-ghost file-input-sm w-full file-input-error bg-white/50" 
+                       accept="image/*" multiple
+                       @change="handleFileChange($event, 'before')"
+                       :name="record.isSaved ? 'append_files_before_' + record.id + '[]' : 'files_before_' + '{{ uid }}_' + record.id + '[]'" />
+
+                <div class="grid grid-cols-3 gap-2 mt-2" x-show="getPreviews('before').length > 0">
+                    <template x-for="img in getPreviews('before')" :key="img.uid || img.url">
+                        <div class="relative aspect-square rounded overflow-hidden border border-error/30 bg-base-100 group/img">
+                            <img :src="img.url" class="object-cover w-full h-full" />
+                            <div class="absolute bottom-0 inset-x-0 bg-error/80 text-white text-[9px] text-center py-0.5">前</div>
+                            
+                            <button type="button" @click="removeImage(img)"
+                                    class="absolute top-0.5 right-0.5 btn btn-circle btn-error btn-xs opacity-0 group-hover/img:opacity-100 scale-75">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="bg-success/5 rounded-lg p-3 border border-success/20">
+                <div class="label pb-1 pt-0">
+                    <span class="label-text font-bold text-xs text-success flex items-center gap-1">
+                        <i class="bi bi-camera-video"></i> 處理後
+                    </span>
+                </div>
+
+                <input type="file" 
+                       x-ref="inputAfter"
+                       class="file-input file-input-ghost file-input-sm w-full file-input-success bg-white/50" 
+                       accept="image/*" multiple
+                       @change="handleFileChange($event, 'after')"
+                       :name="record.isSaved ? 'append_files_after_' + record.id + '[]' : 'files_after_' + '{{ uid }}_' + record.id + '[]'" />
+
+                <div class="grid grid-cols-3 gap-2 mt-2" x-show="getPreviews('after').length > 0">
+                    <template x-for="img in getPreviews('after')" :key="img.uid || img.url">
+                        <div class="relative aspect-square rounded overflow-hidden border border-success/30 bg-base-100 group/img">
+                            <img :src="img.url" class="object-cover w-full h-full" />
+                            <div class="absolute bottom-0 inset-x-0 bg-success/80 text-white text-[9px] text-center py-0.5">後</div>
+                            
+                            <button type="button" @click="removeImage(img)"
+                                    class="absolute top-0.5 right-0.5 btn btn-circle btn-error btn-xs opacity-0 group-hover/img:opacity-100 scale-75">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
