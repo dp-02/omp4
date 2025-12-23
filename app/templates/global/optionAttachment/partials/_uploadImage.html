@@ -70,9 +70,6 @@
              :class="record.isSaved ? 'text-success' : 'text-info'">
             <i class="bi" :class="record.isSaved ? 'bi-check-circle-fill' : 'bi-camera-fill'"></i>
             <span x-text="record.isSaved ? '已存檔紀錄' : '新照片紀錄'"></span>
-            <span class="text-xs font-normal opacity-60 ml-auto" x-show="record.isSaved">
-                ID: <span x-text="record.id"></span>
-            </span>
         </div>
 
         <div class="form-control">
