@@ -8,8 +8,13 @@ from .ConstructionTableOptionData import ConstructionTableOptionData
 from .OptionAttachment import OptionAttachment
 from .OptionAttachmentImage import OptionAttachmentImage
 from .OptionAttachmentNote import OptionAttachmentNote
-from .OptionAttachmentAnomalyState import OptionAttachmentAnomalyState
+from .OptionAttachmentAnomalyBreaker import OptionAttachmentAnomalyBreaker
+from .OptionAttachmentAnomalyDamaged import OptionAttachmentAnomalyDamaged
 from .OptionAttachmentAnomalyImage import OptionAttachmentAnomalyImage
+from .OptionAttachmentAnomalyOptimizer import OptionAttachmentAnomalyOptimizer
+from .OptionAttachmentAnomalyPosition import OptionAttachmentAnomalyPosition
+from .OptionAttachmentAnomalyReason import OptionAttachmentAnomalyReason
+from .OptionAttachmentAnomalyState import OptionAttachmentAnomalyState
 from .ConstructionTableGroup import ConstructionTableGroup
 from .ConstructionTableOption import ConstructionTableOption
 from .DesignTable import DesignTable

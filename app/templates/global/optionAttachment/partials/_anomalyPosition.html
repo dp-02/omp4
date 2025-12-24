@@ -1,0 +1,51 @@
+<div class="form-control">
+    <div class="label pb-1"><span class="label-text font-bold text-xs opacity-70">位置</span></div>
+    
+    <div class="grid grid-cols-4 gap-2">
+        
+        <div>
+            <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Inv</label>
+            <input type="number" min="0" 
+                   class="input input-bordered input-sm w-full px-1 text-center transition-all"
+                   :class="record.isSaved ? 'focus:input-success' : 'focus:input-warning'"
+                   x-model.number="record.inv"
+                   placeholder="---"
+                   :name="record.isSaved ? 'anomaly_update_inv_' + record.id : 'anomaly_create_inv_' + '{{ uid }}_'"
+            />
+        </div>
+
+        <div>
+            <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Mppt</label>
+            <input type="number" min="0"
+                   class="input input-bordered input-sm w-full px-1 text-center transition-all"
+                   :class="record.isSaved ? 'focus:input-success' : 'focus:input-warning'"
+                   x-model.number="record.mppt"
+                   placeholder="---"
+                   :name="record.isSaved ? 'anomaly_update_mppt_' + record.id : 'anomaly_create_mppt_' + '{{ uid }}_'"
+            />
+        </div>
+
+        <div>
+            <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Str</label>
+            <input type="number" min="0"
+                   class="input input-bordered input-sm w-full px-1 text-center transition-all"
+                   :class="record.isSaved ? 'focus:input-success' : 'focus:input-warning'"
+                   x-model.number="record.string"
+                   placeholder="---"
+                   :name="record.isSaved ? 'anomaly_update_string_' + record.id : 'anomaly_create_string_' + '{{ uid }}_'"
+            />
+        </div>
+
+        <div>
+            <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Pnl</label>
+            <input type="number" min="0"
+                   class="input input-bordered input-sm w-full px-1 text-center transition-all"
+                   :class="record.isSaved ? 'focus:input-success' : 'focus:input-warning'"
+                   x-model.number="record.panel"
+                   placeholder="---"
+                   :name="record.isSaved ? 'anomaly_update_panel_' + record.id : 'anomaly_create_panel_' + '{{ uid }}_'"
+            />
+        </div>
+        
+    </div>
+</div>

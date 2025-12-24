@@ -5,15 +5,20 @@ from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class OptionAttachmentAnomalyState(Base):
-    ''' 選項資料附件處裡進度 '''
-    __tablename__ = 'option_attachment_anomaly_state'
+class OptionAttachmentAnomalyDamaged(Base):
+    ''' 選項資料附件處裡破片 '''
+    __tablename__ = 'option_attachment_anomaly_damaged'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
     option_attachment_uid =  Column(Integer, ForeignKey('option_attachment.uid', ondelete='CASCADE'), nullable=False)
-    value = Column(String(4096))
+    file_path_front = Column(String(256))
+    file_path_on = Column(String(256))
+    file_path_below = Column(String(256))
+    file_path_left = Column(String(256))
+    file_path_right = Column(String(256))
+    file_path_number = Column(String(256))
     
-    attachment = relationship("OptionAttachment", back_populates="anomaly_states")
+    attachment = relationship("OptionAttachment", back_populates="anomaly_damageds")
 
     # region CRUD
 
@@ -60,4 +65,4 @@ class OptionAttachmentAnomalyState(Base):
         return result
     
     def __repr__(self):
-        return f'<option_attachment_anomaly_state {self.uid}>'
+        return f'<option_attachment_anomaly_damaged {self.uid}>'

@@ -1,0 +1,9 @@
+<div class="form-control">
+    <div class="label pb-1"><span class="label-text font-bold text-xs opacity-70">說明</span></div>
+    <textarea class="textarea textarea-bordered textarea-sm w-full transition-all" 
+                :class="record.isSaved ? 'focus:textarea-success' : 'focus:textarea-info'"
+                placeholder="請輸入說明..."
+                rows="2"
+                x-model="record.note"
+                :name="record.isSaved ? 'image_update_note_' + record.id : 'image_create_note_' + '{{ uid }}_'"></textarea>
+</div>

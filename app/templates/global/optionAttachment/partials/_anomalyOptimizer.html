@@ -1,0 +1,13 @@
+<div class="form-control">
+    <div class="label pb-1">
+        <span class="label-text font-bold text-xs opacity-70">優化器編號</span>
+    </div>
+    <input type="text" 
+           class="input input-bordered input-sm w-full transition-all font-mono"
+           :class="record.isSaved ? 'focus:input-success' : 'focus:input-warning'"
+           placeholder="1.1.1"
+           autocomplete="off"
+           x-model="record.optimizer"
+           :name="record.isSaved ? 'anomaly_update_optimizer_' + record.id : 'anomaly_create_optimizer_' + '{{ uid }}_'"
+    />
+</div>

@@ -1,0 +1,37 @@
+<div class="form-control" 
+     x-data="{ 
+        reasonOptions: [], 
+        isLoading: true 
+     }"
+     x-init="
+        fetch('/api/optionAttachment/reason/{{ uid }}')
+            .then(response => response.json())
+            .then(data => { 
+                reasonOptions = data; 
+                isLoading = false; 
+            })
+            .catch(error => {
+                console.error('Error loading reasons:', error);
+                isLoading = false;
+            });
+     ">
+    
+    <div class="label pb-1">
+        <span class="label-text font-bold text-xs opacity-70">異常原因</span>
+        <span x-show="isLoading" class="loading loading-spinner loading-xs text-info"></span>
+    </div>
+
+    <select class="select select-bordered select-sm w-full transition-all"
+            :class="record.isSaved ? 'focus:select-success' : 'focus:select-warning'"
+            x-model="record.reason"
+            :disabled="isLoading"
+            :name="record.isSaved ? 'anomaly_update_reason_' + record.id : 'anomaly_create_reason_' + '{{ uid }}_'">
+        
+        <option value="" disabled selected>請選擇異常原因...</option>
+        
+        <template x-for="option in reasonOptions" :key="option.id">
+            <option :value="option.id" x-text="option.name"></option>
+        </template>
+
+    </select>
+</div>

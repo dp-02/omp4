@@ -8,10 +8,9 @@
 <div class="container mx-auto px-4 py-8"
      x-data="{
         isUploading: false,
-        handleUploadTrigger(event) {
-            console.log('基本資料儲存成功，開始上傳附件...');
+        async handleUploadTrigger(event) {
+            console.log('基本資料儲存成功，開始上傳附件與異常紀錄...');
             this.isUploading = true;
-
             const formElement = document.getElementById('form');
             if (!formElement) {
                 console.error('找不到表單元素 #form');
@@ -19,41 +18,36 @@
                 this.isUploading = false;
                 return;
             }
+            
             const formData = new FormData(formElement);
 
-            const uploadImage = fetch('/api/optionAttachment/save/image/construction', {
-                method: 'POST',
-                body: formData, // 瀏覽器會自動設定 multipart/form-data
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest' // 讓 Flask 知道這是 AJAX
-                }
-            });
-
-            const uploadAnomaly = fetch('/api/optionAttachment/save/anomaly/construction', {
-                method: 'POST',
-                body: formData, // 重複使用同一個 formData (包含圖片與異常紀錄文字)
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
-            Promise.all([uploadImage, uploadAnomaly])
-                .then(async (responses) => {
-                    const allOk = responses.every(r => r.ok);
-                    if (!allOk) throw new Error('部分上傳失敗');
-                    
-                    this.isUploading = false;
-                    notyf.success('上傳成功！');
-                })
-                .catch((error) => {
-                    console.error('上傳過程中發生錯誤:', error);
-                    this.isUploading = false;
-                    notyf.error('部分資料儲存失敗，請檢查網路或稍後再試');
+            try {
+                const response = await fetch('/api/optionAttachment/save/construction', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({})); 
+                    throw new Error(errorData.message || `上傳失敗 (Status: ${response.status})`);
+                }
+                const result = await response.json();
+                console.log('伺服器回應:', result);
+                
+                notyf.success('附件與紀錄儲存成功！');
+            } catch (error) {
+                console.error('上傳過程中發生錯誤:', error);
+                notyf.error(error.message || '資料儲存失敗，請檢查網路或稍後再試');
+            } finally {
+                this.isUploading = false;
+            }
         }
      }"
      @start-attachment-upload.window="handleUploadTrigger($event)"
 >
+    </div>
     <div class="card bg-base-100 shadow-xl border border-base-200 max-w-4xl mx-auto">
         <div class="card-body">
             
@@ -117,7 +111,7 @@
                         </div>
                         {% set table_type = 'construction' %}
                         {% with uid=data_o.uid, saved_file=current_file %}
-                            {% include 'global/optionAttachment/_form_attachment.html' %}
+                            {% include 'global/optionAttachment/_formAttachment.html' %}
                         {% endwith %}
                     </div>
                     {% endfor %}

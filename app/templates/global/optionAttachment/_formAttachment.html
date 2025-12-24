@@ -3,24 +3,36 @@
         targetTableType: '{{ table_type }}',
         records: [],
         isLoading: false,
-        isAddMenuOpen: false, // [新增] 控制折疊選單的開關狀態
+        isAddMenuOpen: false, 
+
         async init() {
             await this.loadData();
         },
+
         async loadData() {
             this.isLoading = true;
             try {
                 const url = `/api/optionAttachment/get_saved/${this.targetTableType}/${this.targetUid}`;
                 const response = await fetch(url);
+                
                 if (response.ok) {
                     const savedData = await response.json();
+                    
                     this.records = savedData.map(item => ({
                         id: item.id,            
                         type: item.type,        
-                        desc: item.desc || '',
-                        status: item.status || '0', 
-                        isSaved: true,          
-                        previews: item.images.map(img => ({
+                        note: item.note || '',
+                        state: item.state || '0', 
+                        isSaved: true,
+                        inv: item.inv || '',
+                        mppt: item.mppt || '',
+                        string: item.string || '',
+                        panel: item.panel || '',
+                        reason: item.reason || '',
+                        optimizer: item.optimizer || '',
+                        breaker: Array.isArray(item.breaker) ? item.breaker : [],
+                        damaged_images: item.damaged_images || {},
+                        previews: (item.images || []).map(img => ({
                             uid: img.uid,       
                             url: img.url,       
                             name: img.name,
@@ -31,36 +43,70 @@
                     }));
                 }
             } catch (error) {
-            } finally {this.isLoading = false;}
+                console.error('載入失敗:', error);
+                if (typeof notyf !== 'undefined') notyf.error('載入資料失敗');
+            } finally {
+                this.isLoading = false;
+            }
         },
         
         addRecord(type) {
-            this.records.push({
-                id: Date.now(),
+            let newRecord = {
+                id: Date.now(), // 臨時 ID
                 type: type,
-                desc: '',
+                note: '',
                 previews: [],
-                isSaved: false
-            });
-            // [新增] 點擊新增後，自動收起折疊選單
+                isSaved: false,
+                state: '0'
+            };
+
+            if (type === 'anomaly') {
+                newRecord = {
+                    ...newRecord,
+                    inv: '',
+                    mppt: '',
+                    string: '',
+                    panel: '',
+                    reason: '',
+                    optimizer: '',
+                    breaker: [],      // 初始化為空陣列，供 checkbox 使用
+                    damaged_images: {} // 初始化為空物件，供六面圖使用
+                };
+            }
+
+            this.records.push(newRecord);
             this.isAddMenuOpen = false;
+            
+            this.$nextTick(() => {
+                const lastRecord = this.$el.lastElementChild;
+                if(lastRecord) lastRecord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
         },
         
         async removeRecord(record) {
             if (!confirm('確定要刪除此筆紀錄嗎？')) return;
+            
             if (record.isSaved) {
                 try {
                     const resp = await fetch(`/api/optionAttachment/delete/${record.id}`, { method: 'DELETE' });
+                    
                     if (resp.ok) {
                         this.records = this.records.filter(r => r.id !== record.id);
-                        notyf.success('紀錄已刪除');
-                    } else {notyf.error('刪除失敗');}
-                } catch (e) {console.error(e);}
-            } else {this.records = this.records.filter(r => r.id !== record.id);}
+                        if (typeof notyf !== 'undefined') notyf.success('紀錄已刪除');
+                    } else {
+                        if (typeof notyf !== 'undefined') notyf.error('刪除失敗');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    if (typeof notyf !== 'undefined') notyf.error('刪除發生錯誤');
+                }
+            } else {
+                this.records = this.records.filter(r => r.id !== record.id);
+            }
         }
      }"
      @reload-attachments.window="loadData()"
-     class="mt-4 w-full">
+     class="mt-4 w-full flex flex-col gap-4">
 
     <div class="flex flex-col gap-4 mb-4">
         <template x-for="(record, index) in records" :key="record.id">

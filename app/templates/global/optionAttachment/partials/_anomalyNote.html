@@ -1,0 +1,10 @@
+<div class="form-control">
+    <div class="label pb-1"><span class="label-text font-bold text-xs opacity-70">說明</span></div>
+    <textarea class="textarea textarea-bordered textarea-sm w-full transition-all" 
+            :class="record.isSaved ? 'focus:textarea-success' : 'focus:textarea-warning'"
+            placeholder="請描述異常狀況或是後續處理對策..."
+            rows="3"
+            x-model="record.note"
+            :name="record.isSaved ? 'anomaly_update_note_' + record.id : 'anomaly_create_note_' + '{{ uid }}_'">
+    </textarea>
+</div>

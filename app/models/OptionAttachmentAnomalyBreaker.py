@@ -1,19 +1,23 @@
 from app.database import Base
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, Boolean, Integer, ForeignKey
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class OptionAttachmentAnomalyState(Base):
-    ''' 選項資料附件處裡進度 '''
-    __tablename__ = 'option_attachment_anomaly_state'
+class OptionAttachmentAnomalyBreaker(Base):
+    ''' 選項資料附件處裡斷路器 '''
+    __tablename__ = 'option_attachment_anomaly_breaker'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
     option_attachment_uid =  Column(Integer, ForeignKey('option_attachment.uid', ondelete='CASCADE'), nullable=False)
-    value = Column(String(4096))
+    option_red = Column(Boolean)
+    option_black = Column(Boolean)
+    option_white = Column(Boolean)
+    option_blue = Column(Boolean)
+    option_yellow = Column(Boolean)
     
-    attachment = relationship("OptionAttachment", back_populates="anomaly_states")
+    attachment = relationship("OptionAttachment", back_populates="anomaly_breakers")
 
     # region CRUD
 
@@ -60,4 +64,4 @@ class OptionAttachmentAnomalyState(Base):
         return result
     
     def __repr__(self):
-        return f'<option_attachment_anomaly_state {self.uid}>'
+        return f'<option_attachment_anomaly_breaker {self.uid}>'

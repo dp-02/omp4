@@ -32,8 +32,13 @@ class OptionAttachment(Base):
     
     images = relationship("OptionAttachmentImage", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentImage.uid")
     notes = relationship("OptionAttachmentNote", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentNote.uid")
-    anomaly_states = relationship("OptionAttachmentAnomalyState", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyState.uid")
+    anomaly_breakers = relationship("OptionAttachmentAnomalyBreaker", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyBreaker.uid")
+    anomaly_damageds = relationship("OptionAttachmentAnomalyDamaged", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyDamaged.uid")
     anomaly_images = relationship("OptionAttachmentAnomalyImage", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyImage.uid")
+    anomaly_optimizers = relationship("OptionAttachmentAnomalyOptimizer", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyOptimizer.uid")
+    anomaly_positions = relationship("OptionAttachmentAnomalyPosition", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyPosition.uid")
+    anomaly_reasons = relationship("OptionAttachmentAnomalyReason", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyReason.uid")
+    anomaly_states = relationship("OptionAttachmentAnomalyState", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyState.uid")
     # region CRUD
 
     @classmethod

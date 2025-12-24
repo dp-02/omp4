@@ -1,0 +1,49 @@
+<div class="form-control">
+    <div class="label pb-1">
+        <span class="label-text font-bold text-xs opacity-70">斷路器相別 / 線色</span>
+    </div>
+    
+    <div class="flex flex-wrap items-center gap-3 px-1">
+        
+        <label class="cursor-pointer flex flex-col items-center gap-1">
+            <input type="checkbox" value="red"
+                   class="checkbox checkbox-sm checkbox-error border-error checked:border-error [--chkbg:theme(colors.error)]"
+                   x-model="record.breaker"
+                   :name="record.isSaved ? 'anomaly_update_breaker_' + record.id : 'anomaly_create_breaker_' + '{{ uid }}_'" />
+            <span class="text-[10px] font-bold opacity-60">紅</span>
+        </label>
+
+        <label class="cursor-pointer flex flex-col items-center gap-1">
+            <input type="checkbox" value="black"
+                   class="checkbox checkbox-sm border-gray-800 checked:border-gray-800 [--chkbg:theme(colors.gray.900)] checked:bg-gray-900"
+                   x-model="record.breaker"
+                   :name="record.isSaved ? 'anomaly_update_breaker_' + record.id : 'anomaly_create_breaker_' + '{{ uid }}_'" />
+            <span class="text-[10px] font-bold opacity-60">黑</span>
+        </label>
+
+        <label class="cursor-pointer flex flex-col items-center gap-1">
+            <input type="checkbox" value="white"
+                   class="checkbox checkbox-sm border-gray-400 bg-base-100 [--chkbg:theme(colors.white)] [--chkfg:theme(colors.black)]"
+                   x-model="record.breaker"
+                   :name="record.isSaved ? 'anomaly_update_breaker_' + record.id : 'anomaly_create_breaker_' + '{{ uid }}_'" />
+            <span class="text-[10px] font-bold opacity-60">白</span>
+        </label>
+
+        <label class="cursor-pointer flex flex-col items-center gap-1">
+            <input type="checkbox" value="blue"
+                   class="checkbox checkbox-sm checkbox-info border-info checked:border-info [--chkbg:theme(colors.info)]"
+                   x-model="record.breaker"
+                   :name="record.isSaved ? 'anomaly_update_breaker_' + record.id : 'anomaly_create_breaker_' + '{{ uid }}_'" />
+            <span class="text-[10px] font-bold opacity-60">藍</span>
+        </label>
+
+        <label class="cursor-pointer flex flex-col items-center gap-1">
+            <input type="checkbox" value="yellow"
+                   class="checkbox checkbox-sm checkbox-warning border-warning checked:border-warning [--chkbg:theme(colors.warning)]"
+                   x-model="record.breaker"
+                   :name="record.isSaved ? 'anomaly_update_breaker_' + record.id : 'anomaly_create_breaker_' + '{{ uid }}_'" />
+            <span class="text-[10px] font-bold opacity-60">黃</span>
+        </label>
+
+    </div>
+</div>

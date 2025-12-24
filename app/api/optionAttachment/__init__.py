@@ -5,194 +5,211 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 import os
 from flask import session as flask_session
+from types import SimpleNamespace
 from app.models import (
     OptionAttachment, 
     OptionAttachmentImage, 
     OptionAttachmentNote,
+    OptionAttachmentAnomalyBreaker,
+    OptionAttachmentAnomalyDamaged,
+    OptionAttachmentAnomalyImage,
+    OptionAttachmentAnomalyOptimizer,
+    OptionAttachmentAnomalyPosition,
+    OptionAttachmentAnomalyReason,
     OptionAttachmentAnomalyState,
-    OptionAttachmentAnomalyImage
 )
 import json
+import re
 
 blueprint = Blueprint('api_attachment', __name__)
 
-@blueprint.route('/save/image/<table_type>', methods=['POST'])
+@blueprint.route('/save/<table_type>', methods=['POST'])
 def save_attachment_image(table_type):
-    '''儲存圖片資料 (僅處理一般圖片，自動忽略異常紀錄的 before/after 圖片)'''
-    response = make_response()
-    
-    new_records_map = {}
-    updates_map = {}
-    
-    for key, value in request.form.items():
-        parts = key.split('_')
-        if 'anomaly' in key: continue
-
-        if key.startswith('desc_') and len(parts) >= 3:
-            option_uid = parts[1]
-            record_id = parts[2]
-            if record_id not in new_records_map:
-                new_records_map[record_id] = {'option_uid': option_uid, 'desc': None, 'files': []}
-            new_records_map[record_id]['desc'] = value
-        elif key.startswith('update_desc_') and len(parts) >= 3:
-            db_uid = parts[2] 
-            if db_uid not in updates_map:
-                updates_map[db_uid] = {'desc': None, 'files': []}
-            updates_map[db_uid]['desc'] = value
-
-    for key in request.files:
-        clean_key = key.replace('[]', '')
-        parts = clean_key.split('_')
-        files = request.files.getlist(key)
-        if 'before' in parts or 'after' in parts:
-            continue
-
-        if key.startswith('files_') and len(parts) >= 3:
-            option_uid = parts[1]
-            record_id = parts[2]
-            
-            if not option_uid.isdigit(): continue
-
-            if record_id not in new_records_map:
-                new_records_map[record_id] = {'option_uid': option_uid, 'desc': None, 'files': []}
-            new_records_map[record_id]['files'].extend(files)
-
-        elif key.startswith('append_files_') and len(parts) >= 3:
-            db_uid = parts[2]
-            if not db_uid.isdigit(): continue
-            if db_uid not in updates_map:
-                updates_map[db_uid] = {'desc': None, 'files': []}
-            updates_map[db_uid]['files'].extend(files)
-
-    with session_scope() as session:
-        for record_id, data in new_records_map.items():
-            if not data['desc'] and not data['files']: continue
-            attachment = OptionAttachment.create(session, option_uid=int(data['option_uid']), table_type=table_type, type='image')
-            if data['desc'] and data['desc'].strip():
-                OptionAttachmentNote.create(session, option_attachment_uid=attachment.uid, value=data['desc'])
-            for file_obj in data['files']:
-                if file_obj.filename:
-                    file_path = save(file_obj, "optionAttachment")
-                    if file_path:
-                        OptionAttachmentImage.create(session, option_attachment_uid=attachment.uid, file_path=file_path)
-        for db_uid, data in updates_map.items():
-            attachment_uid = int(db_uid)
-            if data['desc'] is not None:
-                stmt = select(OptionAttachmentNote).where(OptionAttachmentNote.option_attachment_uid == attachment_uid)
-                existing_note = session.execute(stmt).scalar_one_or_none()
-                if existing_note:
-                    existing_note.value = data['desc']
-                elif data['desc'].strip():
-                    OptionAttachmentNote.create(session, option_attachment_uid=attachment_uid, value=data['desc'])
-            for file_obj in data['files']:
-                if file_obj.filename:
-                    file_path = save(file_obj, "optionAttachment")
-                    if file_path:
-                        OptionAttachmentImage.create(session, option_attachment_uid=attachment_uid, file_path=file_path)
-    response.headers['HX-Trigger'] = json.dumps({
-        "response-data": {
-            "title": "資料儲存成功！"
-        }
+    ''' 儲存附件資料 '''
+    response = jsonify({
+        "status": "success", 
+        "message": "預留位置：邏輯尚未實作"
     })
-    return response
-@blueprint.route('/save/anomaly/<table_type>', methods=['POST'])
-def save_attachment_anomaly(table_type):
-    '''儲存異常紀錄 (包含新增紀錄與更新現有紀錄)'''
-    response = make_response()
-    new_records_map = {} # 格式: { 'temp_id': { option_uid, status, desc, files: [{obj, type}] } }
-    updates_map = {}     # 格式: { 'db_uid': { status, desc, files: [{obj, type}] } }
 
-    for key, value in request.form.items():
-        parts = key.split('_')
-        if key.startswith('desc_') or key.startswith('update_desc_'):
-            continue
-
-        if key.startswith('anomaly_status_'):
-            if len(parts) >= 4: # 新增
-                option_uid = parts[2]
-                record_id = parts[3]
-                if record_id not in new_records_map:
-                    new_records_map[record_id] = {'option_uid': option_uid, 'status': None, 'desc': None, 'files': []}
-                new_records_map[record_id]['status'] = value
-            elif len(parts) == 3: # 更新
-                db_uid = parts[2]
-                if db_uid not in updates_map:
-                    updates_map[db_uid] = {'status': None, 'desc': None, 'files': []}
-                updates_map[db_uid]['status'] = value
-        elif key.startswith('anomaly_desc_') and len(parts) >= 4:
-            option_uid = parts[2]
-            record_id = parts[3]
-            if record_id not in new_records_map:
-                new_records_map[record_id] = {'option_uid': option_uid, 'status': None, 'desc': None, 'files': []}
-            new_records_map[record_id]['desc'] = value
-        elif key.startswith('update_anomaly_desc_') and len(parts) >= 4:
-            db_uid = parts[3] 
-            if db_uid not in updates_map:
-                updates_map[db_uid] = {'status': None, 'desc': None, 'files': []}
-            updates_map[db_uid]['desc'] = value
-
-    for key in request.files:
-        clean_key = key.replace('[]', '')
-        parts = clean_key.split('_')
-        file_list = request.files.getlist(key)
-        if 'before' not in parts and 'after' not in parts:
-            continue
-        img_type = 'before' # 預設為 before
-        if '_after_' in key:
-            img_type = 'after'
-        if key.startswith('files_') and len(parts) >= 4:
-            option_uid = parts[2]
-            record_id = parts[3]
-            if record_id not in new_records_map:
-                new_records_map[record_id] = {'option_uid': option_uid, 'status': None, 'desc': None, 'files': []}
-            for f in file_list:
-                new_records_map[record_id]['files'].append({'obj': f, 'type': img_type})
-        elif key.startswith('append_files_') and len(parts) >= 4:
-            db_uid = parts[3]
-            if db_uid not in updates_map:
-                updates_map[db_uid] = {'status': None, 'desc': None, 'files': []}
-            for f in file_list:
-                updates_map[db_uid]['files'].append({'obj': f, 'type': img_type})
     with session_scope() as session:
+        option_attachment = None
+        # 處裡 form 欄位
         
-        # --- A. 處理新增 (New Records) ---
-        for record_id, data in new_records_map.items():
-            attachment = OptionAttachment.create(session, option_uid=int(data['option_uid']), table_type=table_type, type='anomaly')
-            if data['status'] is not None:
-                OptionAttachmentAnomalyState.create(session, option_attachment_uid=attachment.uid, value=data['status'])
-            if data['desc'] and data['desc'].strip():
-                OptionAttachmentNote.create(session, option_attachment_uid=attachment.uid, value=data['desc'])
-            for file_info in data['files']:
-                file_obj = file_info['obj']
-                category_type = file_info['type'] # 'before' or 'after'
-                if file_obj.filename:
-                    file_path = save(file_obj, "optionAttachment/anomaly")
-                    if file_path:
-                        OptionAttachmentAnomalyImage.create(session, option_attachment_uid=attachment.uid, file_path=file_path,type=category_type)
-        for db_uid, data in updates_map.items():
-            attachment_uid = int(db_uid)
-            if data['status'] is not None:
-                stmt = select(OptionAttachmentAnomalyState).where(OptionAttachmentAnomalyState.option_attachment_uid == attachment_uid)
-                existing_state = session.execute(stmt).scalar_one_or_none()
-                if existing_state:
-                    existing_state.value = data['status']
-                else:
-                    OptionAttachmentAnomalyState.create(session, option_attachment_uid=attachment_uid, value=data['status'])
-            if data['desc'] is not None:
-                stmt = select(OptionAttachmentNote).where(OptionAttachmentNote.option_attachment_uid == attachment_uid)
-                existing_note = session.execute(stmt).scalar_one_or_none()
+        for key, value in request.form.items():
+            parts = key.split('_')
+            if len(parts) < 2 : continue
+
+            requset_data = SimpleNamespace()
+            requset_data.attachment_type = parts[0]
+            requset_data.act = parts[1]
+            requset_data.name = parts[2]
+
+            # 處裡 image
+            if requset_data.attachment_type == 'image':
+                if requset_data.act == 'create':
+                    requset_data.option_uid = parts[3]
+                    option_attachment = option_attachment if option_attachment else OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                    if requset_data.name == "note":
+                        OptionAttachmentNote.create(session, option_attachment_uid = option_attachment.uid, value = value)
+
+                elif requset_data.act == 'update':
+                    requset_data.attachment_uid = parts[3]
+                    if requset_data.name == "note":
+                        stmt = select(OptionAttachmentNote).where(OptionAttachmentNote.option_attachment_uid == requset_data.attachment_uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if existing: existing.value = value
+            # 處裡 anomaly
+            elif requset_data.attachment_type == 'anomaly':
+                if requset_data.act == 'create':
+                    requset_data.option_uid = parts[3]
+                    option_attachment = option_attachment if option_attachment else OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                    if requset_data.name == "note":
+                        OptionAttachmentNote.create(session, option_attachment_uid = option_attachment.uid, value = value)
+                    if requset_data.name == "state":
+                        OptionAttachmentAnomalyState.create(session, option_attachment_uid = option_attachment.uid, value = value)
+                    if requset_data.name in ["inv", "mppt", "string", "panel"]:
+                        stmt = select(OptionAttachmentAnomalyPosition).where(OptionAttachmentAnomalyPosition.option_attachment_uid == option_attachment.uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if existing: 
+                            if(requset_data.name=="inv"): existing.inv = None if value == '' else value
+                            elif(requset_data.name=="mppt"): existing.mppt = None if value == '' else value
+                            elif(requset_data.name=="string"): existing.string = None if value == '' else value
+                            elif(requset_data.name=="panel"): existing.panel = None if value == '' else value
+                        else :
+                            if(requset_data.name=="inv"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, inv = value)
+                            elif(requset_data.name=="mppt"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, mppt = value)
+                            elif(requset_data.name=="string"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, string = value)
+                            elif(requset_data.name=="panel"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, panel = value)
+                    if requset_data.name == "reason":
+                        OptionAttachmentAnomalyReason.create(session, option_attachment_uid = option_attachment.uid, value = value)
+                    if requset_data.name == "optimizer":
+                        OptionAttachmentAnomalyOptimizer.create(session, option_attachment_uid = option_attachment.uid, value = value)
+                    if requset_data.name == "breaker":
+                        value = request.form.getlist(key)
+                        OptionAttachmentAnomalyBreaker.create(session, option_attachment_uid = option_attachment.uid, option_red = "red" in value, option_black = "black" in value, option_white = "white" in value, option_blue = "blue" in value, option_yellow = "yellow" in value)
+                elif requset_data.act == 'update':
+                    requset_data.attachment_uid = parts[3]
+                    if requset_data.name == "note":
+                        stmt = select(OptionAttachmentNote).where(OptionAttachmentNote.option_attachment_uid == requset_data.attachment_uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if existing: existing.value = value
+                    if requset_data.name == "state":
+                        stmt = select(OptionAttachmentAnomalyState).where(OptionAttachmentAnomalyState.option_attachment_uid == requset_data.attachment_uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if existing: existing.value = value
+                    if requset_data.name in ["inv", "mppt", "string", "panel"]:
+                        stmt = select(OptionAttachmentAnomalyPosition).where(OptionAttachmentAnomalyPosition.option_attachment_uid == requset_data.attachment_uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if existing: 
+                            if(requset_data.name=="inv"): existing.inv = None if value == '' else value
+                            elif(requset_data.name=="mppt"): existing.mppt = None if value == '' else value
+                            elif(requset_data.name=="string"): existing.string = None if value == '' else value
+                            elif(requset_data.name=="panel"): existing.panel = None if value == '' else value
+                    if requset_data.name == "reason":
+                        stmt = select(OptionAttachmentAnomalyReason).where(OptionAttachmentAnomalyReason.option_attachment_uid == requset_data.attachment_uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if existing: existing.value = value
+                    if requset_data.name == "optimizer":
+                        stmt = select(OptionAttachmentAnomalyOptimizer).where(OptionAttachmentAnomalyOptimizer.option_attachment_uid == requset_data.attachment_uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if existing: existing.value = value
+                    if requset_data.name == "breaker":
+                        value = request.form.getlist(key)
+                        stmt = select(OptionAttachmentAnomalyBreaker).where(OptionAttachmentAnomalyBreaker.option_attachment_uid == requset_data.attachment_uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if existing: 
+                            existing.option_red = "red" in value
+                            existing.option_black = "black" in value
+                            existing.option_white = "white" in value
+                            existing.option_blue = "blue" in value
+                            existing.option_yellow = "yellow" in value
+
+        # 處裡 files 欄位
+        for key in request.files:
+            parts = key.split('_')
+            if len(parts) < 2 : continue
+
+            requset_data = SimpleNamespace()
+            requset_data.attachment_type = parts[0]
+            requset_data.act = parts[1]
+            requset_data.name = parts[2]
+            requset_data.file_list = request.files.getlist(key)
+
+            if requset_data.attachment_type == 'image':
+                if requset_data.name == "files":
+                    if requset_data.act == 'create':
+                        requset_data.option_uid = parts[3]
+                        option_attachment = option_attachment if option_attachment else OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                        for f in requset_data.file_list:
+                            if f.filename:
+                                file_path = save(f,"optionAttachment")
+                                OptionAttachmentImage.create(session, option_attachment_uid = option_attachment.uid, file_path = file_path)
+                    elif requset_data.act == 'append':
+                        requset_data.attachment_uid = parts[3]
+                        for f in requset_data.file_list:
+                            if f.filename:
+                                file_path = save(f,"optionAttachment")
+                                OptionAttachmentImage.create(session, option_attachment_uid = requset_data.attachment_uid, file_path = file_path)
+            elif requset_data.attachment_type == 'anomaly':
+                if requset_data.act == 'create':
+                    if requset_data.name == "damaged":
+                        requset_data.position = parts[3]
+                        requset_data.option_uid = parts[4]
+                        stmt = select(OptionAttachmentAnomalyDamaged).where(OptionAttachmentAnomalyDamaged.option_attachment_uid == requset_data.option_uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if not existing: existing = OptionAttachmentAnomalyDamaged.create(session, option_attachment_uid = requset_data.option_uid)
+                        f = request.files.get(key)
+                        if f:
+                            file_path = save(f,"optionAttachment")
+                            if requset_data.position == "front":existing.file_path_front = file_path
+                            elif requset_data.position == "on":existing.file_path_on = file_path
+                            elif requset_data.position == "below":existing.file_path_below = file_path
+                            elif requset_data.position == "left":existing.file_path_left = file_path
+                            elif requset_data.position == "right":existing.file_path_right = file_path
+                            elif requset_data.position == "number":existing.file_path_number = file_path
+                    if requset_data.name == "files":
+                        requset_data.progress_type = parts[3]
+                        requset_data.option_uid = parts[4]
+                        file_path = save(f,"optionAttachment")
+                        OptionAttachmentAnomalyImage.create(session, option_attachment_uid = requset_data.option_uid, type = requset_data.progress_type, file_path = file_path)
+                elif requset_data.act == 'append':
+                    print(key)
+                    if requset_data.name == "damaged":
+                        requset_data.position = parts[3]
+                        requset_data.attachment_uid = parts[4]
+                        stmt = select(OptionAttachmentAnomalyDamaged).where(OptionAttachmentAnomalyDamaged.option_attachment_uid == requset_data.attachment_uid)
+                        existing = session.execute(stmt).scalar_one_or_none()
+                        if not existing: existing = OptionAttachmentAnomalyDamaged.create(session, option_attachment_uid = requset_data.attachment_uid)
+                        f = request.files.get(key)
+                        if f:
+                            file_path = save(f,"optionAttachment")
+                            if requset_data.position == "front":
+                                if existing.file_path_front:delete_file(requset_data.file_path_front)
+                                existing.file_path_front = file_path
+                            elif requset_data.position == "on":
+                                if existing.file_path_on:delete_file(requset_data.file_path_on)
+                                existing.file_path_on = file_path
+                            elif requset_data.position == "below":
+                                if existing.file_path_below:delete_file(requset_data.file_path_below)
+                                existing.file_path_below = file_path
+                            elif requset_data.position == "left":
+                                if existing.file_path_left:delete_file(requset_data.file_path_left)
+                                existing.file_path_left = file_path
+                            elif requset_data.position == "right":
+                                if existing.file_path_right:delete_file(requset_data.file_path_right)
+                                existing.file_path_right = file_path
+                            elif requset_data.position == "number":
+                                if existing.file_path_number:delete_file(requset_data.file_path_number)
+                                existing.file_path_number = file_path
+                    if requset_data.name == "files":
+                        requset_data.progress_type = parts[3]
+                        requset_data.attachment_uid = parts[4]
+                        f = request.files.getlist(key)
+                        for f in requset_data.file_list:
+                            if f:
+                                file_path = save(f,"optionAttachment")
+                                OptionAttachmentAnomalyImage.create(session, option_attachment_uid = requset_data.attachment_uid, type = requset_data.progress_type, file_path = file_path)
                 
-                if existing_note:
-                    existing_note.value = data['desc']
-                elif data['desc'].strip():
-                    OptionAttachmentNote.create(session, option_attachment_uid=attachment_uid, value=data['desc'])
-            for file_info in data['files']:
-                file_obj = file_info['obj']
-                category_type = file_info['type']
-                if file_obj.filename:
-                    file_path = save(file_obj, "optionAttachment/anomaly")
-                    if file_path:
-                        OptionAttachmentAnomalyImage.create(session, option_attachment_uid=attachment_uid, file_path=file_path,type=category_type)
     # HTMX Trigger 回傳
     response.headers['HX-Trigger'] = json.dumps({
         "reload-attachments": True,
@@ -214,9 +231,14 @@ def get_saved(table_type, option_uid):
             )
             .options(
                 selectinload(OptionAttachment.notes),
-                selectinload(OptionAttachment.images),          # 一般圖片
-                selectinload(OptionAttachment.anomaly_states),  # [新增] 異常狀態
-                selectinload(OptionAttachment.anomaly_images)   # [新增] 異常照片
+                selectinload(OptionAttachment.images),
+                selectinload(OptionAttachment.anomaly_states),
+                selectinload(OptionAttachment.anomaly_images),
+                selectinload(OptionAttachment.anomaly_positions),
+                selectinload(OptionAttachment.anomaly_reasons),
+                selectinload(OptionAttachment.anomaly_optimizers),
+                selectinload(OptionAttachment.anomaly_breakers),
+                selectinload(OptionAttachment.anomaly_damageds)
             )
             .order_by(OptionAttachment.uid.asc())
         )
@@ -225,44 +247,113 @@ def get_saved(table_type, option_uid):
         output_data = []
 
         for record in results:
-            description = ""
+            # --- 基礎欄位 ---
+            description = record.notes[0].value if record.notes else ""
+            
+            # --- 初始化擴充欄位變數 ---
+            state_value = '0' # 預設未處理
+            inv, mppt, string, panel = None, None, None, None
+            reason_val = ""
+            optimizer_val = ""
+            breaker_list = []      # 前端 checkbox 需要 array: ['red', 'blue']
+            damaged_images = {}    # 六面圖: {'front': url, ...}
+            generic_images = []    # Before/After
+            
             if record.notes and len(record.notes) > 0: 
                 description = record.notes[0].value
             image_list = []
-            status_value = None # 預設狀態
+            state_value = None # 預設狀態
             if record.type == 'anomaly':
-                # A. 取得處理進度 (0:未處理, 1:已處理, 2:不可處理)
-                if record.anomaly_states and len(record.anomaly_states) > 0:
-                    status_value = record.anomaly_states[0].value
-                else:
-                    status_value = '0' # 若無資料預設為未處理
-                # B. 取得異常照片 (區分 before/after)
+                # 1. 狀態 (State)
+                if record.anomaly_states:
+                    state_value = record.anomaly_states[0].value
+
+                # 2. 位置 (Position) - 假設是一對一 (取第一個)
+                if record.anomaly_positions:
+                    pos = record.anomaly_positions[0]
+                    inv, mppt, string, panel = pos.inv, pos.mppt, pos.string, pos.panel
+
+                # 3. 原因 (Reason)
+                if record.anomaly_reasons:
+                    reason_val = record.anomaly_reasons[0].value # 這裡是存 UID 字串
+
+                # 4. 優化器 (Optimizer)
+                if record.anomaly_optimizers:
+                    optimizer_val = record.anomaly_optimizers[0].value
+
+                # 5. 斷路器 (Breaker) - 將 Boolean 轉回 List
+                if record.anomaly_breakers:
+                    b = record.anomaly_breakers[0]
+                    if b.option_red: breaker_list.append('red')
+                    if b.option_black: breaker_list.append('black')
+                    if b.option_white: breaker_list.append('white')
+                    if b.option_blue: breaker_list.append('blue')
+                    if b.option_yellow: breaker_list.append('yellow')
+
+                # 6. 六面圖 (Damaged) - 將路徑轉為 URL
+                if record.anomaly_damageds:
+                    d = record.anomaly_damageds[0]
+                    # 定義 mapping: {DB欄位: 前端key}
+                    mapping = {
+                        d.file_path_front: 'front',
+                        d.file_path_on: 'on',
+                        d.file_path_below: 'below',
+                        d.file_path_left: 'left',
+                        d.file_path_right: 'right',
+                        d.file_path_number: 'number'
+                    }
+                    for path, key in mapping.items():
+                        if path:
+                            damaged_images[key] = f"/download/{path}"
+
+                # 7. 一般異常圖 (Before/After)
                 for img in record.anomaly_images:
                     file_url = f"/download/{img.file_path}"
-                    image_list.append({
+                    generic_images.append({
                         "uid": img.uid,
                         "url": file_url,
                         "name": os.path.basename(img.file_path),
-                        "category": img.type,  # 關鍵：將 DB 的 type 映射給前端的 category
-                        "isDoc": False         # 假設都是圖片
+                        "category": img.type, # before / after
+                        "isDoc": False
                     })
             else:
                 for img in record.images:
                     file_url = f"/download/{img.file_path}"
-                    image_list.append({
-                        "uid": img.uid,
-                        "url": file_url,
-                        "name": os.path.basename(img.file_path),
-                        "isDoc": False
-                    })
+                    image_list.append({"uid": img.uid,"url": file_url,"name": os.path.basename(img.file_path),"isDoc": False})
+            
+            # 組裝最終物件 (Flattened structure 對應前端 x-model)
             output_data.append({
                 "id": record.uid,
-                "type": record.type,       # 'image' or 'anomaly'
-                "desc": description,
-                "status": status_value,    # [新增] 給前端 radio button 使用
+                "isSaved": True, # 標記為已存檔
+                "type": record.type,
+                "note": description,
+                "state": state_value,
+                "inv": inv,
+                "mppt": mppt,
+                "string": string,
+                "panel": panel,
+                "reason": reason_val,
+                "optimizer": optimizer_val,
+                "breaker": breaker_list,
+                "damaged_images": damaged_images,
+                "anomaly_images": generic_images,
                 "images": image_list
             })
     return jsonify(output_data)
+
+
+@blueprint.route('/reason/<option_uid>', methods=['GET'])
+def get_reason(option_uid):
+    '''取得原因'''
+    with session_scope() as session:
+        ...
+    data = [
+        {"id": "1", "name": "面板破損"},
+        {"id": "2", "name": "支架鏽蝕"},
+        {"id": "3", "name": "接頭過熱"},
+        {"id": "4", "name": "遮蔭影響"}
+    ]
+    return jsonify(data)
 
 @blueprint.route('/delete/<int:uid>', methods=['DELETE'])
 def delete_option_attachment(uid):

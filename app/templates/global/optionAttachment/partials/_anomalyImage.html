@@ -1,0 +1,62 @@
+<div class="divider my-0 text-xs text-base-content/30">照片</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    
+    <div class="bg-error/5 rounded-lg p-3 border border-error/20">
+        <div class="label pb-1 pt-0">
+            <span class="label-text font-bold text-xs text-error flex items-center gap-1">
+                <i class="bi bi-clipboard"></i> 處理前
+            </span>
+        </div>
+        
+        <input type="file" 
+                x-ref="inputBefore"
+                class="file-input file-input-ghost file-input-sm w-full file-input-error bg-white/50" 
+                accept="image/*" multiple
+                @change="handleFileChange($event, 'before')"
+                :name="record.isSaved ? 'anomaly_append_files_before_' + record.id + '_[]' : 'anomaly_files_before_' + '{{ uid }}_' + '_[]'" />
+
+        <div class="grid grid-cols-3 gap-2 mt-2" x-show="getPreviews('before').length > 0">
+            <template x-for="img in getPreviews('before')" :key="img.uid || img.url">
+                <div class="relative aspect-square rounded overflow-hidden border border-error/30 bg-base-100 group/img">
+                    <img :src="img.url" class="object-cover w-full h-full" />
+                    <div class="absolute bottom-0 inset-x-0 bg-error/80 text-white text-[9px] text-center py-0.5">前</div>
+                    
+                    <button type="button" @click="removeImage(img)"
+                            class="absolute top-0.5 right-0.5 btn btn-circle btn-error btn-xs opacity-0 group-hover/img:opacity-100 scale-75">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <div class="bg-success/5 rounded-lg p-3 border border-success/20">
+        <div class="label pb-1 pt-0">
+            <span class="label-text font-bold text-xs text-success flex items-center gap-1">
+                <i class="bi bi-clipboard-check"></i> 處理後
+            </span>
+        </div>
+
+        <input type="file" 
+                x-ref="inputAfter"
+                class="file-input file-input-ghost file-input-sm w-full file-input-success bg-white/50" 
+                accept="image/*" multiple
+                @change="handleFileChange($event, 'after')"
+                :name="record.isSaved ? 'anomaly_append_files_after_' + record.id + '_[]' : 'anomaly_create_files_after_' + '{{ uid }}_' + '_[]'" />
+
+        <div class="grid grid-cols-3 gap-2 mt-2" x-show="getPreviews('after').length > 0">
+            <template x-for="img in getPreviews('after')" :key="img.uid || img.url">
+                <div class="relative aspect-square rounded overflow-hidden border border-success/30 bg-base-100 group/img">
+                    <img :src="img.url" class="object-cover w-full h-full" />
+                    <div class="absolute bottom-0 inset-x-0 bg-success/80 text-white text-[9px] text-center py-0.5">後</div>
+                    
+                    <button type="button" @click="removeImage(img)"
+                            class="absolute top-0.5 right-0.5 btn btn-circle btn-error btn-xs opacity-0 group-hover/img:opacity-100 scale-75">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>

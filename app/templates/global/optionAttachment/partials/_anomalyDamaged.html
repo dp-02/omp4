@@ -1,0 +1,59 @@
+<div class="form-control">
+    <div class="label pb-1">
+        <span class="label-text font-bold text-xs opacity-70">外觀受損 / 序號照片</span>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2">
+        
+        {# 修改 Key 名稱以對應資料庫欄位: top->on, bottom->below, sn->number #}
+        {% set image_fields = [
+            ('front', '正面', 'bi-card-image'),
+            ('on', '上邊', 'bi-arrow-up-square'),
+            ('below', '下邊', 'bi-arrow-down-square'),
+            ('left', '左邊', 'bi-arrow-left-square'),
+            ('right', '右邊', 'bi-arrow-right-square'),
+            ('number', '序號', 'bi-upc-scan')
+        ] %}
+
+        {% for key, label, icon in image_fields %}
+        <div class="relative w-full aspect-square group"
+             x-data="{ 
+                preview: null,
+                handleFile(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.preview = URL.createObjectURL(file);
+                    }
+                }
+             }">
+            
+            <label class="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer transition-all overflow-hidden bg-base-100 hover:bg-base-200"
+                   :class="[
+                       record.isSaved ? 'border-success/40 hover:border-success' : 'border-warning/40 hover:border-warning',
+                       preview ? 'border-solid' : ''
+                   ]">
+                
+                <div class="flex flex-col items-center gap-1 opacity-40 transition-opacity"
+                     x-show="!preview">
+                    <i class="bi {{ icon }} text-2xl"></i>
+                    <span class="text-[10px] font-bold">{{ label }}</span>
+                </div>
+
+                <img x-show="preview" :src="preview" 
+                     class="absolute inset-0 w-full h-full object-cover" 
+                     style="display: none;" />
+                
+                <template x-if="!preview && record.damaged_images && record.damaged_images['{{ key }}']">
+                    <img :src="record.damaged_images['{{ key }}']" class="absolute inset-0 w-full h-full object-cover" />
+                </template>
+
+                <input type="file" class="hidden" accept="image/*"
+                       @change="handleFile($event)"
+                       :name="record.isSaved ? 'anomaly_append_damaged_{{ key }}_' + record.id : 'anomaly_create_damaged_{{ key }}_' + '{{ uid }}_'"
+                />
+            </label>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>

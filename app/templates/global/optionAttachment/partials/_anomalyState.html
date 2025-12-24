@@ -1,0 +1,26 @@
+<div class="form-control">
+    <div class="label pb-1"><span class="label-text font-bold text-xs opacity-70">處理進度</span></div>
+    <div class="flex flex-wrap gap-4 px-1">
+        <label class="cursor-pointer flex items-center gap-2">
+            <input type="radio"
+                    :name="record.isSaved ? 'anomaly_update_state_' + record.id : 'anomaly_create_state_' + '{{ uid }}_'"
+                    class="radio radio-sm" :class="record.isSaved ? 'radio-success' : 'radio-warning'"
+                    value="0" x-model="record.state" />
+            <span class="label-text">未處理</span>
+        </label>
+        <label class="cursor-pointer flex items-center gap-2">
+            <input type="radio"
+                    :name="record.isSaved ? 'anomaly_update_state_' + record.id : 'anomaly_create_state_' + '{{ uid }}_'"
+                    class="radio radio-sm" :class="record.isSaved ? 'radio-success' : 'radio-warning'"
+                    value="1" x-model="record.state" />
+            <span class="label-text">已處理</span>
+        </label>
+        <label class="cursor-pointer flex items-center gap-2">
+            <input type="radio"
+                    :name="record.isSaved ? 'anomaly_update_state_' + record.id : 'anomaly_create_state_' + '{{ uid }}_'"
+                    class="radio radio-sm" :class="record.isSaved ? 'radio-success' : 'radio-warning'"
+                    value="2" x-model="record.state" />
+            <span class="label-text">不可處理</span>
+        </label>
+    </div>
+</div>
