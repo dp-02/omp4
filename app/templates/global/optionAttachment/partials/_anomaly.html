@@ -102,18 +102,25 @@
             <i class="bi" :class="record.isSaved ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
             <span x-text="record.isSaved ? '已存檔異常紀錄' : '新異常紀錄'"></span>
         </div>
-
         {% include 'global/optionAttachment/partials/_anomalyState.html' %}
 
-        {% include 'global/optionAttachment/partials/_anomalyPosition.html' %}
-
-        {% include 'global/optionAttachment/partials/_anomalyReason.html' %}
-
-        {% include 'global/optionAttachment/partials/_anomalyOptimizer.html' %}
-
-        {% include 'global/optionAttachment/partials/_anomalyBreaker.html' %}
-
-        {% include 'global/optionAttachment/partials/_anomalyDamaged.html' %}
+        {% if table_type == 'checklist' %}
+            {% if table_uid in [2,4,5,7] %}
+                {% include 'global/optionAttachment/partials/_anomalyPosition.html' %}
+            {% endif %}
+            {% if table_uid in [2,3,4,5,7,8,9,10] %}
+                {% include 'global/optionAttachment/partials/_anomalyReason.html' %}
+            {% endif %}
+            {% if table_uid in [2] and option_uid in [27,28] %}
+                {% include 'global/optionAttachment/partials/_anomalyOptimizer.html' %}
+            {% endif %}
+            {% if table_uid in [5,9] and option_uid in [56,58,59,100,103,104,105,108] %}
+                {% include 'global/optionAttachment/partials/_anomalyBreaker.html' %}
+            {% endif %}
+            {% if table_uid in [2] and option_uid in [12] %}
+                {% include 'global/optionAttachment/partials/_anomalyDamaged.html' %}
+            {% endif %}
+        {% endif %}
 
         {% include 'global/optionAttachment/partials/_anomalyNote.html' %}
 

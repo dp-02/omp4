@@ -85,6 +85,7 @@ def table(site_uid, check_type, checklist_uid, table_uid):
         "check_type":check_type,
         "checklist_uid":checklist_uid,
         "table_name":"",
+        "table_uid":0,
         "saved":[],
         "options":[]
     }
@@ -95,9 +96,10 @@ def table(site_uid, check_type, checklist_uid, table_uid):
         query = session.execute(stmt).scalars().all()
         for data_o in query:
             data['options'].append(ChecklistTableOption.to_dict(data_o))
-        stmt = select(ChecklistTable.name).where(ChecklistTable.uid == table_uid)
+        stmt = select(ChecklistTable).where(ChecklistTable.uid == table_uid)
         query = session.execute(stmt).scalar()
-        data['table_name'] = query
+        data['table_uid'] = query.uid
+        data['table_name'] = query.name
         stmt = select(ChecklistTableOptionData).where(ChecklistTableOptionData.checklist_uid == checklist_uid)
         results = session.execute(stmt).scalars().all()
         data['saved']  = {rec.option_uid: rec.value for rec in results}

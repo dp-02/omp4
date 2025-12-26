@@ -16,6 +16,7 @@ from app.models import (
     OptionAttachmentAnomalyOptimizer,
     OptionAttachmentAnomalyPosition,
     OptionAttachmentAnomalyReason,
+    OptionAttachmentAnomalyReasonSetting,
     OptionAttachmentAnomalyState,
 )
 import json
@@ -280,7 +281,7 @@ def get_saved(table_type, option_uid):
 
                 # 3. 原因 (Reason)
                 if record.anomaly_reasons:
-                    reason_val = record.anomaly_reasons[0].value # 這裡是存 UID 字串
+                    reason_val = record.anomaly_reasons[0].value
 
                 # 4. 優化器 (Optimizer)
                 if record.anomaly_optimizers:
@@ -350,14 +351,15 @@ def get_saved(table_type, option_uid):
 @blueprint.route('/reason/<option_uid>', methods=['GET'])
 def get_reason(option_uid):
     '''取得原因'''
+    data = []
     with session_scope() as session:
-        ...
-    data = [
-        {"id": "1", "name": "面板破損"},
-        {"id": "2", "name": "支架鏽蝕"},
-        {"id": "3", "name": "接頭過熱"},
-        {"id": "4", "name": "遮蔭影響"}
-    ]
+        stmt = select(OptionAttachmentAnomalyReasonSetting).where(OptionAttachmentAnomalyReasonSetting.checklist_option_uid == option_uid).order_by(OptionAttachmentAnomalyReasonSetting.sort)
+        reason = session.execute(stmt).scalars()
+        for data_r in reason:
+            data.append({
+                "value":str(data_r.value),
+                "name":data_r.name,
+            })
     return jsonify(data)
 
 @blueprint.route('/delete/<int:uid>', methods=['DELETE'])

@@ -2,7 +2,11 @@
     <div class="label pb-1"><span class="label-text font-bold text-xs opacity-70">位置</span></div>
     
     <div class="grid grid-cols-4 gap-2">
-        
+        {% if option_uid in [11,12,13,14,15,16,17,18,19,20,21,22,23,24,
+            42,44,45,48,49,
+            56,58,59,
+            68,70,71,72,73,74,75,76,77,78,79,80,81,82] 
+        %}
         <div>
             <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Inv</label>
             <input type="number" min="0" 
@@ -13,7 +17,11 @@
                    :name="record.isSaved ? 'anomaly_update_inv_' + record.id : 'anomaly_create_inv_' + '{{ uid }}_'"
             />
         </div>
-
+        {% endif %}
+        {% if option_uid in [11,12,13,14,15,16,17,18,19,20,21,22,23,24,
+            42,44,45,48,49,
+            79,80] 
+        %}
         <div>
             <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Mppt</label>
             <input type="number" min="0"
@@ -24,7 +32,11 @@
                    :name="record.isSaved ? 'anomaly_update_mppt_' + record.id : 'anomaly_create_mppt_' + '{{ uid }}_'"
             />
         </div>
-
+        {% endif %}
+        {% if option_uid in [11,12,13,14,15,16,17,18,19,20,21,22,23,24,
+            42,44,45,48,
+            79,80] 
+        %}
         <div>
             <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Str</label>
             <input type="number" min="0"
@@ -35,7 +47,8 @@
                    :name="record.isSaved ? 'anomaly_update_string_' + record.id : 'anomaly_create_string_' + '{{ uid }}_'"
             />
         </div>
-
+        {% endif %}
+        {% if option_uid in [11,12,13,14,15,16,17,18,19,20,21,22,23,24] %}
         <div>
             <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Pnl</label>
             <input type="number" min="0"
@@ -46,6 +59,6 @@
                    :name="record.isSaved ? 'anomaly_update_panel_' + record.id : 'anomaly_create_panel_' + '{{ uid }}_'"
             />
         </div>
-        
+        {% endif %}
     </div>
 </div>
