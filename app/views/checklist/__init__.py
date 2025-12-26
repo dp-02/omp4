@@ -104,3 +104,36 @@ def table(site_uid, check_type, checklist_uid, table_uid):
         results = session.execute(stmt).scalars().all()
         data['saved']  = {rec.option_uid: rec.value for rec in results}
     return render_template('Checklist/table.html', data = data)
+
+
+@blueprint.route('/<int:site_uid>/<int:check_type>/<int:checklist_uid>/create_report/choose_option/')
+@login_required
+def create_rport_choose_option(site_uid, check_type, checklist_uid):
+    ''' 表單 '''
+    data = {
+        "site_uid":site_uid,
+        "check_type":check_type,
+        "checklist_uid":checklist_uid,
+        "table":[]
+    }
+    with session_scope() as session:
+        stmt = select(ChecklistTable)
+        tables = session.execute(stmt).scalars()
+        for data_t in tables:
+            data['table'].append({
+                "uid":data_t.uid,
+                "name":data_t.name,
+                "options":[]
+            })
+            if check_type == 2 :
+                stmt = select(ChecklistTableOption).where(ChecklistTableOption.table_uid == data_t.uid).order_by(ChecklistTableOption.sort)
+                options = session.execute(stmt).scalars()
+                for data_o in options:
+                    data['table'][-1]['options'].append({
+                        "uid":data_o.uid,
+                        "name":data_o.name
+                    }
+                    )
+
+
+    return render_template('Checklist/createReportChooseOption.html', data = data)
