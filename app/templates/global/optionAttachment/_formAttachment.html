@@ -32,7 +32,14 @@
                         optimizer: item.optimizer || '',
                         breaker: Array.isArray(item.breaker) ? item.breaker : [],
                         damaged_images: item.damaged_images || {},
-                        previews: (item.images || []).map(img => ({
+                        images_previews: (item.images || []).map(img => ({
+                            uid: img.uid,       
+                            url: img.url,       
+                            name: img.name,
+                            isDoc: false,       
+                            isSaved: true
+                        })),
+                        anomaly_previews: (item.anomaly_images || []).map(img => ({
                             uid: img.uid,       
                             url: img.url,       
                             name: img.name,
@@ -55,7 +62,7 @@
                 id: Date.now(), // 臨時 ID
                 type: type,
                 note: '',
-                previews: [],
+                images_previews: [],
                 isSaved: false,
                 state: '0'
             };

@@ -6,12 +6,12 @@
         },
         get displayPreviews() {
             if (!this.currentRecord) return [];
-            return this.currentRecord.previews || [];
+            return this.currentRecord.images_previews || [];
         },
         syncInputFiles() {
             const inputEl = this.$refs.fileInput;
             const dataTransfer = new DataTransfer();
-            this.currentRecord.previews.forEach(preview => {
+            this.currentRecord.images_previews.forEach(preview => {
                 if (!preview.isSaved && preview.fileObj) {
                     dataTransfer.items.add(preview.fileObj);
                 }
@@ -23,7 +23,7 @@
             if (newFiles.length > 0) {
                 newFiles.forEach(file => {
                     if (this.currentRecord) {
-                        this.currentRecord.previews.push({
+                        this.currentRecord.images_previews.push({
                             url: URL.createObjectURL(file),
                             name: file.name,
                             isDoc: !file.type.startsWith('image/'),
@@ -41,15 +41,15 @@
                         if(!confirm('確定要刪除這張已存檔的照片嗎？')) return;
                         const resp = await fetch(`/api/optionAttachment/image/delete/${imgItem.uid}`, { method: 'DELETE' });
                         if(resp.ok) {
-                            this.currentRecord.previews.splice(imgIndex, 1);
+                            this.currentRecord.images_previews.splice(imgIndex, 1);
                             notyf.success('照片已刪除');
                         }
                     } 
                     else {
-                        this.currentRecord.previews.splice(imgIndex, 1);
+                        this.currentRecord.images_previews.splice(imgIndex, 1);
                         const inputEl = this.$refs.fileInput; 
                         const dataTransfer = new DataTransfer();
-                        this.currentRecord.previews.forEach(preview => {
+                        this.currentRecord.images_previews.forEach(preview => {
                             if (!preview.isSaved && preview.fileObj) {dataTransfer.items.add(preview.fileObj);}
                         });
                         inputEl.files = dataTransfer.files;

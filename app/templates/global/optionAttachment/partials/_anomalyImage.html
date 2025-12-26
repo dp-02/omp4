@@ -14,7 +14,7 @@
                 class="file-input file-input-ghost file-input-sm w-full file-input-error bg-white/50" 
                 accept="image/*" multiple
                 @change="handleFileChange($event, 'before')"
-                :name="record.isSaved ? 'anomaly_append_files_before_' + record.id + '_[]' : 'anomaly_files_before_' + '{{ uid }}_' + '_[]'" />
+                :name="record.isSaved ? 'anomaly_append_files_before_' + record.id + '_[]' : 'anomaly_create_files_before_' + '{{ uid }}_' + '_[]'" />
 
         <div class="grid grid-cols-3 gap-2 mt-2" x-show="getPreviews('before').length > 0">
             <template x-for="img in getPreviews('before')" :key="img.uid || img.url">

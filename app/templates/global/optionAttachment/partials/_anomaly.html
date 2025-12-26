@@ -5,7 +5,7 @@
         init() {
             this.record = record;
             if (!this.record.state) { this.record.state = '0'; }
-            if (!this.record.previews) { this.record.previews = []; }
+            if (!this.record.anomaly_previews) { this.record.anomaly_previews = []; }
             if (!this.record.reason) { this.record.reason = ''; }
             if (!this.record.optimizer) { this.record.optimizer = ''; }
             ['inv', 'mppt', 'string', 'panel'].forEach(key => {
@@ -23,8 +23,8 @@
             }
         },
         getPreviews(category) {
-            if (!this.record || !this.record.previews) return [];
-            return this.record.previews.filter(img => img.category === category);
+            if (!this.record || !this.record.anomaly_previews) return [];
+            return this.record.anomaly_previews.filter(img => img.category === category);
         },
         syncFiles(category) {
             const refName = category === 'before' ? 'inputBefore' : 'inputAfter';
@@ -35,7 +35,7 @@
                 return;
             }
             const dataTransfer = new DataTransfer();
-            this.record.previews.forEach(preview => {
+            this.record.anomaly_previews.forEach(preview => {
                 if (preview.category === category && !preview.isSaved && preview.fileObj) {
                     dataTransfer.items.add(preview.fileObj);
                 }
@@ -47,7 +47,7 @@
             if (files && files.length > 0) {
                 Array.from(files).forEach(file => {
                     if (this.record) {
-                        this.record.previews.push({
+                        this.record.anomaly_previews.push({
                             url: URL.createObjectURL(file),
                             name: file.name,
                             isDoc: !file.type.startsWith('image/'),
@@ -63,7 +63,7 @@
         },
         async removeImage(imgItem) {
             if (!this.record) return;
-            const realIndex = this.record.previews.indexOf(imgItem);
+            const realIndex = this.record.anomaly_previews.indexOf(imgItem);
             if (realIndex === -1) return;
 
             if (imgItem.isSaved) {
@@ -72,7 +72,7 @@
                 try {
                     const resp = await fetch(`/api/optionAttachment/anomaly_image/delete/${imgItem.uid}`, { method: 'DELETE' });
                     if(resp.ok) {
-                        this.record.previews.splice(realIndex, 1);
+                        this.record.anomaly_previews.splice(realIndex, 1);
                         if (typeof notyf !== 'undefined') notyf.success('照片已刪除');
                     } else {
                         if (typeof notyf !== 'undefined') notyf.error('刪除失敗');
@@ -82,7 +82,7 @@
                 }
             } 
             else {
-                this.record.previews.splice(realIndex, 1);
+                this.record.anomaly_previews.splice(realIndex, 1);
                 this.syncFiles(imgItem.category);
             }
         }

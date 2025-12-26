@@ -10,9 +10,9 @@
 </div>
 
 <div class="grid grid-cols-3 md:grid-cols-5 gap-2 mt-2" 
-        x-show="record.previews && record.previews.length > 0">
+        x-show="record.images_previews && record.images_previews.length > 0">
     
-    <template x-for="(img, idx) in record.previews" :key="idx">
+    <template x-for="(img, idx) in record.images_previews" :key="idx">
         <div class="relative aspect-square rounded-lg overflow-hidden border bg-base-200 group/img"
                 :class="img.isSaved ? 'border-success/50' : 'border-info/50'">
             

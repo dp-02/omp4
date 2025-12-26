@@ -76,10 +76,10 @@ def save_attachment_image(table_type):
                             elif(requset_data.name=="string"): existing.string = None if value == '' else value
                             elif(requset_data.name=="panel"): existing.panel = None if value == '' else value
                         else :
-                            if(requset_data.name=="inv"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, inv = value)
-                            elif(requset_data.name=="mppt"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, mppt = value)
-                            elif(requset_data.name=="string"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, string = value)
-                            elif(requset_data.name=="panel"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, panel = value)
+                            if(requset_data.name=="inv"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, inv = None if value == '' else value)
+                            elif(requset_data.name=="mppt"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, mppt = None if value == '' else value)
+                            elif(requset_data.name=="string"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, string = None if value == '' else value)
+                            elif(requset_data.name=="panel"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, panel = None if value == '' else value)
                     if requset_data.name == "reason":
                         OptionAttachmentAnomalyReason.create(session, option_attachment_uid = option_attachment.uid, value = value)
                     if requset_data.name == "optimizer":
@@ -123,7 +123,8 @@ def save_attachment_image(table_type):
                             existing.option_white = "white" in value
                             existing.option_blue = "blue" in value
                             existing.option_yellow = "yellow" in value
-
+                        else:
+                            OptionAttachmentAnomalyBreaker.create(session, option_attachment_uid = requset_data.attachment_uid, option_red = "red" in value, option_black = "black" in value, option_white = "white" in value, option_blue = "blue" in value, option_yellow = "yellow" in value)
         # 處裡 files 欄位
         for key in request.files:
             parts = key.split('_')
@@ -152,12 +153,13 @@ def save_attachment_image(table_type):
                                 OptionAttachmentImage.create(session, option_attachment_uid = requset_data.attachment_uid, file_path = file_path)
             elif requset_data.attachment_type == 'anomaly':
                 if requset_data.act == 'create':
+                    option_attachment = option_attachment if option_attachment else OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
                     if requset_data.name == "damaged":
                         requset_data.position = parts[3]
                         requset_data.option_uid = parts[4]
-                        stmt = select(OptionAttachmentAnomalyDamaged).where(OptionAttachmentAnomalyDamaged.option_attachment_uid == requset_data.option_uid)
+                        stmt = select(OptionAttachmentAnomalyDamaged).where(OptionAttachmentAnomalyDamaged.option_attachment_uid == option_attachment.uid)
                         existing = session.execute(stmt).scalar_one_or_none()
-                        if not existing: existing = OptionAttachmentAnomalyDamaged.create(session, option_attachment_uid = requset_data.option_uid)
+                        if not existing: existing = OptionAttachmentAnomalyDamaged.create(session, option_attachment_uid = option_attachment.uid)
                         f = request.files.get(key)
                         if f:
                             file_path = save(f,"optionAttachment")
@@ -170,36 +172,39 @@ def save_attachment_image(table_type):
                     if requset_data.name == "files":
                         requset_data.progress_type = parts[3]
                         requset_data.option_uid = parts[4]
-                        file_path = save(f,"optionAttachment")
-                        OptionAttachmentAnomalyImage.create(session, option_attachment_uid = requset_data.option_uid, type = requset_data.progress_type, file_path = file_path)
+                        for f in requset_data.file_list:
+                            if f:
+                                file_path = save(f,"optionAttachment")
+                                OptionAttachmentAnomalyImage.create(session, option_attachment_uid = option_attachment.uid, type = requset_data.progress_type, file_path = file_path)
                 elif requset_data.act == 'append':
-                    print(key)
                     if requset_data.name == "damaged":
                         requset_data.position = parts[3]
                         requset_data.attachment_uid = parts[4]
+
                         stmt = select(OptionAttachmentAnomalyDamaged).where(OptionAttachmentAnomalyDamaged.option_attachment_uid == requset_data.attachment_uid)
                         existing = session.execute(stmt).scalar_one_or_none()
+
                         if not existing: existing = OptionAttachmentAnomalyDamaged.create(session, option_attachment_uid = requset_data.attachment_uid)
                         f = request.files.get(key)
                         if f:
                             file_path = save(f,"optionAttachment")
                             if requset_data.position == "front":
-                                if existing.file_path_front:delete_file(requset_data.file_path_front)
+                                if existing.file_path_front:delete_file(existing.file_path_front)
                                 existing.file_path_front = file_path
                             elif requset_data.position == "on":
-                                if existing.file_path_on:delete_file(requset_data.file_path_on)
+                                if existing.file_path_on:delete_file(existing.file_path_on)
                                 existing.file_path_on = file_path
                             elif requset_data.position == "below":
-                                if existing.file_path_below:delete_file(requset_data.file_path_below)
+                                if existing.file_path_below:delete_file(existing.file_path_below)
                                 existing.file_path_below = file_path
                             elif requset_data.position == "left":
-                                if existing.file_path_left:delete_file(requset_data.file_path_left)
+                                if existing.file_path_left:delete_file(existing.file_path_left)
                                 existing.file_path_left = file_path
                             elif requset_data.position == "right":
-                                if existing.file_path_right:delete_file(requset_data.file_path_right)
+                                if existing.file_path_right:delete_file(existing.file_path_right)
                                 existing.file_path_right = file_path
                             elif requset_data.position == "number":
-                                if existing.file_path_number:delete_file(requset_data.file_path_number)
+                                if existing.file_path_number:delete_file(existing.file_path_number)
                                 existing.file_path_number = file_path
                     if requset_data.name == "files":
                         requset_data.progress_type = parts[3]
