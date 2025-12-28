@@ -137,3 +137,12 @@ def create_rport_choose_option(site_uid, check_type, checklist_uid):
 
 
     return render_template('Checklist/createReportChooseOption.html', data = data)
+
+@blueprint.route('/<int:site_uid>/anomaly_state/')
+@login_required
+def anomaly_state(site_uid):
+    ''' 首頁 '''
+    data = {
+        "site_uid":site_uid
+    }
+    return render_template('checklist/anomalyState.html', data = data)

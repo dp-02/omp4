@@ -1,0 +1,43 @@
+{% if data_options %}
+    {% for item in data_options %}
+        <a href="/checklist/{{item.site_uid}}/{{item.check_type}}/{{item.checklist_uid}}/{{item.table_uid}}/#option{{item.option_sort}}"
+           class="alert shadow-sm border border-base-200 hover:scale-[1.01] transition-transform duration-200 cursor-pointer text-left no-underline
+           {% if item.state == '0' %}alert-error text-white
+           {% elif item.state == '1' %}alert-success text-white
+           {% elif item.state == '2' %}alert-warning
+           {% else %}bg-base-200{% endif %}">
+            
+            <div class="flex flex-col md:flex-row gap-2 w-full items-start md:items-center">
+                <span class="font-bold whitespace-nowrap">
+                    <i class="bi 
+                    {% if item.state == '0' %}bi-x-circle
+                    {% elif item.state == '1' %}bi-check-circle
+                    {% else %}bi-exclamation-circle{% endif %}"></i>
+                    【{% if item.state == '0' %}未處理
+                    {% elif item.state == '1' %}已處理
+                    {% else %}不可處理{% endif %}】
+                </span>
+
+                <span class="font-mono text-sm opacity-90">
+                    {{ item.check_date }}
+                </span>
+
+                <i class="bi bi-chevron-right opacity-50 hidden md:block"></i>
+
+                <span class="flex-1 font-medium">
+                    {{ item.table_name }}
+                </span>
+                <i class="bi bi-chevron-right opacity-50 hidden md:block"></i>
+
+                <span class="flex-1 font-medium">
+                    {{ item.option_sort }}.{{ item.option_name }}
+                </span>
+            </div>
+        </a>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info bg-base-100 border-info/20">
+        <i class="bi bi-info-circle text-info"></i>
+        <span>目前沒有符合條件的項目。</span>
+    </div>
+{% endif %}
