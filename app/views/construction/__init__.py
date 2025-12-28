@@ -75,3 +75,17 @@ def table(site_uid, group_uid, table_uid):
         results = session.execute(stmt).scalars().all()
         data['saved']  = {rec.option_uid: rec.value for rec in results}
     return render_template('construction/table.html', data = data)
+
+@blueprint.route('/<int:site_uid>/<int:group_uid>/hazard_notice/')
+@login_required
+def hazard_notice(site_uid, group_uid):
+    ''' 每日危害通知單 '''
+    data = {
+        "site_uid":site_uid,
+        "group_uid":group_uid,
+        "group_name":""
+    }
+    with session_scope() as session:
+        group = ConstructionTableGroup.get(session, uid = group_uid)
+        data['group_name'] = group.name
+    return render_template('construction/hazardNotice.html', data = data)

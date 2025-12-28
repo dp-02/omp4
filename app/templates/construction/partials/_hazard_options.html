@@ -1,0 +1,7 @@
+<option value="" disabled selected>請選擇上傳日期……</option>
+
+{% for item in data_option %}
+    <option value="{{ item.uid }}">
+        {{ item.at_createdtime.strftime('%Y-%m-%d %H:%M') }}
+    </option>
+{% endfor %}

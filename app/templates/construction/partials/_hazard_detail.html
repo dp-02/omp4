@@ -1,0 +1,30 @@
+{% if data_detail %}
+<div class="flex flex-col items-start gap-6 animate-fade-in">
+    
+    <div class="w-full">
+        <h6 class="font-bold text-lg mb-2 border-b border-base-300 pb-1 text-base-content/70">
+            現場照片
+        </h6>
+        <figure class="w-full max-w-lg bg-base-100 p-2 border border-base-200 rounded-lg shadow-sm">
+            <img src="/download/{{ data_detail.file_path }}" 
+                 class="w-full h-auto rounded object-contain max-h-[400px]" 
+                 alt="危害通知單照片">
+        </figure>
+    </div>
+
+    <div class="w-full">
+        <h6 class="font-bold text-lg mb-2 border-b border-base-300 pb-1 text-base-content/70">
+            備註內容
+        </h6>
+        <div class="bg-base-200/50 p-4 rounded-lg border border-base-200">
+            <p class="text-base-content whitespace-pre-wrap">{{ data_detail.note }}</p>
+        </div>
+    </div>
+
+</div>
+{% else %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>查無此筆資料詳細內容。</span>
+</div>
+{% endif %}

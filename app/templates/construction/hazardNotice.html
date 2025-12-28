@@ -1,0 +1,122 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+{{data.group_name}}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-4xl mx-auto">
+        <div class="card-body">
+            
+            <h1 class="card-title text-3xl font-bold mb-6 pb-2 border-b border-base-200 flex items-center gap-2">
+                <i class="bi bi-exclamation-triangle text-warning"></i>
+                {{data.group_name}}
+            </h1>
+
+            <div class="grid grid-cols-1 gap-8">
+                
+                <section>
+                    <h3 class="text-xl font-bold mb-4 text-base-content/80">每日危害通知單</h3>
+                    
+                    <form id="form"
+                          hx-post="/api/construction/hazard_notice/create" 
+                          hx-encoding="multipart/form-data"
+                          hx-swap="none"
+                          hx-on::after-request="
+                            if(event.detail.successful) {
+                                this.reset();
+                                const notyf = new Notyf();
+                                notyf.success('新增成功！');
+                                document.body.dispatchEvent(new Event('historyUpdated'));
+                            } else {
+                                const notyf = new Notyf();
+                                notyf.error('新增失敗');
+                            }
+                          ">
+                        
+                        <input type="hidden" name="site_uid" value="{{data.site_uid}}">
+                        <input type="hidden" name="group_uid" value="{{data.group_uid}}">
+
+                        <div class="flex flex-col gap-4">
+                            <div class="form-control w-full">
+                                <label for="file" class="label">
+                                    <span class="label-text font-bold">上傳危害通知單照片</span>
+                                    <span class="label-text-alt">image/jpeg, image/png</span>
+                                </label>
+                                <input type="file" 
+                                       class="file-input file-input-bordered w-full" 
+                                       name="file" 
+                                       id="file" 
+                                       accept="image/jpeg, image/png">
+                            </div>
+
+                            <div class="form-control w-full">
+                                <label for="note" class="label">
+                                    <span class="label-text font-bold">備註內容</span>
+                                    <span class="label-text-alt">施工日誌、注意事項等</span>
+                                </label>
+                                <textarea class="textarea textarea-bordered h-24 text-base" 
+                                          id="note" 
+                                          name="note" 
+                                          placeholder="請輸入備註..."></textarea>
+                            </div>
+
+                            <div class="mt-2">
+                                <button type="submit" class="btn btn-primary px-8 text-white shadow-md">
+                                    <i class="bi bi-send"></i> 送出
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <div class="divider"></div>
+
+                <section>
+                    <h3 class="text-xl font-bold mb-4 text-base-content/80">歷史上傳紀錄</h3>
+                    
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="form-control w-full">
+                            <label class="label font-bold">選擇日期</label>
+                            <select class="select select-bordered w-full" 
+                                    name="hazard_uid" 
+                                    id="historySelect"
+                                    hx-get="/api/construction/hazard_notice_options/get/{{data.site_uid}}/{{data.group_uid}}" 
+                                    hx-trigger="load, historyUpdated from:body"
+                                    hx-target="this"
+                                    hx-swap="innerHTML">
+                                <option disabled selected>載入中...</option>
+                            </select>
+                        </div>
+
+                        <div id="displayContainer"
+                            class="bg-base-200/50 rounded-box p-6 border border-base-200 min-h-[200px]"
+                            hx-get="/api/construction/hazard_notice_detail/get"
+                            hx-include="#historySelect"
+                            hx-trigger="change from:#historySelect"
+                            hx-target="this"
+                            hx-swap="innerHTML">
+                            
+                            <div class="flex flex-col items-center justify-center h-full opacity-50">
+                                <i class="bi bi-image text-4xl mb-2"></i>
+                                <p>請選擇日期以查看紀錄</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="card-actions mt-8">
+                <a class="btn btn-neutral btn-outline gap-2" 
+                    href="/construction/{{data.site_uid}}/{{data.group_uid}}/" 
+                    role="button">
+                    <i class="bi bi-arrow-return-left"></i> 
+                    返回
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

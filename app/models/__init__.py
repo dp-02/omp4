@@ -5,6 +5,7 @@ from .ChecklistTableOptionData import ChecklistTableOptionData
 from .ChecklistTableOption import ChecklistTableOption
 from .ConstructionTable import ConstructionTable
 from .ConstructionTableOptionData import ConstructionTableOptionData
+from .ConstructionHazardNotice import ConstructionHazardNotice
 from .OptionAttachment import OptionAttachment
 from .OptionAttachmentImage import OptionAttachmentImage
 from .OptionAttachmentNote import OptionAttachmentNote
