@@ -16,13 +16,10 @@
                   action="/checklist/{{data.site_uid}}/{{data.check_type}}/{{data.checklist_uid}}/report/"
                   x-data="{
                       toggleAll(isChecked) {
-                          // 全選所有項目 (包含子項目)
-                          // 注意：觸發 click() 比直接設 checked 更好，因為會觸發各自的 change 事件，讓狀態連動更新
                           const checkboxes = $el.querySelectorAll('.parent-checkbox');
                           checkboxes.forEach(box => {
                               if(box.checked !== isChecked) {
                                   box.checked = isChecked;
-                                  // 手動觸發 change 事件以更新子項目
                                   box.dispatchEvent(new Event('change'));
                               }
                           });
@@ -48,32 +45,26 @@
                             
                             <div class="flex flex-col gap-1"
                                  x-data="{
-                                    // 切換所有子選項
                                     toggleChildren(isChecked) {
                                         const children = $el.querySelectorAll('.child-checkbox');
                                         children.forEach(c => c.checked = isChecked);
                                         this.updateParent(); // 強制更新父狀態
                                     },
-                                    // 核心邏輯：計算子選項狀態並更新父選項外觀
                                     updateParent() {
                                         const children = Array.from($el.querySelectorAll('.child-checkbox'));
                                         const parent = $el.querySelector('.parent-checkbox');
                                         
-                                        // 如果沒有子選項，就不做處理
                                         if (children.length === 0) return;
 
                                         const checkedCount = children.filter(c => c.checked).length;
                                         
                                         if (checkedCount === 0) {
-                                            // 全部未勾選
                                             parent.checked = false;
                                             parent.indeterminate = false;
                                         } else if (checkedCount === children.length) {
-                                            // 全部勾選
                                             parent.checked = true;
                                             parent.indeterminate = false;
                                         } else {
-                                            // 部分勾選 (顯示橫線 -)
                                             parent.checked = false; // 邏輯上算未勾選(方便下次點擊變全選)
                                             parent.indeterminate = true; // 設定視覺為橫線
                                         }
@@ -101,7 +92,7 @@
                                                        class="checkbox checkbox-xs checkbox-secondary child-checkbox" 
                                                        name="option{{ i }}_{{loop.index}}" 
                                                        id="option{{ i }}_{{loop.index}}" 
-                                                       value="option{{loop.index}}"
+                                                       value="{{ data_o.uid }}"
                                                        @change="updateParent()">
                                                 <span class="label-text text-sm text-base-content/80">
                                                     {{ i }} - {{loop.index}}. {{ data_o.name }}

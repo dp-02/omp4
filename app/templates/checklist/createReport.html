@@ -1,0 +1,27 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+電廠{% if data.check_type == '1' %}檢測{% else %}維修{% endif %}報告
+{% endblock %}
+
+{% block content %}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-3xl mx-auto">
+        <div class="card-body">
+            <h1 class="card-title text-3xl font-bold mb-6 pb-2 border-b border-base-200 flex items-center gap-2">
+                <i class="bi bi-file-earmark-text text-primary"></i>
+                電廠{% if data.check_type == '1' %}檢測{% else %}維修{% endif %}報告
+            </h1>
+            <div class="card-actions flex justify-end mt-8 pt-4 border-t border-base-200">
+                <a class="btn btn-neutral btn-outline gap-2" 
+                    href="/checklist/{{data.site_uid}}/{{data.check_type}}/{{data.checklist_uid}}/" 
+                    role="button">
+                    <i class="bi bi-arrow-return-left"></i> 
+                    返回
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

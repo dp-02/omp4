@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, render_template, abort, request
 from flask import session as flask_session
 from app.database import session_scope
 from app.auth import login_required
@@ -109,7 +109,7 @@ def table(site_uid, check_type, checklist_uid, table_uid):
 @blueprint.route('/<int:site_uid>/<int:check_type>/<int:checklist_uid>/create_report/choose_option/')
 @login_required
 def create_rport_choose_option(site_uid, check_type, checklist_uid):
-    ''' 表單 '''
+    ''' 產生報告選擇選項 '''
     data = {
         "site_uid":site_uid,
         "check_type":check_type,
@@ -138,10 +138,59 @@ def create_rport_choose_option(site_uid, check_type, checklist_uid):
 
     return render_template('Checklist/createReportChooseOption.html', data = data)
 
+@blueprint.route('/<int:site_uid>/<int:check_type>/<int:checklist_uid>/report/', methods=['POST'])
+@login_required
+def create_rport(site_uid, check_type, checklist_uid):
+    ''' 產生報告選擇選項 '''
+    data = {
+        "site_uid":site_uid,
+        "check_type":check_type,
+        "checklist_uid":checklist_uid,
+        "table":[]
+    }
+    selected_items = {}
+
+    for key, value in request.form.items():
+        if not key.startswith('option'):
+            continue
+        clean_key = key.replace('option', '')
+        if '_' in clean_key:
+            parts = clean_key.split('_')
+            parent_idx = parts[0]
+            child_idx = parts[1]
+            if parent_idx not in selected_items: selected_items[parent_idx] = {'uid': None, 'children': []}
+            selected_items[parent_idx]['children'].append({
+                "uid":value,
+                "index":child_idx
+            })
+        else:
+            parent_idx = clean_key
+            if parent_idx not in selected_items: selected_items[parent_idx] = {'uid': value, 'children': []}
+
+    final_report_data = []
+    
+    if check_type == 1: # 檢測
+        final_report_data = [item['uid'] for item in selected_items.values() if item['uid']]
+    elif check_type == 2: # 維修
+        for idx, item in selected_items.items():
+            final_report_data.append({
+                'parent_uid': item['uid'],
+                'selected_options': item['children']
+            })
+
+    # 4. (Debug 用) 打印結果看是否正確
+    print(f"Check Type: {check_type}")
+    print(f"Parsed Data: {final_report_data}")
+
+    # 5. 進行資料庫查詢或生成 PDF 邏輯...
+    # return render_template(...) or send_file(...)
+
+    return render_template('Checklist/createReport.html', data = data)
+
 @blueprint.route('/<int:site_uid>/anomaly_state/')
 @login_required
 def anomaly_state(site_uid):
-    ''' 首頁 '''
+    ''' 未處裡事項 '''
     data = {
         "site_uid":site_uid
     }
