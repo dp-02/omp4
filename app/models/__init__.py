@@ -17,6 +17,7 @@ from .OptionAttachmentAnomalyPosition import OptionAttachmentAnomalyPosition
 from .OptionAttachmentAnomalyReason import OptionAttachmentAnomalyReason
 from .OptionAttachmentAnomalyReasonSetting import OptionAttachmentAnomalyReasonSetting
 from .OptionAttachmentAnomalyState import OptionAttachmentAnomalyState
+from .OptionAttachmentForChecklist import OptionAttachmentForChecklist
 from .ConstructionTableGroup import ConstructionTableGroup
 from .ConstructionTableOption import ConstructionTableOption
 from .DesignTable import DesignTable

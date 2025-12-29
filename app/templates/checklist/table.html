@@ -68,6 +68,7 @@
                 <div class="flex flex-col">
                     {% for data_o in data.options %}
                     {% set current_val = data.saved.get(data_o.uid) %}
+                    <input type="hidden" name="checklist_uid" value="{{data.checklist_uid}}">
 
                     <div class="form-control py-4 border-b border-base-200 last:border-none hover:bg-base-[var(--b2,hex)] transition-colors px-2 rounded-lg">
                         

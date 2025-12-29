@@ -8,6 +8,7 @@ from flask import session as flask_session
 from types import SimpleNamespace
 from app.models import (
     OptionAttachment, 
+    OptionAttachmentForChecklist, 
     OptionAttachmentImage, 
     OptionAttachmentNote,
     OptionAttachmentAnomalyBreaker,
@@ -20,7 +21,6 @@ from app.models import (
     OptionAttachmentAnomalyState,
 )
 import json
-import re
 
 blueprint = Blueprint('api_attachment', __name__)
 
@@ -38,7 +38,7 @@ def save_attachment_image(table_type):
         
         for key, value in request.form.items():
             parts = key.split('_')
-            if len(parts) < 2 : continue
+            if len(parts) < 3 : continue
 
             requset_data = SimpleNamespace()
             requset_data.attachment_type = parts[0]
@@ -49,7 +49,15 @@ def save_attachment_image(table_type):
             if requset_data.attachment_type == 'image':
                 if requset_data.act == 'create':
                     requset_data.option_uid = parts[3]
-                    option_attachment = option_attachment if option_attachment else OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                    if not option_attachment:
+                        option_attachment = OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                        if table_type == "checklist":
+                            checklist_uid = request.form.get('checklist_uid')
+                            OptionAttachmentForChecklist.create(
+                                session,
+                                option_attachment_uid = option_attachment.uid,
+                                checklist_uid = checklist_uid
+                            )
                     if requset_data.name == "note":
                         OptionAttachmentNote.create(session, option_attachment_uid = option_attachment.uid, value = value)
 
@@ -63,7 +71,15 @@ def save_attachment_image(table_type):
             elif requset_data.attachment_type == 'anomaly':
                 if requset_data.act == 'create':
                     requset_data.option_uid = parts[3]
-                    option_attachment = option_attachment if option_attachment else OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                    if not option_attachment:
+                        option_attachment = OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                        if table_type == "checklist":
+                            checklist_uid = request.form.get('checklist_uid')
+                            OptionAttachmentForChecklist.create(
+                                session,
+                                option_attachment_uid = option_attachment.uid,
+                                checklist_uid = checklist_uid
+                            )
                     if requset_data.name == "note":
                         OptionAttachmentNote.create(session, option_attachment_uid = option_attachment.uid, value = value)
                     if requset_data.name == "state":
@@ -229,25 +245,50 @@ def save_attachment_image(table_type):
 def get_saved(table_type, option_uid):
     '''讀取所有附件資料'''
     with session_scope() as session:
-        stmt = (
-            select(OptionAttachment)
-            .where(
-                OptionAttachment.option_uid == int(option_uid),
-                OptionAttachment.table_type == table_type 
+        if table_type == "checklist":
+            checklist_uid = request.args.get('checklist_uid')
+            print(checklist_uid)
+            stmt = (
+                select(OptionAttachment).join(
+                    OptionAttachmentForChecklist, OptionAttachmentForChecklist.option_attachment_uid == OptionAttachment.uid
+                ).where(
+                    OptionAttachment.option_uid == int(option_uid),
+                    OptionAttachment.table_type == table_type,
+                    OptionAttachmentForChecklist.checklist_uid == checklist_uid
+                ).options(
+                    selectinload(OptionAttachment.notes),
+                    selectinload(OptionAttachment.images),
+                    selectinload(OptionAttachment.anomaly_states),
+                    selectinload(OptionAttachment.anomaly_images),
+                    selectinload(OptionAttachment.anomaly_positions),
+                    selectinload(OptionAttachment.anomaly_reasons),
+                    selectinload(OptionAttachment.anomaly_optimizers),
+                    selectinload(OptionAttachment.anomaly_breakers),
+                    selectinload(OptionAttachment.anomaly_damageds)
+                )
+                .order_by(OptionAttachment.uid.asc())
             )
-            .options(
-                selectinload(OptionAttachment.notes),
-                selectinload(OptionAttachment.images),
-                selectinload(OptionAttachment.anomaly_states),
-                selectinload(OptionAttachment.anomaly_images),
-                selectinload(OptionAttachment.anomaly_positions),
-                selectinload(OptionAttachment.anomaly_reasons),
-                selectinload(OptionAttachment.anomaly_optimizers),
-                selectinload(OptionAttachment.anomaly_breakers),
-                selectinload(OptionAttachment.anomaly_damageds)
+        else:
+            stmt = (
+                select(OptionAttachment)
+                .where(
+                    OptionAttachment.option_uid == int(option_uid),
+                    OptionAttachment.table_type == table_type 
+                )
+                .options(
+                    selectinload(OptionAttachment.notes),
+                    selectinload(OptionAttachment.images),
+                    selectinload(OptionAttachment.anomaly_states),
+                    selectinload(OptionAttachment.anomaly_images),
+                    selectinload(OptionAttachment.anomaly_positions),
+                    selectinload(OptionAttachment.anomaly_reasons),
+                    selectinload(OptionAttachment.anomaly_optimizers),
+                    selectinload(OptionAttachment.anomaly_breakers),
+                    selectinload(OptionAttachment.anomaly_damageds)
+                )
+                .order_by(OptionAttachment.uid.asc())
             )
-            .order_by(OptionAttachment.uid.asc())
-        )
+            
         results = session.execute(stmt).scalars().all()
 
         output_data = []

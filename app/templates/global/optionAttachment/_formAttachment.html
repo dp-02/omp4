@@ -1,6 +1,7 @@
 <div x-data="{
         targetUid: {{ uid }}, 
         targetTableType: '{{ table_type }}',
+        checklistUid: `{{ data.checklist_uid if data is defined and data.checklist_uid else '' }}`,
         records: [],
         isLoading: false,
         isAddMenuOpen: false, 
@@ -12,7 +13,13 @@
         async loadData() {
             this.isLoading = true;
             try {
-                const url = `/api/optionAttachment/get_saved/${this.targetTableType}/${this.targetUid}`;
+                let url = `/api/optionAttachment/get_saved/${this.targetTableType}/${this.targetUid}`;
+                
+                // 判斷是否有 checklistUid，若有則串接
+                if (this.checklistUid) {
+                    url += `?checklist_uid=${this.checklistUid}`;
+                }
+
                 const response = await fetch(url);
                 
                 if (response.ok) {
