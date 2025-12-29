@@ -1,0 +1,158 @@
+<div class="w-full bg-base-100 rounded-xl border border-base-300 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+    
+    <div class="bg-base-200/60 px-5 py-3 border-b border-base-300 flex flex-wrap justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
+            
+            {% if state == '0' %}
+                <div class="badge badge-error badge-lg font-bold gap-2">
+                    <i class="bi bi-exclamation-triangle-fill"></i> 未處理
+                </div>
+            {% elif state == '1' %}
+                <div class="badge badge-success badge-lg font-bold gap-2">
+                    <i class="bi bi-check-circle-fill"></i> 已處裡
+                </div>
+            {% elif state == '2' %}
+                <div class="badge badge-neutral badge-lg font-bold gap-2">
+                    <i class="bi bi-slash-circle"></i> 不可處理
+                </div>
+            {% else %}
+                <div class="badge badge-ghost badge-lg font-bold gap-2">
+                    <i class="bi bi-question-circle-fill"></i> 未定義 ({{ state }})
+                </div>
+            {% endif %}
+
+            {% if uid %}
+            <span class="text-sm font-mono opacity-50">#{{ uid }}</span>
+            {% endif %}
+        </div>
+        
+        {% if reason %}
+        <div class="flex items-center gap-2 text-sm text-base-content/80 bg-base-100 px-3 py-1 rounded-full border border-base-200">
+            <span class="opacity-60">原因:</span>
+            <span class="font-semibold">{{ reason }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="p-5 space-y-6">
+        
+        {# 定義變數檢查區塊是否有內容 #}
+        {% set has_position = inv or mppt or string or panel %}
+        {% set has_right_col = optimizer or breaker %}
+
+        {% if has_position or has_right_col %}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {# 左側：設備位置 #}
+            {% if has_position %}
+            <div class="bg-base-200/30 rounded-lg p-4 border border-base-200">
+                <h4 class="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="bi bi-geo-alt"></i> 設備位置 (Position)
+                </h4>
+                <div class="flex flex-wrap gap-2">
+                    {% for label, val in [('INV', inv), ('MPPT', mppt), ('STR', string), ('PNL', panel)] %}
+                        {% if val %}
+                        <div class="flex flex-col items-center p-2 bg-base-100 rounded border border-base-200 min-w-[70px] flex-1">
+                            <span class="text-[10px] opacity-50 font-bold">{{ label }}</span>
+                            <span class="font-mono text-lg font-bold text-primary">{{ val }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {# 右側：優化器與斷路器 #}
+            {% if has_right_col %}
+            <div class="bg-base-200/30 rounded-lg p-4 border border-base-200 flex flex-col justify-center gap-3">
+                
+                {% if optimizer %}
+                <div class="flex items-center justify-between {% if breaker %}border-b border-base-200 pb-2 border-dashed{% endif %}">
+                    <span class="text-sm opacity-60">優化器 (Optimizer)</span>
+                    <span class="font-mono font-medium">{{ optimizer }}</span>
+                </div>
+                {% endif %}
+
+                {% if breaker %}
+                <div class="flex items-center justify-between {% if optimizer %}pt-1{% endif %}">
+                    <span class="text-sm opacity-60">斷路器 (Breaker)</span>
+                    <div class="flex gap-1 flex-wrap justify-end">
+                        {% for b in breaker %}
+                            {# 定義顏色映射 #}
+                            {% set color_cls = 'bg-base-300 text-base-content' %}
+                            {% if b == 'red' %}{% set color_cls = 'bg-red-100 text-red-700 border-red-200' %}
+                            {% elif b == 'blue' %}{% set color_cls = 'bg-blue-100 text-blue-700 border-blue-200' %}
+                            {% elif b == 'yellow' %}{% set color_cls = 'bg-yellow-100 text-yellow-700 border-yellow-200' %}
+                            {% elif b == 'black' %}{% set color_cls = 'bg-neutral text-neutral-content border-neutral' %}
+                            {% elif b == 'white' %}{% set color_cls = 'bg-base-100 text-base-content border-base-300 shadow-sm' %}
+                            {% endif %}
+                            
+                            <span class="badge {{ color_cls }} badge-sm uppercase border font-medium px-2">
+                                {{ b }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if note %}
+        <div class="alert bg-base-100 border border-base-200 text-sm shadow-sm flex-col items-start gap-1 p-3">
+            <span class="text-xs font-bold opacity-50 uppercase">備註 Note</span>
+            <div class="opacity-80 whitespace-pre-wrap">{{ note }}</div>
+        </div>
+        {% endif %}
+
+        {% if damaged_images %}
+            {% set faces = [
+                ('front', '正面'), ('on', '上方'), ('below', '下方'),
+                ('left', '左側'), ('right', '右側'), ('number', '編號')
+            ] %}
+            
+            {# 檢查是否至少有一張圖片存在 #}
+            {% if damaged_images['front'] or damaged_images['on'] or damaged_images['below'] or damaged_images['left'] or damaged_images['right'] or damaged_images['number'] %}
+            <div>
+                <div class="divider text-xs opacity-50 my-2">六面圖紀錄</div>
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3">
+                    {% for key, label in faces %}
+                        {% if damaged_images[key] %}
+                        <div class="flex flex-col gap-1 group">
+                            <div class="aspect-square rounded bg-base-200 border border-base-300 overflow-hidden relative">
+                                <a href="{{ damaged_images[key] }}" target="_blank" class="block w-full h-full cursor-zoom-in">
+                                    <img src="{{ damaged_images[key] }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ label }}">
+                                </a>
+                            </div>
+                            <span class="text-[10px] text-center opacity-60 font-medium group-hover:opacity-100 transition-opacity">{{ label }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        {% endif %}
+
+        {% if anomaly_images %}
+        <div>
+            <div class="divider text-xs opacity-50 my-2">現場照片</div>
+            <div class="flex flex-wrap gap-3 mt-3">
+                {% for img in anomaly_images %}
+                <div class="relative group w-32 h-24 sm:w-40 sm:h-28 bg-base-200 rounded-lg overflow-hidden border border-base-300">
+                    <a href="{{ img.url }}" target="_blank" class="block w-full h-full cursor-zoom-in">
+                        <img src="{{ img.url }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ img.name }}">
+                    </a>
+                    {% if img.type %}
+                    <div class="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-1 text-center truncate">
+                        {{ img.type }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>

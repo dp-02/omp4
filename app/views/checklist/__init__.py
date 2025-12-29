@@ -7,7 +7,9 @@ from app.models import (
     Checklist,
     ChecklistTable,
     ChecklistTableOptionData,
-    ChecklistTableOption
+    ChecklistTableOption,
+    OptionAttachment,
+    OptionAttachmentForChecklist
 )
 blueprint = Blueprint('view_checklist', __name__)
 
@@ -146,7 +148,7 @@ def create_rport(site_uid, check_type, checklist_uid):
         "site_uid":site_uid,
         "check_type":check_type,
         "checklist_uid":checklist_uid,
-        "table":[]
+        "table":{}
     }
     selected_items = {}
 
@@ -178,13 +180,42 @@ def create_rport(site_uid, check_type, checklist_uid):
                 'selected_options': item['children']
             })
 
-    # 4. (Debug 用) 打印結果看是否正確
-    print(f"Check Type: {check_type}")
-    print(f"Parsed Data: {final_report_data}")
-
-    # 5. 進行資料庫查詢或生成 PDF 邏輯...
-    # return render_template(...) or send_file(...)
-
+    with session_scope() as session:
+        if check_type == 1: # 檢測
+            stmt = select(ChecklistTableOptionData,ChecklistTableOption,ChecklistTable,OptionAttachment).join(
+                ChecklistTableOption, ChecklistTableOption.uid == ChecklistTableOptionData.option_uid
+            ).join(
+                ChecklistTable, ChecklistTable.uid == ChecklistTableOption.table_uid
+            ).join(
+                OptionAttachmentForChecklist, OptionAttachmentForChecklist.checklist_uid == ChecklistTableOptionData.checklist_uid
+            ).join(
+                OptionAttachment, OptionAttachment.uid == OptionAttachmentForChecklist.option_attachment_uid
+            ).where(
+                ChecklistTableOptionData.checklist_uid == checklist_uid,
+                ChecklistTable.uid.in_(final_report_data)
+            )
+            query = session.execute(stmt).all()
+            for data_table in query:
+                checklist_table_option_data = data_table[0]
+                checklist_table_option = data_table[1]
+                checklist_table = data_table[2]
+                option_attachment = data_table[3]
+                if checklist_table.uid not in data['table']: 
+                    data['table'][checklist_table.uid]  = {
+                        "name":checklist_table.name,
+                        "options":{}
+                    }
+                if checklist_table_option.uid not in data['table'][checklist_table.uid]['options']: 
+                    data['table'][checklist_table.uid]['options'][checklist_table_option.uid] = {
+                        "name":checklist_table_option.name,
+                        "sort":checklist_table_option.sort,
+                        "value":checklist_table_option_data.value,
+                        "attachment":[]
+                    }
+                if option_attachment.option_uid == checklist_table_option.uid: 
+                    data['table'][checklist_table.uid]['options'][checklist_table_option.uid]['attachment'].append(option_attachment.uid)
+        elif check_type == 2: # 維修
+            ...
     return render_template('Checklist/createReport.html', data = data)
 
 @blueprint.route('/<int:site_uid>/anomaly_state/')

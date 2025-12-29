@@ -1,4 +1,4 @@
-from flask import Blueprint, request, make_response, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from app.database import session_scope
 from app.saveFile import save, delete_file
 from sqlalchemy import select
@@ -389,6 +389,119 @@ def get_saved(table_type, option_uid):
     return jsonify(output_data)
 
 
+@blueprint.route('/report/get/<int:attachment_uid>', methods=['GET'])
+def report_get(attachment_uid):
+    ''' 取得單一附件的 HTML 片段 '''
+    with session_scope() as session:
+        stmt = (
+            select(OptionAttachment)
+            .where(OptionAttachment.uid == attachment_uid)
+            .options(
+                selectinload(OptionAttachment.notes),
+                selectinload(OptionAttachment.images),
+                selectinload(OptionAttachment.anomaly_states),
+                selectinload(OptionAttachment.anomaly_images),
+                selectinload(OptionAttachment.anomaly_positions),
+                selectinload(OptionAttachment.anomaly_reasons),
+                selectinload(OptionAttachment.anomaly_optimizers),
+                selectinload(OptionAttachment.anomaly_breakers),
+                selectinload(OptionAttachment.anomaly_damageds)
+            )
+        )
+        attachment = session.execute(stmt).scalar_one_or_none()
+
+        if not attachment:
+            return '<div class="alert alert-error">找不到該附件記錄</div>', 404
+
+        # 基礎 Context
+        context = {
+            "attachment": attachment,
+            "note": attachment.notes[0].value if attachment.notes else "",
+            "readonly": True,
+            "uid": attachment.uid
+        }
+
+        if attachment.type == "anomaly":            
+            # 1. note (狀態)
+            if attachment.notes:
+                context['note'] = attachment.notes[0].value
+
+            # 2. State (狀態)
+            if attachment.anomaly_states:
+                context['state'] = attachment.anomaly_states[0].value
+
+            # 3. Position (位置)
+            if attachment.anomaly_positions:
+                pos = attachment.anomaly_positions[0]
+                context['inv'] = pos.inv
+                context['mppt'] = pos.mppt
+                context['string'] = pos.string
+                context['panel'] = pos.panel
+            
+            # 4. Reason (原因)
+            if attachment.anomaly_reasons:
+                context['reason'] = attachment.anomaly_reasons[0].value
+
+            # 5. Optimizer (優化器)
+            if attachment.anomaly_optimizers:
+                context['optimizer'] = attachment.anomaly_optimizers[0].value
+
+            # 6. Breaker (斷路器)
+            breaker_list = []
+            if attachment.anomaly_breakers:
+                b = attachment.anomaly_breakers[0]
+                if b.option_red: breaker_list.append('red')
+                if b.option_black: breaker_list.append('black')
+                if b.option_white: breaker_list.append('white')
+                if b.option_blue: breaker_list.append('blue')
+                if b.option_yellow: breaker_list.append('yellow')
+            context['breaker'] = breaker_list # Template 通常預期 'breaker' 作為 key
+
+            # 7. Damaged Images (六面圖)
+            damaged_images = {}
+            if attachment.anomaly_damageds:
+                d = attachment.anomaly_damageds[0]
+                mapping = {
+                    'front': d.file_path_front,
+                    'on': d.file_path_on,
+                    'below': d.file_path_below,
+                    'left': d.file_path_left,
+                    'right': d.file_path_right,
+                    'number': d.file_path_number
+                }
+                for key, path in mapping.items():
+                    if path:
+                        damaged_images[key] = f"/download/{path}"
+            context['damaged_images'] = damaged_images
+
+            # 8. Anomaly Images (異常過程圖)
+            anomaly_images_list = []
+            for img in attachment.anomaly_images:
+                anomaly_images_list.append({
+                    "uid": img.uid,
+                    "url": f"/download/{img.file_path}",
+                    "name": os.path.basename(img.file_path),
+                    "type": img.type
+                })
+            context['anomaly_images'] = anomaly_images_list
+
+            return render_template('global/optionAttachment/partials/_report_anomaly.html', **context)
+
+        elif attachment.type == "image":
+            # 一般照片
+            image_list = []
+            for img in attachment.images:
+                image_list.append({
+                    "uid": img.uid,
+                    "url": f"/download/{img.file_path}",
+                    "name": os.path.basename(img.file_path)
+                })
+            context['images'] = image_list
+            
+            return render_template('global/optionAttachment/partials/_report_image.html', **context)
+
+    return '<div class="alert alert-warning">未知的附件類型</div>', 400
+
 @blueprint.route('/reason/<option_uid>', methods=['GET'])
 def get_reason(option_uid):
     '''取得原因'''
@@ -426,7 +539,6 @@ def delete_attachment_single_image(image_uid):
         delete_file(image_record.file_path)
         OptionAttachmentImage.delete(session, uid = image_uid)
     return jsonify({'message': 'Image deleted successfully'}), 200
-
 
 @blueprint.route('/anomaly_image/delete/<int:image_uid>', methods=['DELETE'])
 def delete_attachment_anomaly_image(image_uid):
