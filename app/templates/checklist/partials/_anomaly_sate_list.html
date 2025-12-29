@@ -13,9 +13,7 @@
                     {% if item.state == '0' %}bi-x-circle
                     {% elif item.state == '1' %}bi-check-circle
                     {% else %}bi-exclamation-circle{% endif %}"></i>
-                    【{% if item.state == '0' %}未處理
-                    {% elif item.state == '1' %}已處理
-                    {% else %}不可處理{% endif %}】
+                    【{% if item.state == '0' %}未處理{% elif item.state == '1' %}已處理{% else %}不可處理{% endif %}】
                 </span>
 
                 <span class="font-mono text-sm opacity-90">
@@ -30,7 +28,7 @@
                 <i class="bi bi-chevron-right opacity-50 hidden md:block"></i>
 
                 <span class="flex-1 font-medium">
-                    {{ item.option_sort }}.{{ item.option_name }}
+                    {{ item.option_name }}
                 </span>
             </div>
         </a>
