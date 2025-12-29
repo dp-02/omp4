@@ -39,7 +39,6 @@ def save_attachment_image(table_type):
         for key, value in request.form.items():
             parts = key.split('_')
             if len(parts) < 3 : continue
-
             requset_data = SimpleNamespace()
             requset_data.attachment_type = parts[0]
             requset_data.act = parts[1]
@@ -65,7 +64,7 @@ def save_attachment_image(table_type):
                     requset_data.attachment_uid = parts[3]
                     if requset_data.name == "note":
                         stmt = select(OptionAttachmentNote).where(OptionAttachmentNote.option_attachment_uid == requset_data.attachment_uid)
-                        existing = session.execute(stmt).scalar_one_or_none()
+                        existing = session.execute(stmt).scalar()
                         if existing: existing.value = value
             # 處裡 anomaly
             elif requset_data.attachment_type == 'anomaly':
@@ -108,15 +107,15 @@ def save_attachment_image(table_type):
                     requset_data.attachment_uid = parts[3]
                     if requset_data.name == "note":
                         stmt = select(OptionAttachmentNote).where(OptionAttachmentNote.option_attachment_uid == requset_data.attachment_uid)
-                        existing = session.execute(stmt).scalar_one_or_none()
+                        existing = session.execute(stmt).scalar()
                         if existing: existing.value = value
                     if requset_data.name == "state":
                         stmt = select(OptionAttachmentAnomalyState).where(OptionAttachmentAnomalyState.option_attachment_uid == requset_data.attachment_uid)
-                        existing = session.execute(stmt).scalar_one_or_none()
+                        existing = session.execute(stmt).scalar()
                         if existing: existing.value = value
                     if requset_data.name in ["inv", "mppt", "string", "panel"]:
                         stmt = select(OptionAttachmentAnomalyPosition).where(OptionAttachmentAnomalyPosition.option_attachment_uid == requset_data.attachment_uid)
-                        existing = session.execute(stmt).scalar_one_or_none()
+                        existing = session.execute(stmt).scalar()
                         if existing: 
                             if(requset_data.name=="inv"): existing.inv = None if value == '' else value
                             elif(requset_data.name=="mppt"): existing.mppt = None if value == '' else value
@@ -124,16 +123,16 @@ def save_attachment_image(table_type):
                             elif(requset_data.name=="panel"): existing.panel = None if value == '' else value
                     if requset_data.name == "reason":
                         stmt = select(OptionAttachmentAnomalyReason).where(OptionAttachmentAnomalyReason.option_attachment_uid == requset_data.attachment_uid)
-                        existing = session.execute(stmt).scalar_one_or_none()
+                        existing = session.execute(stmt).scalar()
                         if existing: existing.value = value
                     if requset_data.name == "optimizer":
                         stmt = select(OptionAttachmentAnomalyOptimizer).where(OptionAttachmentAnomalyOptimizer.option_attachment_uid == requset_data.attachment_uid)
-                        existing = session.execute(stmt).scalar_one_or_none()
+                        existing = session.execute(stmt).scalar()
                         if existing: existing.value = value
                     if requset_data.name == "breaker":
                         value = request.form.getlist(key)
                         stmt = select(OptionAttachmentAnomalyBreaker).where(OptionAttachmentAnomalyBreaker.option_attachment_uid == requset_data.attachment_uid)
-                        existing = session.execute(stmt).scalar_one_or_none()
+                        existing = session.execute(stmt).scalar()
                         if existing: 
                             existing.option_red = "red" in value
                             existing.option_black = "black" in value
@@ -247,7 +246,6 @@ def get_saved(table_type, option_uid):
     with session_scope() as session:
         if table_type == "checklist":
             checklist_uid = request.args.get('checklist_uid')
-            print(checklist_uid)
             stmt = (
                 select(OptionAttachment).join(
                     OptionAttachmentForChecklist, OptionAttachmentForChecklist.option_attachment_uid == OptionAttachment.uid
