@@ -108,7 +108,7 @@
             {% if table_uid in [2,4,5,7] %}
                 {% include 'global/optionAttachment/partials/_anomalyPosition.html' %}
             {% endif %}
-            {% if table_uid in [2,3,4,5,7,8,9,10] %}
+            {% if table_uid in [2,3,4,5,7,8,9,10] and option_uid in [12,13,18,23,31,35,36,38,42,52,69,72,73,74,82,87,88,90,96,107,110,111]%}
                 {% include 'global/optionAttachment/partials/_anomalyReason.html' %}
             {% endif %}
             {% if table_uid in [2] and option_uid in [27,28] %}
