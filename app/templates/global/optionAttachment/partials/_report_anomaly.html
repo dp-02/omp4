@@ -25,16 +25,43 @@
             <span class="text-sm font-mono opacity-50">#{{ uid }}</span>
             {% endif %}
         </div>
-        
-        {% if reason %}
-        <div class="flex items-center gap-2 text-sm text-base-content/80 bg-base-100 px-3 py-1 rounded-full border border-base-200">
-            <span class="opacity-60">原因:</span>
-            <span class="font-semibold">{{ reason }}</span>
-        </div>
-        {% endif %}
     </div>
 
     <div class="p-5 space-y-6">
+        {% if reason %}
+        <div x-data="{
+                val: '{{ reason }}',
+                label: null,
+                isLoading: true,
+                init() {
+                    fetch('/api/optionAttachment/reason/{{ option_uid }}')
+                        .then(res => res.json())
+                        .then(data => {
+                            const target = data.find(opt => opt.value == this.val);
+                            this.label = target ? target.name : this.val;
+                        })
+                        .catch(err => {
+                            console.error('Reason load error', err);
+                            this.label = this.val;
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                        });
+                }
+             }"
+             class="alert bg-base-100 border border-base-200 text-sm shadow-sm flex-row items-center gap-3 p-3">
+            
+            <span class="text-xs font-bold opacity-50 uppercase whitespace-nowrap">原因 Reason:</span>
+            
+            <div class="flex-1 font-semibold text-base-content/90">
+                <template x-if="isLoading">
+                    <span class="loading loading-dots loading-xs opacity-50"></span>
+                </template>
+                
+                <span x-text="label" x-show="!isLoading"></span>
+            </div>
+        </div>
+        {% endif %}
         
         {# 定義變數檢查區塊是否有內容 #}
         {% set has_position = inv or mppt or string or panel %}

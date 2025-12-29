@@ -419,6 +419,8 @@ def report_get(attachment_uid):
             "uid": attachment.uid
         }
 
+        context['option_uid'] = attachment.option_uid
+
         if attachment.type == "anomaly":            
             # 1. note (狀態)
             if attachment.notes:
