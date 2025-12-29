@@ -108,13 +108,13 @@
             {% if table_uid in [2,4,5,7] %}
                 {% include 'global/optionAttachment/partials/_anomalyPosition.html' %}
             {% endif %}
-            {% if table_uid in [2,3,4,5,7,8,9,10] and option_uid in [12,13,18,23,31,35,36,38,42,52,69,72,73,74,82,87,88,90,96,107,110,111]%}
+            {% if table_uid in [2,3,4,5,7,8,9,10] and option_uid in [12,13,18,23,31,35,38,42,52,69,72,73,74,82,87,88,90,96,107,110,111]%}
                 {% include 'global/optionAttachment/partials/_anomalyReason.html' %}
             {% endif %}
             {% if table_uid in [2] and option_uid in [27,28] %}
                 {% include 'global/optionAttachment/partials/_anomalyOptimizer.html' %}
             {% endif %}
-            {% if table_uid in [5,9] and option_uid in [56,58,59,100,103,104,105,108] %}
+            {% if table_uid in [5,9] and option_uid in [56,58,59,100,103,104,105,106,108] %}
                 {% include 'global/optionAttachment/partials/_anomalyBreaker.html' %}
             {% endif %}
             {% if table_uid in [2] and option_uid in [12] %}
