@@ -180,4 +180,4 @@ def get_handle_list_partial(site_uid):
                 "option_name":data_o[2]
             })
 
-    return render_template('checklist/partials/_anomaly_sate_list.html', data_options=data_options)
+    return render_template('checklist/partials/_anomaly_state_list.html', data_options=data_options)
