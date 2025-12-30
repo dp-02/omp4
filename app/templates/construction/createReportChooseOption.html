@@ -1,0 +1,107 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+{{data.table_name}}生成報告
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-3xl mx-auto">
+        <div class="card-body">
+            <h1 class="card-title text-3xl font-bold mb-6 pb-2 border-b border-base-200 flex items-center gap-2">
+                <i class="bi bi-file-earmark-text text-primary"></i>
+                {{data.table_name}}生成報告
+            </h1>
+            <form method="post" 
+                  action="/construction/{{data.site_uid}}/{{data.group_uid}}/report/"
+                  x-data="{
+                      toggleAll(isChecked) {
+                          const checkboxes = $el.querySelectorAll('.parent-checkbox');
+                          checkboxes.forEach(box => {
+                              if(box.checked !== isChecked) {
+                                  box.checked = isChecked;
+                                  box.dispatchEvent(new Event('change'));
+                              }
+                          });
+                      }
+                  }">
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <label class="label-text font-bold text-lg text-base-content/70">選擇要產出的檢測項目</label>
+                    </div>
+                    
+                    <div class="form-control bg-base-200 rounded-lg p-3 mb-4">
+                        <label class="cursor-pointer label justify-start gap-3">
+                            <input type="checkbox" 
+                                   class="checkbox checkbox-primary" 
+                                   @change="toggleAll($el.checked)">
+                            <span class="label-text font-bold text-primary">全選 / 取消</span>
+                        </label>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        {% for data_t in data.table %}
+                            {% set i = loop.index %}
+                            
+                            <div class="flex flex-col gap-1"
+                                 x-data="{
+                                    toggleChildren(isChecked) {
+                                        const children = $el.querySelectorAll('.child-checkbox');
+                                        children.forEach(c => c.checked = isChecked);
+                                        this.updateParent(); // 強制更新父狀態
+                                    },
+                                    updateParent() {
+                                        const children = Array.from($el.querySelectorAll('.child-checkbox'));
+                                        const parent = $el.querySelector('.parent-checkbox');
+                                        
+                                        if (children.length === 0) return;
+
+                                        const checkedCount = children.filter(c => c.checked).length;
+                                        
+                                        if (checkedCount === 0) {
+                                            parent.checked = false;
+                                            parent.indeterminate = false;
+                                        } else if (checkedCount === children.length) {
+                                            parent.checked = true;
+                                            parent.indeterminate = false;
+                                        } else {
+                                            parent.checked = false; // 邏輯上算未勾選(方便下次點擊變全選)
+                                            parent.indeterminate = true; // 設定視覺為橫線
+                                        }
+                                    }
+                                 }"
+                                 x-init="updateParent()" 
+                                 > <div class="form-control hover:bg-base-100 border border-base-200 rounded-lg px-3 transition-colors">
+                                    <label class="cursor-pointer label justify-start gap-3">
+                                        <input type="checkbox" 
+                                               class="checkbox checkbox-sm parent-checkbox" 
+                                               name="option{{ i }}" 
+                                               id="option{{ i }}" 
+                                               value="{{ data_t.uid }}"
+                                               @change="toggleChildren($el.checked)">
+                                        <span class="label-text text-base">{{ i }}. {{ data_t.name }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="card-actions flex justify-end mt-8 pt-4 border-t border-base-200">
+                    <a class="btn btn-neutral btn-outline gap-2" 
+                       href="/construction/{{data.site_uid}}/{{data.group_uid}}/" 
+                       role="button">
+                        <i class="bi bi-arrow-return-left"></i> 
+                        返回
+                    </a>
+                    <button type="submit" class="btn btn-success text-white gap-2 shadow-md">
+                        <i class="bi bi-file-earmark-check"></i>
+                        產出報告
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

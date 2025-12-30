@@ -1,7 +1,7 @@
 {% extends 'global/base.html' %}
 
 {% block title %}
-電廠{% if data.check_type == '1' %}檢測{% else %}維修{% endif %}報告
+{{data.table_name}}報告
 {% endblock %}
 
 {% block content %}
@@ -13,7 +13,7 @@
                     <i class="bi bi-file-earmark-text text-2xl"></i>
                 </div>
                 <span>
-                    電廠<span class="text-primary">{% if data.check_type == '1' %}檢測{% else %}維修{% endif %}</span>報告
+                    <span class="text-primary">{{data.table_name}}</span>報告
                 </span>
             </h1>
 
@@ -76,7 +76,7 @@
 
             <div class="card-actions flex justify-end mt-10 pt-6 border-t border-base-200">
                 <a class="btn btn-neutral btn-outline gap-2 px-6" 
-                   href="/checklist/{{data.site_uid}}/{{data.check_type}}/{{data.checklist_uid}}/" 
+                   href="/construction/{{ data.site_uid }}/{{ data.group_uid }}/" 
                    role="button">
                     <i class="bi bi-arrow-return-left"></i> 
                     返回列表

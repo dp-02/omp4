@@ -145,7 +145,7 @@ def create_rport_choose_option(site_uid, check_type, checklist_uid):
 @blueprint.route('/<int:site_uid>/<int:check_type>/<int:checklist_uid>/report/', methods=['POST'])
 @login_required
 def create_rport(site_uid, check_type, checklist_uid):
-    ''' 產生報告選擇選項 '''
+    ''' 產生報告 '''
     data = {
         "site_uid":site_uid,
         "check_type":check_type,
