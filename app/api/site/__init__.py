@@ -136,7 +136,7 @@ def site_update():
 def get_by_region(region_index):
     data_s = []
     with session_scope() as session:
-        stmt = select(Site).where(Site.region == region_index)
+        stmt = select(Site).where(Site.region == region_index).order_by(Site.build_date)
         query = session.scalars(stmt).all()
         for item in query:
             data_s.append(Site.to_dict(item))
