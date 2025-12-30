@@ -53,9 +53,9 @@ def site_create():
     structured_phases = parse_site_form_data(request.form)
 
     with session_scope() as session:
-        query1 = Site.create(session, region = region, name = name, address = address, company = company, build_date = build_date, wait_cheack = wait_cheack, phase_number = phase_number, user_uid = user_uid)
+        query1 = Site.create(session, region = region, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, phase_number = phase_number, user_uid = user_uid)
         for p_data in structured_phases:
-            query2 = SitePhase.create(session, site_uid = query1.uid,  name = name)
+            query2 = SitePhase.create(session, site_uid = query1.uid,  name = p_data['name'])
             for i_data in p_data['inverters']:
                 SitePhaseInverter.create(session, phase_uid = query2.uid, brand = i_data['brand'], model = i_data['model'])
             for m_data in p_data['modules']:
@@ -112,7 +112,7 @@ def site_update():
 
     structured_phases = parse_site_form_data(request.form)
     with session_scope() as session:
-        Site.update(session, uid = site_uid, name = name, address = address, company = company, build_date = build_date, wait_cheack = wait_cheack)
+        Site.update(session, uid = site_uid, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack)
         for p_data in structured_phases:
             SitePhase.update(session, uid = p_data['uid'], name = p_data['name'])
             for i_data in p_data['inverters']:

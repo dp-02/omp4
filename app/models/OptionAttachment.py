@@ -10,6 +10,7 @@ class OptionAttachment(Base):
     __tablename__ = 'option_attachment'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
+    site_uid = Column(Integer, ForeignKey('site.uid', ondelete='CASCADE'), nullable=False)
     option_uid = Column(Integer, nullable=False, index=True)
     table_type = Column(String(32), nullable=False, index=True)
     type = Column(String(32))

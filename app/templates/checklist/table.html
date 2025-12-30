@@ -24,7 +24,7 @@
             const formData = new FormData(formElement);
 
             try {
-                const response = await fetch('/api/optionAttachment/save/checklist', {
+                const response = await fetch('/api/optionAttachment/save/{{data.site_uid}}/checklist', {
                     method: 'POST',
                     body: formData,
                     headers: {

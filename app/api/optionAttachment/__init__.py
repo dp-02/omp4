@@ -24,8 +24,8 @@ import json
 
 blueprint = Blueprint('api_attachment', __name__)
 
-@blueprint.route('/save/<table_type>', methods=['POST'])
-def save_attachment_image(table_type):
+@blueprint.route('/save/<int:site_uid>/<table_type>', methods=['POST'])
+def save_attachment_image(site_uid, table_type):
     ''' 儲存附件資料 '''
     response = jsonify({
         "status": "success", 
@@ -49,7 +49,13 @@ def save_attachment_image(table_type):
                 if requset_data.act == 'create':
                     requset_data.option_uid = parts[3]
                     if not option_attachment:
-                        option_attachment = OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                        option_attachment = OptionAttachment.create(
+                            session, 
+                            site_uid = site_uid,
+                            option_uid = requset_data.option_uid, 
+                            table_type= table_type, 
+                            type = requset_data.attachment_type
+                            )
                         if table_type == "checklist":
                             checklist_uid = request.form.get('checklist_uid')
                             OptionAttachmentForChecklist.create(
@@ -71,7 +77,13 @@ def save_attachment_image(table_type):
                 if requset_data.act == 'create':
                     requset_data.option_uid = parts[3]
                     if not option_attachment:
-                        option_attachment = OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                        option_attachment = OptionAttachment.create(
+                            session, 
+                            site_uid = site_uid,
+                            option_uid = requset_data.option_uid, 
+                            table_type= table_type, 
+                            type = requset_data.attachment_type
+                            )
                         if table_type == "checklist":
                             checklist_uid = request.form.get('checklist_uid')
                             OptionAttachmentForChecklist.create(
@@ -156,7 +168,13 @@ def save_attachment_image(table_type):
                 if requset_data.name == "files":
                     if requset_data.act == 'create':
                         requset_data.option_uid = parts[3]
-                        option_attachment = option_attachment if option_attachment else OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                        option_attachment = option_attachment if option_attachment else OptionAttachment.create(
+                            session, 
+                            site_uid = site_uid,
+                            option_uid = requset_data.option_uid, 
+                            table_type= table_type, 
+                            type = requset_data.attachment_type
+                            )
                         for f in requset_data.file_list:
                             if f.filename:
                                 file_path = save(f,"optionAttachment")
@@ -169,7 +187,13 @@ def save_attachment_image(table_type):
                                 OptionAttachmentImage.create(session, option_attachment_uid = requset_data.attachment_uid, file_path = file_path)
             elif requset_data.attachment_type == 'anomaly':
                 if requset_data.act == 'create':
-                    option_attachment = option_attachment if option_attachment else OptionAttachment.create(session, option_uid = requset_data.option_uid, table_type= table_type, type = requset_data.attachment_type)
+                    option_attachment = option_attachment if option_attachment else OptionAttachment.create(
+                        session, 
+                            site_uid = site_uid,
+                        option_uid = requset_data.option_uid, 
+                        table_type= table_type, 
+                        type = requset_data.attachment_type
+                        )
                     if requset_data.name == "damaged":
                         requset_data.position = parts[3]
                         requset_data.option_uid = parts[4]
@@ -267,11 +291,13 @@ def get_saved(table_type, option_uid):
                 .order_by(OptionAttachment.uid.asc())
             )
         else:
+            site_uid = request.args.get('site_uid')
             stmt = (
                 select(OptionAttachment)
                 .where(
                     OptionAttachment.option_uid == int(option_uid),
-                    OptionAttachment.table_type == table_type 
+                    OptionAttachment.table_type == table_type ,
+                    OptionAttachment.site_uid == site_uid 
                 )
                 .options(
                     selectinload(OptionAttachment.notes),

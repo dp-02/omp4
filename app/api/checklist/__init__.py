@@ -10,7 +10,8 @@ from app.models import (
     ChecklistTableOption,
     ChecklistTableOptionData,
     OptionAttachment,
-    OptionAttachmentAnomalyState
+    OptionAttachmentAnomalyState,
+    OptionAttachmentForChecklist
 )
 
 blueprint = Blueprint('api_checklist', __name__)
@@ -123,7 +124,7 @@ def get_handle_list_partial(site_uid):
     with session_scope() as session:
         stmt = None
         if filter_state == 'All':
-            stmt = select(ChecklistTableOptionData,
+            stmt = select(OptionAttachment,
                           OptionAttachmentAnomalyState.value,
                           ChecklistTableOption.name,
                           ChecklistTableOption.sort,
@@ -133,7 +134,7 @@ def get_handle_list_partial(site_uid):
                           Checklist.check_date,
                           Checklist.check_type,
                           ).join(
-                OptionAttachment, OptionAttachment.option_uid == ChecklistTableOptionData.option_uid
+                ChecklistTableOptionData, OptionAttachment.option_uid == ChecklistTableOptionData.option_uid
             ).join(
                 OptionAttachmentAnomalyState, OptionAttachmentAnomalyState.option_attachment_uid == OptionAttachment.uid
             ).join(
@@ -142,9 +143,13 @@ def get_handle_list_partial(site_uid):
                 ChecklistTable, ChecklistTable.uid == ChecklistTableOption.table_uid
             ).join(
                 Checklist, Checklist.uid == ChecklistTableOptionData.checklist_uid
+            ).join(
+                OptionAttachmentForChecklist, OptionAttachment.uid == OptionAttachmentForChecklist.option_attachment_uid
+            ).where(
+                Checklist.uid == OptionAttachmentForChecklist.checklist_uid
             )
         else:
-            stmt = select(ChecklistTableOptionData,
+            stmt = select(OptionAttachment,
                           OptionAttachmentAnomalyState.value,
                           ChecklistTableOption.name,
                           ChecklistTableOption.sort,
@@ -154,7 +159,7 @@ def get_handle_list_partial(site_uid):
                           Checklist.check_date,
                           Checklist.check_type,
                           ).join(
-                OptionAttachment, OptionAttachment.option_uid == ChecklistTableOptionData.option_uid
+                ChecklistTableOptionData, OptionAttachment.option_uid == ChecklistTableOptionData.option_uid
             ).join(
                 OptionAttachmentAnomalyState, OptionAttachmentAnomalyState.option_attachment_uid == OptionAttachment.uid
             ).join(
@@ -165,6 +170,10 @@ def get_handle_list_partial(site_uid):
                 Checklist, Checklist.uid == ChecklistTableOptionData.checklist_uid
             ).where(
                 OptionAttachmentAnomalyState.value == filter_state
+            ).join(
+                OptionAttachmentForChecklist, OptionAttachment.uid == OptionAttachmentForChecklist.option_attachment_uid
+            ).where(
+                Checklist.uid == OptionAttachmentForChecklist.checklist_uid
             )
         options = session.execute(stmt).all()
         for data_o in options:

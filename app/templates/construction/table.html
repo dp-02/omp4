@@ -22,7 +22,7 @@
             const formData = new FormData(formElement);
 
             try {
-                const response = await fetch('/api/optionAttachment/save/construction', {
+                const response = await fetch('/api/optionAttachment/save/{{data.site_uid}}/construction', {
                     method: 'POST',
                     body: formData,
                     headers: {

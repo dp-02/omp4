@@ -1,6 +1,7 @@
 <div x-data="{
         targetUid: {{ uid }}, 
         targetTableType: '{{ table_type }}',
+        siteUid: '{{ data.site_uid }}',
         checklistUid: `{{ data.checklist_uid if data is defined and data.checklist_uid else '' }}`,
         records: [],
         isLoading: false,
@@ -15,10 +16,13 @@
             try {
                 let url = `/api/optionAttachment/get_saved/${this.targetTableType}/${this.targetUid}`;
                 
-                // 判斷是否有 checklistUid，若有則串接
                 if (this.checklistUid) {
                     url += `?checklist_uid=${this.checklistUid}`;
                 }
+                if (this.siteUid) {
+                    url += `?site_uid=${this.siteUid}`;
+                }
+
 
                 const response = await fetch(url);
                 
