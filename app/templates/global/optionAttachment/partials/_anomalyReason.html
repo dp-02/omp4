@@ -38,7 +38,7 @@
             x-model="record.reason"
             
             :disabled="isLoading"
-            :name="record.isSaved ? 'anomaly_update_reason_' + record.id : 'anomaly_create_reason_' + '{{ uid }}_'">
+            :name="record.isSaved ? 'anomaly_update_reason_' + record.id : 'anomaly_create_reason_' + '{{ uid }}_' + record.id">
         
         <option value="" disabled>請選擇異常原因...</option>
         

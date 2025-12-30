@@ -6,7 +6,7 @@
     accept="image/*"
     multiple
     @change="handleFileChange($event)"
-    :name="record.isSaved ? 'image_append_files_' + record.id + '_[]' : 'image_create_files_' + '{{ uid }}_' + '_[]'" />
+    :name="record.isSaved ? 'image_append_files_' + record.id + '_[]' : 'image_create_files_' + '{{ uid }}_' + record.id + '_[]'" />
 </div>
 
 <div class="grid grid-cols-3 md:grid-cols-5 gap-2 mt-2" 

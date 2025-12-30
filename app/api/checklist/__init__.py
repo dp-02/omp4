@@ -118,6 +118,7 @@ def api_delete_checklist(checklist_uid):
 
 @blueprint.route('/anomaly_state/get_partial/<site_uid>')
 def get_handle_list_partial(site_uid):
+    '''處裡進度'''
     data_options = []
     filter_state = request.args.get('filter_state', 'All') 
 
@@ -146,7 +147,8 @@ def get_handle_list_partial(site_uid):
             ).join(
                 OptionAttachmentForChecklist, OptionAttachment.uid == OptionAttachmentForChecklist.option_attachment_uid
             ).where(
-                Checklist.uid == OptionAttachmentForChecklist.checklist_uid
+                Checklist.uid == OptionAttachmentForChecklist.checklist_uid,
+                OptionAttachment.type == "anomaly"
             )
         else:
             stmt = select(OptionAttachment,
@@ -173,7 +175,8 @@ def get_handle_list_partial(site_uid):
             ).join(
                 OptionAttachmentForChecklist, OptionAttachment.uid == OptionAttachmentForChecklist.option_attachment_uid
             ).where(
-                Checklist.uid == OptionAttachmentForChecklist.checklist_uid
+                Checklist.uid == OptionAttachmentForChecklist.checklist_uid,
+                OptionAttachment.type == "anomaly"
             )
         options = session.execute(stmt).all()
         for data_o in options:

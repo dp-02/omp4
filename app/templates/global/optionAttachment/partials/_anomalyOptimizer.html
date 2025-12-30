@@ -8,6 +8,6 @@
            placeholder="1.1.1"
            autocomplete="off"
            x-model="record.optimizer"
-           :name="record.isSaved ? 'anomaly_update_optimizer_' + record.id : 'anomaly_create_optimizer_' + '{{ uid }}_'"
+           :name="record.isSaved ? 'anomaly_update_optimizer_' + record.id : 'anomaly_create_optimizer_' + '{{ uid }}_' + record.id"
     />
 </div>

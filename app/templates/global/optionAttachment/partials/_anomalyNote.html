@@ -5,6 +5,6 @@
             placeholder="請描述異常狀況或是後續處理對策..."
             rows="3"
             x-model="record.note"
-            :name="record.isSaved ? 'anomaly_update_note_' + record.id : 'anomaly_create_note_' + '{{ uid }}_'">
+            :name="record.isSaved ? 'anomaly_update_note_' + record.id : 'anomaly_create_note_' + '{{ uid }}_' + record.id">
     </textarea>
 </div>

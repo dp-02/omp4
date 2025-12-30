@@ -31,9 +31,8 @@ def save_attachment_image(site_uid, table_type):
         "status": "success", 
         "message": "預留位置：邏輯尚未實作"
     })
-
     with session_scope() as session:
-        option_attachment = None
+        option_attachment_map = {}
         # 處裡 form 欄位
         
         for key, value in request.form.items():
@@ -48,7 +47,9 @@ def save_attachment_image(site_uid, table_type):
             if requset_data.attachment_type == 'image':
                 if requset_data.act == 'create':
                     requset_data.option_uid = parts[3]
-                    if not option_attachment:
+                    requset_data.temp_id = parts[4]
+
+                    if not option_attachment_map.get(requset_data.temp_id):
                         option_attachment = OptionAttachment.create(
                             session, 
                             site_uid = site_uid,
@@ -56,15 +57,16 @@ def save_attachment_image(site_uid, table_type):
                             table_type= table_type, 
                             type = requset_data.attachment_type
                             )
+                        option_attachment_map.setdefault(requset_data.temp_id, option_attachment)
                         if table_type == "checklist":
                             checklist_uid = request.form.get('checklist_uid')
                             OptionAttachmentForChecklist.create(
                                 session,
-                                option_attachment_uid = option_attachment.uid,
+                                option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid,
                                 checklist_uid = checklist_uid
                             )
                     if requset_data.name == "note":
-                        OptionAttachmentNote.create(session, option_attachment_uid = option_attachment.uid, value = value)
+                        OptionAttachmentNote.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, value = value)
 
                 elif requset_data.act == 'update':
                     requset_data.attachment_uid = parts[3]
@@ -76,7 +78,8 @@ def save_attachment_image(site_uid, table_type):
             elif requset_data.attachment_type == 'anomaly':
                 if requset_data.act == 'create':
                     requset_data.option_uid = parts[3]
-                    if not option_attachment:
+                    requset_data.temp_id = parts[4]
+                    if not option_attachment_map.get(requset_data.temp_id):
                         option_attachment = OptionAttachment.create(
                             session, 
                             site_uid = site_uid,
@@ -84,19 +87,20 @@ def save_attachment_image(site_uid, table_type):
                             table_type= table_type, 
                             type = requset_data.attachment_type
                             )
+                        option_attachment_map.setdefault(requset_data.temp_id, option_attachment)
                         if table_type == "checklist":
                             checklist_uid = request.form.get('checklist_uid')
                             OptionAttachmentForChecklist.create(
                                 session,
-                                option_attachment_uid = option_attachment.uid,
+                                option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid,
                                 checklist_uid = checklist_uid
                             )
                     if requset_data.name == "note":
-                        OptionAttachmentNote.create(session, option_attachment_uid = option_attachment.uid, value = value)
+                        OptionAttachmentNote.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, value = value)
                     if requset_data.name == "state":
-                        OptionAttachmentAnomalyState.create(session, option_attachment_uid = option_attachment.uid, value = value)
+                        OptionAttachmentAnomalyState.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, value = value)
                     if requset_data.name in ["inv", "mppt", "string", "panel"]:
-                        stmt = select(OptionAttachmentAnomalyPosition).where(OptionAttachmentAnomalyPosition.option_attachment_uid == option_attachment.uid)
+                        stmt = select(OptionAttachmentAnomalyPosition).where(OptionAttachmentAnomalyPosition.option_attachment_uid == option_attachment_map.get(requset_data.temp_id).uid)
                         existing = session.execute(stmt).scalar_one_or_none()
                         if existing: 
                             if(requset_data.name=="inv"): existing.inv = None if value == '' else value
@@ -104,17 +108,17 @@ def save_attachment_image(site_uid, table_type):
                             elif(requset_data.name=="string"): existing.string = None if value == '' else value
                             elif(requset_data.name=="panel"): existing.panel = None if value == '' else value
                         else :
-                            if(requset_data.name=="inv"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, inv = None if value == '' else value)
-                            elif(requset_data.name=="mppt"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, mppt = None if value == '' else value)
-                            elif(requset_data.name=="string"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, string = None if value == '' else value)
-                            elif(requset_data.name=="panel"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment.uid, panel = None if value == '' else value)
+                            if(requset_data.name=="inv"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, inv = None if value == '' else value)
+                            elif(requset_data.name=="mppt"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, mppt = None if value == '' else value)
+                            elif(requset_data.name=="string"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, string = None if value == '' else value)
+                            elif(requset_data.name=="panel"): OptionAttachmentAnomalyPosition.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, panel = None if value == '' else value)
                     if requset_data.name == "reason":
-                        OptionAttachmentAnomalyReason.create(session, option_attachment_uid = option_attachment.uid, value = value)
+                        OptionAttachmentAnomalyReason.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, value = value)
                     if requset_data.name == "optimizer":
-                        OptionAttachmentAnomalyOptimizer.create(session, option_attachment_uid = option_attachment.uid, value = value)
+                        OptionAttachmentAnomalyOptimizer.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, value = value)
                     if requset_data.name == "breaker":
                         value = request.form.getlist(key)
-                        OptionAttachmentAnomalyBreaker.create(session, option_attachment_uid = option_attachment.uid, option_red = "red" in value, option_black = "black" in value, option_white = "white" in value, option_blue = "blue" in value, option_yellow = "yellow" in value)
+                        OptionAttachmentAnomalyBreaker.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, option_red = "red" in value, option_black = "black" in value, option_white = "white" in value, option_blue = "blue" in value, option_yellow = "yellow" in value)
                 elif requset_data.act == 'update':
                     requset_data.attachment_uid = parts[3]
                     if requset_data.name == "note":
@@ -168,17 +172,20 @@ def save_attachment_image(site_uid, table_type):
                 if requset_data.name == "files":
                     if requset_data.act == 'create':
                         requset_data.option_uid = parts[3]
-                        option_attachment = option_attachment if option_attachment else OptionAttachment.create(
+                        requset_data.temp_id = parts[4]
+                        if not option_attachment_map.get(requset_data.temp_id):
+                            option_attachment =  OptionAttachment.create(
                             session, 
                             site_uid = site_uid,
                             option_uid = requset_data.option_uid, 
                             table_type= table_type, 
                             type = requset_data.attachment_type
                             )
+                            option_attachment_map.setdefault(requset_data.temp_id, option_attachment)
                         for f in requset_data.file_list:
                             if f.filename:
                                 file_path = save(f,"optionAttachment")
-                                OptionAttachmentImage.create(session, option_attachment_uid = option_attachment.uid, file_path = file_path)
+                                OptionAttachmentImage.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, file_path = file_path)
                     elif requset_data.act == 'append':
                         requset_data.attachment_uid = parts[3]
                         for f in requset_data.file_list:
@@ -187,19 +194,22 @@ def save_attachment_image(site_uid, table_type):
                                 OptionAttachmentImage.create(session, option_attachment_uid = requset_data.attachment_uid, file_path = file_path)
             elif requset_data.attachment_type == 'anomaly':
                 if requset_data.act == 'create':
-                    option_attachment = option_attachment if option_attachment else OptionAttachment.create(
+                    requset_data.temp_id = parts[5]
+                    if not option_attachment_map.get(requset_data.temp_id):
+                        option_attachment =  OptionAttachment.create(
                         session, 
-                            site_uid = site_uid,
+                        site_uid = site_uid,
                         option_uid = requset_data.option_uid, 
                         table_type= table_type, 
                         type = requset_data.attachment_type
                         )
+                        option_attachment_map.setdefault(requset_data.temp_id, option_attachment)
                     if requset_data.name == "damaged":
                         requset_data.position = parts[3]
                         requset_data.option_uid = parts[4]
-                        stmt = select(OptionAttachmentAnomalyDamaged).where(OptionAttachmentAnomalyDamaged.option_attachment_uid == option_attachment.uid)
+                        stmt = select(OptionAttachmentAnomalyDamaged).where(OptionAttachmentAnomalyDamaged.option_attachment_uid == option_attachment_map.get(requset_data.temp_id).uid)
                         existing = session.execute(stmt).scalar_one_or_none()
-                        if not existing: existing = OptionAttachmentAnomalyDamaged.create(session, option_attachment_uid = option_attachment.uid)
+                        if not existing: existing = OptionAttachmentAnomalyDamaged.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid)
                         f = request.files.get(key)
                         if f:
                             file_path = save(f,"optionAttachment")
@@ -215,7 +225,7 @@ def save_attachment_image(site_uid, table_type):
                         for f in requset_data.file_list:
                             if f:
                                 file_path = save(f,"optionAttachment")
-                                OptionAttachmentAnomalyImage.create(session, option_attachment_uid = option_attachment.uid, type = requset_data.progress_type, file_path = file_path)
+                                OptionAttachmentAnomalyImage.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, type = requset_data.progress_type, file_path = file_path)
                 elif requset_data.act == 'append':
                     if requset_data.name == "damaged":
                         requset_data.position = parts[3]

@@ -5,5 +5,5 @@
                 placeholder="請輸入說明..."
                 rows="2"
                 x-model="record.note"
-                :name="record.isSaved ? 'image_update_note_' + record.id : 'image_create_note_' + '{{ uid }}_'"></textarea>
+                :name="record.isSaved ? 'image_update_note_' + record.id : 'image_create_note_' + '{{ uid }}_' + record.id"></textarea>
 </div>

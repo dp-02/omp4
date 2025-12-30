@@ -44,7 +44,7 @@
                    :class="record.isSaved ? 'focus:input-success' : 'focus:input-warning'"
                    x-model.number="record.string"
                    placeholder="---"
-                   :name="record.isSaved ? 'anomaly_update_string_' + record.id : 'anomaly_create_string_' + '{{ uid }}_'"
+                   :name="record.isSaved ? 'anomaly_update_string_' + record.id : 'anomaly_create_string_' + '{{ uid }}_' + record.id"
             />
         </div>
         {% endif %}
@@ -56,7 +56,7 @@
                    :class="record.isSaved ? 'focus:input-success' : 'focus:input-warning'"
                    x-model.number="record.panel"
                    placeholder="---"
-                   :name="record.isSaved ? 'anomaly_update_panel_' + record.id : 'anomaly_create_panel_' + '{{ uid }}_'"
+                   :name="record.isSaved ? 'anomaly_update_panel_' + record.id : 'anomaly_create_panel_' + '{{ uid }}_' + record.id"
             />
         </div>
         {% endif %}
