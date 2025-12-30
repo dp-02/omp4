@@ -28,6 +28,8 @@
             </h1>
 
             <form id="form" 
+            x-ref="checkForm" 
+            novalidate
             hx-post="{% if act == 'create' %}/api/checklist/create{% else %}/api/checklist/update{% endif %}" 
             hx-swap="none">
                 <input type="hidden" id="uid" name="uid" value="{{data.uid if data.uid}}">
@@ -35,7 +37,10 @@
                 <input type="hidden" id="check_type" name="check_type" value="{{data.check_type}}">
                 <div class="form-control w-full mb-4">
                     <label for="check_date" class="label">
-                        <span class="label-text font-semibold">檢測日期</span>
+                        <span class="label-text font-semibold">
+                            檢測日期
+                            <span class="text-error">*</span>
+                        </span>
                     </label>
                     <input type="date" 
                            class="input input-bordered w-full" 
@@ -43,7 +48,7 @@
                            name="check_date" 
                            placeholder="請選擇日期"
                            value="{{data.check_date if data.check_date}}"
-                           >
+                           > 
                 </div>
 
                 <div class="form-control w-full mb-6">
@@ -64,7 +69,21 @@
                 </div>
 
                 <div class="card-actions flex items-center gap-4 mt-2">
-                    <button type="submit" class="btn btn-primary px-8 text-white shadow-md">
+                    <button type="button" 
+                            @click="
+                                if (!document.getElementById('check_date').value) {
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: '欄位未填',
+                                        text: '請選擇檢測日期！',
+                                        confirmButtonText: 'OK'
+                                    });
+                                } else {
+                                    // 通過驗證，手動觸發 HTMX 的送出
+                                    htmx.trigger($refs.checkForm, 'submit');
+                                }
+                            "
+                            class="btn btn-primary px-8 text-white shadow-md">
                         <i class="bi bi-check-lg"></i>
                         送出
                     </button>
