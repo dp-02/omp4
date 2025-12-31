@@ -66,19 +66,42 @@
                   hx-encoding="multipart/form-data"
                   enctype="multipart/form-data">
                 <div class="flex flex-col">
+                    <input type="hidden" name="checklist_uid" value="{{data.checklist_uid}}">
                     {% for data_o in data.options %}
                     {% set current_val = data.saved.get(data_o.uid) %}
-                    <input type="hidden" name="checklist_uid" value="{{data.checklist_uid}}">
-
                     <div class="form-control py-4 border-b border-base-200 last:border-none hover:bg-base-[var(--b2,hex)] transition-colors px-2 rounded-lg">
-                        
                         <div class="mb-3" id="option{{loop.index}}">
                             <span class="font-bold text-lg text-base-content">
                                 <span class="badge badge-neutral mr-2">{{ loop.index }}</span>
                                 {{data_o.name}}
                             </span>
                         </div>
-
+                        <div class="flex flex-wrap gap-6 items-center pl-2 md:pl-10">
+                            <label class="label cursor-pointer justify-start gap-2 hover:opacity-80">
+                                <input type="checkbox" 
+                                       class="checkbox checkbox-success" 
+                                       name="{{ data_o.uid }}" 
+                                       id="{{ data_o.uid }}_1" 
+                                       value="無"
+                                       {% if current_val == '無' %}checked{% endif %}>
+                                <span class="label-text font-medium text-success-content/90">無</span>
+                            </label>
+                        </div>
+                        {% set table_type = 'checklist' %}
+                        {% set option_uid = data_o.uid %}
+                        {% with uid=data_o.uid, saved_file=current_file %}
+                            {% include 'global/optionAttachment/_formAttachment.html' %}
+                        {% endwith %}
+                    </div>
+                    {% if data.table_name == "熱影像檢測紀錄表" %}
+                    {% else %}
+                    <div class="form-control py-4 border-b border-base-200 last:border-none hover:bg-base-[var(--b2,hex)] transition-colors px-2 rounded-lg">
+                        <div class="mb-3" id="option{{loop.index}}">
+                            <span class="font-bold text-lg text-base-content">
+                                <span class="badge badge-neutral mr-2">{{ loop.index }}</span>
+                                {{data_o.name}}
+                            </span>
+                        </div>
                         <div class="flex flex-wrap gap-6 items-center pl-2 md:pl-10">
                             
                             <label class="label cursor-pointer justify-start gap-2 hover:opacity-80">
@@ -117,6 +140,7 @@
                             {% include 'global/optionAttachment/_formAttachment.html' %}
                         {% endwith %}
                     </div>
+                    {% endif%}
                     {% endfor %}
                 </div>
 
