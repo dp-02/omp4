@@ -28,8 +28,12 @@
         {% block style %}{% endblock %}
         {% block head_scripts %}{% endblock %}
     </head>
-    <body>        
+    <body class="min-h-screen flex flex-col">        
+        {% include 'global/base/_nav.html' %}
+        <main class="flex-grow container mx-auto p-4">
         {% block content %}{% endblock %}
+        </main>
+        {% include 'global/base/_footer.html' %}
                 
         <!-- SweetAlert2 -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>

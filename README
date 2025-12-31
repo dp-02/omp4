@@ -1,0 +1,10 @@
+
+### docker rum
+
+Web 應用程式 (如 Flask/Django/FastAPI) 如果你的 Python 程式是一個網站伺服器（例如開在 Port 5000），你需要做 Port Mapping (端口對應)：
+
+```Bash
+docker run -p 8000:8000 my-python-app
+```
+
+這代表將本機的 5000 Port 對應到 容器內的 5000 Port。
