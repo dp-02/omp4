@@ -3,10 +3,12 @@
     <div class="flex items-center gap-2 p-1 border border-base-200 rounded hover:bg-base-200/50">
         {% if opt.has_record %}
             <span class="badge badge-success badge-sm gap-1">
-                <i class="bi bi-check"></i> 合格
+                <i class="bi bi-check"></i>
             </span>
         {% else %}
-            <span class="badge badge-ghost badge-sm text-gray-400">未勾選</span>
+            <span class="badge badge-ghost badge-sm text-gray-400">
+                <i class="bi bi-slash"></i>
+            </span>
         {% endif %}
         <span class="text-sm {{ 'text-base-content' if opt.checked else 'text-gray-400' }}">
             {{ loop.index }}. {{ opt.name }}

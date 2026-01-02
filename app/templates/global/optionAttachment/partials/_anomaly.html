@@ -105,7 +105,7 @@
         {% include 'global/optionAttachment/partials/_anomalyState.html' %}
 
         {% if table_type == 'checklist' %}
-            {% if table_uid in [2,4,5,7] %}
+            {% if table_uid in [2,4,5,7] and option_uid in [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 42, 44, 45, 48, 49, 56, 58, 59, 68, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82] %}
                 {% include 'global/optionAttachment/partials/_anomalyPosition.html' %}
             {% endif %}
             {% if table_uid in [2,3,4,5,7,8,9,10] and option_uid in [12,13,18,23,31,35,38,42,52,69,72,73,74,82,87,88,90,96,107,110,111]%}

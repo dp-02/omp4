@@ -68,7 +68,7 @@ def update(site_uid):
         region_index = site_obj.region
         form_data = Site.to_dict(site_obj) 
 
-        stmt = select(SitePhase).where(SitePhase.site_uid == site_obj.uid).order_by(SitePhase.name)
+        stmt = select(SitePhase).where(SitePhase.site_uid == site_obj.uid)
         phases = session.scalars(stmt).all()
         form_data['phase'] = len(phases)
         for i, phase in enumerate(phases, start=1):
