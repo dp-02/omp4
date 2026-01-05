@@ -6,7 +6,7 @@ app = create_app()
 
 if __name__ == '__main__':
     # 如果 ENV 是 'production'，則執行生產模式
-    if app.config.get('ENV') == 'production':
+    if app.config.get('FLASK_ENV') == 'production':
         print("🚀 Starting Production Server (Waitress)...")
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
         host = app.config.get('PROD_HOST', '0.0.0.0')
