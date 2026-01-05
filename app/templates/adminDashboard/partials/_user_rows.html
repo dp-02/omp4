@@ -1,0 +1,27 @@
+{% for user in users %}
+<tr class="hover">
+  <th>{{ user.line_id }}</th>
+  <td>
+    <div class="font-bold">{{ user.name }}</div>
+  </td>
+  <td class="text-center">
+    <div class="join">
+      <a href="/adminDashboard/edit/{{ user.uid }}" class="btn btn-sm btn-ghost join-item text-info">
+        <i class="bi bi-pencil"></i>
+        編輯
+      </a>
+      
+      <button 
+        class="btn btn-sm btn-ghost join-item text-error"
+        hx-delete="/api/adminDashboard/user/delete/{{ user.uid }}"
+        hx-trigger="confirmed-delete"
+        hx-target="closest tr"
+        hx-swap="outerHTML"
+        @click="confirmDelete($event)">
+        <i class="bi bi-trash"></i>
+        刪除
+      </button>
+    </div>
+  </td>
+</tr>
+{% endfor %}
