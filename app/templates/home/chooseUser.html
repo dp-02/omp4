@@ -1,0 +1,31 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+首頁
+{% endblock %}
+
+{% block content %}
+<div class="grid min-h-screen place-items-center bg-base-100"
+     x-data="{ userList: [], selectedUser: '' }"
+     hx-get="/api/adminDashboard/user/get_all"
+     hx-trigger="load"
+     hx-swap="none"
+     @response-data.window="userList = $event.detail.value">
+  <div class="card w-96 bg-base-100 shadow-xl border border-base-300">
+    <div class="card-body">
+      <form action="/choose_region/" method="post">
+        <h2 class="card-title">選擇使用者</h2>
+        <div class="card-actions flex flex-col gap-4">
+          <select class="select select-bordered w-full" name="user_uid" x-model="selectedUser">
+            <option disabled selected value="">請選擇...</option>
+            <template x-for="user in userList" :key="user.uid">
+              <option :value="user.uid" x-text="user.name"></option>
+            </template>
+          </select>
+          <button type="submit" class="btn btn-primary btn-block" >登入</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
