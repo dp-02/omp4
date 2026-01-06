@@ -116,7 +116,12 @@ def get_history_details(graph_type):
             record = records_map.get(opt_dict['uid']) 
             opt_dict['has_record'] = True if record else False
             options.append(opt_dict)
-    
+
+        stmt = select(DesignChecklist.uid).where(DesignChecklist.type == graph_type).order_by(DesignChecklist.at_createdtime.desc()).limit(1)
+        latest_uid = session.execute(stmt).scalar()
+        is_latest = str(latest_uid) == designlist_uid if latest_uid else False
+        designlist_data['is_latest'] = is_latest
+
     return render_template(
         'design/partials/_history_details_swap.html',
         designlist_options=designlist_options,

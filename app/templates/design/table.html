@@ -95,14 +95,25 @@
                         <label for="file_cad" class="label">
                             <span class="label-text font-bold"><i class="bi bi-file-earmark-code mr-1"></i> CAD / SketchUp</span>
                         </label>
-                        <input type="file" class="file-input file-input-bordered w-full" name="file_cad" id="file_cad">
+                        <input type="file" 
+                            class="file-input file-input-bordered w-full" 
+                            name="file_cad" 
+                            id="file_cad"
+                            accept=".dwg,.dxf,.skp">
+                        <label class="label">
+                            <span class="label-text-alt text-warning">支援格式: .dwg, .dxf, .skp</span>
+                        </label>
                     </div>
 
                     <div class="col-span-1 bg-base-200 rounded-box p-4">
                         <label for="file_pdf" class="label">
                             <span class="label-text font-bold"><i class="bi bi-file-earmark-pdf mr-1"></i> PDF 規劃圖</span>
                         </label>
-                        <input type="file" class="file-input file-input-bordered w-full" name="file_pdf" id="file_pdf">
+                        <input type="file" 
+                            class="file-input file-input-bordered w-full" 
+                            name="file_pdf" 
+                            id="file_pdf"
+                            accept=".pdf,application/pdf">
                     </div>
                     
                     <div class="col-span-full">

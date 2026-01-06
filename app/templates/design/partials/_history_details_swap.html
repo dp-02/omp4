@@ -28,6 +28,23 @@
    class="btn btn-primary btn-outline w-full shadow-sm {{ '' if designlist_data.file_path_cad else 'btn-disabled' }}" 
    {% if designlist_data.file_path_cad %}
        href="/download/attachment/{{ designlist_data.file_path_cad }}"
+       {% if not designlist_data.is_latest %}
+           onclick="event.preventDefault(); 
+                    Swal.fire({
+                        title: '非最新版本警告',
+                        text: '您目前正在檢視歷史紀錄，確定要下載舊版 CAD 檔案嗎？',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: '確定下載',
+                        cancelButtonText: '取消',
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = this.href;
+                        }
+                    });"
+       {% endif %}
    {% else %}
        role="button" aria-disabled="true" tabindex="-1"
    {% endif %}
@@ -39,6 +56,23 @@
    class="btn btn-success btn-outline w-full shadow-sm {{ '' if designlist_data.file_path_pdf else 'btn-disabled' }}" 
    {% if designlist_data.file_path_pdf %}
        href="/download/attachment/{{ designlist_data.file_path_pdf }}"
+       {% if not designlist_data.is_latest %}
+           onclick="event.preventDefault(); 
+                    Swal.fire({
+                        title: '非最新版本警告',
+                        text: '您目前正在檢視歷史紀錄，確定要下載舊版 PDF 嗎？',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: '確定下載',
+                        cancelButtonText: '取消',
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = this.href;
+                        }
+                    });"
+       {% endif %}
    {% else %}
        role="button" aria-disabled="true" tabindex="-1"
    {% endif %}
