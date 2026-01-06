@@ -12,8 +12,8 @@ import json
 
 blueprint = Blueprint('api_design', __name__)
 
-@blueprint.route('/create', methods=['POST'])
-def create():
+@blueprint.route('/<graph_type>/create', methods=['POST'])
+def create(graph_type):
     response = make_response()
     site_uid = request.form.get('siteUid')
     table_uid = request.form.get('tableUid')
@@ -33,12 +33,13 @@ def create():
 
     with session_scope() as session:
         query1 = DesignChecklist.create(session, 
-                               table_uid = table_uid, 
-                               site_uid = site_uid,
-                               note = note,
-                               phase = phase,
-                               file_path_cad = saved_file_cad_path,
-                               file_path_pdf = saved_file_pdf_path)
+                                        table_uid = table_uid, 
+                                        site_uid = site_uid,
+                                        note = note,
+                                        type = graph_type,
+                                        phase = phase,
+                                        file_path_cad = saved_file_cad_path,
+                                        file_path_pdf = saved_file_pdf_path)
         for option_uid in checked_items:
             DesignTableOptionData.create(
                 session,
@@ -57,8 +58,8 @@ def create():
     
     return response
 
-@blueprint.route('/get_table_details', methods=['GET'])
-def get_table_details():
+@blueprint.route('/<graph_type>/get_table_details', methods=['GET'])
+def get_table_details(graph_type):
     options = []
     histories = []
     site_uid = request.args.get('siteUid')
@@ -71,7 +72,8 @@ def get_table_details():
             options.append(DesignTableOption.to_dict(data_o))
         stmt = select(DesignChecklist).where(
             DesignChecklist.table_uid == table_uid,
-            DesignChecklist.site_uid == site_uid
+            DesignChecklist.site_uid == site_uid,
+            DesignChecklist.type == graph_type,
         ).order_by(DesignChecklist.at_createdtime.desc())
         query = session.execute(stmt).scalars().all()
         for data_d in query:
@@ -80,22 +82,24 @@ def get_table_details():
     return render_template(
         'design/partials/_table_details_swap.html',
         options=options,
-        histories=histories
+        histories=histories,
+        graph_type = graph_type
     )
 
-@blueprint.route('/get_history_details', methods=['GET'])
-def get_history_details():
+@blueprint.route('/<graph_type>/get_history_details', methods=['GET'])
+def get_history_details(graph_type):
     designlist_data = None
     options = []
     designlist_options = []
     designlist_uid = request.args.get('designlistUid')
     table_uid  = request.args.get('tableUid')
+    records_map = {}
     
     if not designlist_uid:
         return "", 204 # 如果沒有 ID，不做任何事
 
     with session_scope() as session:
-        stmt = select(DesignChecklist).where(DesignChecklist.uid == designlist_uid)
+        stmt = select(DesignChecklist).where(DesignChecklist.uid == designlist_uid, DesignChecklist.type == graph_type)
         query = session.execute(stmt).scalar()
         designlist_data = DesignTableOption.to_dict(query)
 

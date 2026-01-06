@@ -39,7 +39,7 @@
                             }
                         });
                     "
-                    hx-post="/api/design/create"
+                    hx-post="/api/design/{{data.graph_type}}/create"
                     hx-encoding="multipart/form-data"
                     hx-swap="none">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -57,7 +57,7 @@
                                     name="tableUid" 
                                     id="tableUid"
                                     hx-include="#siteUid"
-                                    hx-get="/api/design/get_table_details" 
+                                    hx-get="/api/design/{{data.graph_type}}/get_table_details" 
                                     hx-target="#option"
                                     hx-swap="innerHTML"
                                     hx-indicator="#loading-indicator">
@@ -166,7 +166,7 @@
             </div>
 
             <div class="card-actions mt-6">
-                <a class="btn btn-neutral btn-ghost gap-2" href="/design/{{data.site_uid}}/" role="button">
+                <a class="btn btn-neutral btn-ghost gap-2" href="/design/{{data.graph_type}}/{{data.site_uid}}/" role="button">
                     <i class="bi bi-arrow-return-left"></i> 返回
                 </a>
             </div>

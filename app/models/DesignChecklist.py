@@ -14,6 +14,7 @@ class DesignChecklist(Base):
     site_uid = Column(Integer, ForeignKey('site.uid', ondelete='CASCADE'), nullable=False)
     phase = Column(Integer)
     note = Column(String(4096))
+    type = Column(String(32))
     file_path_cad = Column(String(256))
     file_path_pdf = Column(String(256))
     at_createdtime = Column(DateTime, default=datetime.now)

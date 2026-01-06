@@ -12,7 +12,7 @@
 <select id="historySelect" 
         class="select select-bordered w-full max-w-xs" 
         name="designlistUid"
-        hx-get="/api/design/get_history_details"
+        hx-get="/api/design/{{graph_type}}/get_history_details"
         hx-target="#historyOptions"
         hx-indicator="#history-loading"
         hx-include="#tableUid"

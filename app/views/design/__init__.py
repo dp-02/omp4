@@ -13,12 +13,13 @@ from app.models import (
 )
 blueprint = Blueprint('view_design', __name__)
 
-@blueprint.route('/<int:site_uid>/')
+@blueprint.route('/<graph_type>/<int:site_uid>/')
 @login_required
-def choose_group(site_uid):
+def choose_group(graph_type,site_uid):
     ''' 選擇大表 '''
     data = {
         "site_uid":site_uid,
+        "graph_type":graph_type,
         "group":[]
     }
     with session_scope() as session:
@@ -31,12 +32,13 @@ def choose_group(site_uid):
             })
     return render_template('design/chooseGroup.html', data = data)
 
-@blueprint.route('/<int:site_uid>/<int:group_uid>/')
+@blueprint.route('/<graph_type>/<int:site_uid>/<int:group_uid>/')
 @login_required
-def choose_phase(site_uid, group_uid):
+def choose_phase(graph_type,site_uid, group_uid):
     ''' 選擇期數 '''
     data = {
         "site_uid":site_uid,
+        "graph_type":graph_type,
         "group_uid":group_uid,
         "phase":[]
     }
@@ -47,12 +49,13 @@ def choose_phase(site_uid, group_uid):
             data['phase'].append(SitePhase.to_dict(data_p))
     return render_template('design/choosePhase.html', data = data)
 
-@blueprint.route('/<int:site_uid>/<int:group_uid>/<int:phase_number>/')
+@blueprint.route('/<graph_type>/<int:site_uid>/<int:group_uid>/<int:phase_number>/')
 @login_required
-def table(site_uid, group_uid, phase_number):
+def table(graph_type,site_uid, group_uid, phase_number):
     ''' 選擇表 '''
     data = {
         "site_uid":site_uid,
+        "graph_type":graph_type,
         "group_uid":group_uid,
         "phase":phase_number,
         "group_table":[],

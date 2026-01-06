@@ -10,13 +10,15 @@
         <div class="card-body">
             
             <h1 class="card-title text-3xl font-bold mb-6 pb-2 border-b border-base-200">
-                <i class="bi bi-vector-pen mr-2 text-secondary"></i> 設計規範
+                {% if data.graph_type == 'design'%}<i class="bi bi-vector-pen mr-2 text-secondary"></i>
+                {%else%}<i class="bi bi-map mr-2 text-primary"></i>{%endif%}
+                {% if data.graph_type == 'design'%}設計規範{%else%}現場施工圖{%endif%}
             </h1>
 
             <div class="flex flex-col gap-4 mb-8">
                 {% for data_g in data.group %}
-                    <a class="btn btn-secondary btn-lg w-full text-white text-xl shadow-md hover:scale-[1.01] transition-transform duration-200 justify-between group" 
-                       href="/design/{{data.site_uid}}/{{data_g.uid}}/" 
+                    <a class="btn {% if data.graph_type == 'design'%}btn-secondary{%else%}btn-primary{%endif%} btn-lg w-full text-white text-xl shadow-md hover:scale-[1.01] transition-transform duration-200 justify-between group" 
+                       href="/design/{{data.graph_type}}/{{data.site_uid}}/{{data_g.uid}}/" 
                        role="button">
                         <span>{{data_g.name}}</span>
                         <i class="bi bi-chevron-right opacity-70 group-hover:translate-x-1 transition-transform"></i>
