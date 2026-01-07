@@ -22,13 +22,16 @@ def create(graph_type):
     
     checked_items = request.form.getlist('option_uid') 
 
-    file_cad = request.files.get('file_cad')
+    file_cad_1 = request.files.get('file_cad_1')
+    file_cad_2 = request.files.get('file_cad_2')
     file_pdf = request.files.get('file_pdf')
     
-    saved_file_cad_path = None
+    saved_file_cad_path_1 = None
+    saved_file_cad_path_2 = None
     saved_file_pdf_path = None
 
-    if file_cad: saved_file_cad_path= save(file_cad, "design")
+    if file_cad_1: saved_file_cad_path_1= save(file_cad_1, "design")
+    if file_cad_2: saved_file_cad_path_2= save(file_cad_2, "design")
     if file_pdf: saved_file_pdf_path= save(file_pdf, "design")
 
     with session_scope() as session:
@@ -38,7 +41,8 @@ def create(graph_type):
                                         note = note,
                                         type = graph_type,
                                         phase = phase,
-                                        file_path_cad = saved_file_cad_path,
+                                        file_path_cad_1 = saved_file_cad_path_1,
+                                        file_path_cad_2 = saved_file_cad_path_2,
                                         file_path_pdf = saved_file_pdf_path)
         for option_uid in checked_items:
             DesignTableOptionData.create(

@@ -92,13 +92,27 @@
                     </div>
 
                     <div class="col-span-1 bg-base-200 rounded-box p-4">
-                        <label for="file_cad" class="label">
-                            <span class="label-text font-bold"><i class="bi bi-file-earmark-code mr-1"></i> CAD / SketchUp</span>
+                        <label for="file_cad_1" class="label">
+                            <span class="label-text font-bold"><i class="bi bi-file-earmark-code mr-1"></i> CAD / SketchUp（一）</span>
                         </label>
                         <input type="file" 
                             class="file-input file-input-bordered w-full" 
-                            name="file_cad" 
-                            id="file_cad"
+                            name="file_cad_1" 
+                            id="file_cad_1"
+                            accept=".dwg,.dxf,.skp">
+                        <label class="label">
+                            <span class="label-text-alt text-warning">支援格式: .dwg, .dxf, .skp</span>
+                        </label>
+                    </div>
+
+                    <div class="col-span-1 bg-base-200 rounded-box p-4">
+                        <label for="file_cad_2" class="label">
+                            <span class="label-text font-bold"><i class="bi bi-file-earmark-code mr-1"></i> CAD / SketchUp（二）</span>
+                        </label>
+                        <input type="file" 
+                            class="file-input file-input-bordered w-full" 
+                            name="file_cad_2" 
+                            id="file_cad_2"
                             accept=".dwg,.dxf,.skp">
                         <label class="label">
                             <span class="label-text-alt text-warning">支援格式: .dwg, .dxf, .skp</span>
@@ -145,12 +159,18 @@
 
                     <div>
                         <a class="btn btn-primary btn-outline w-full shadow-sm btn-disabled" id="download1" href="#">
-                            <i class="bi bi-download"></i> 下載 CAD / SKETCHUP 圖檔
+                            <i class="bi bi-download"></i> 下載 CAD / SKETCHUP 圖檔（一）
                         </a>
                     </div>
 
                     <div>
-                        <a class="btn btn-success btn-outline w-full shadow-sm btn-disabled" id="download2" href="#">
+                        <a class="btn btn-primary btn-outline w-full shadow-sm btn-disabled" id="download2" href="#">
+                            <i class="bi bi-download"></i> 下載 CAD / SKETCHUP 圖檔（二）
+                        </a>
+                    </div>
+
+                    <div>
+                        <a class="btn btn-success btn-outline w-full shadow-sm btn-disabled" id="download3" href="#">
                             <i class="bi bi-download"></i> 下載 PDF 規劃圖檔
                         </a>
                     </div>
