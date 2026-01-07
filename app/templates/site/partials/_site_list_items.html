@@ -17,7 +17,7 @@
                     <div class="text-xs opacity-50 md:hidden">{{ data_s_s.company }}</div>
                 </td>
                 <td class="hidden md:table-cell">{{ data_s_s.address }}</td>
-                <td class="hidden md:table-cell">{{ data_s_s.build_date }}</td>
+                <td class="hidden md:table-cell">{% if data_s_s.build_date %}{{ data_s_s.build_date }}{%else%}待確認{%endif%}</td>
                 <td class="text-center">
                     <a href="/site/{{ data_s_s.uid }}" class="btn btn-sm btn-ghost text-success">
                         <i class="bi bi-gear"></i> 管理
