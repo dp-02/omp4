@@ -107,7 +107,7 @@ def table(site_uid, check_type, checklist_uid, table_uid):
         stmt = select(ChecklistTableOptionData).where(ChecklistTableOptionData.checklist_uid == checklist_uid)
         results = session.execute(stmt).scalars().all()
         data['saved']  = {rec.option_uid: rec.value for rec in results}
-    return render_template('Checklist/table.html', data = data)
+    return render_template('checklist/table.html', data = data)
 
 
 @blueprint.route('/<int:site_uid>/<int:check_type>/<int:checklist_uid>/create_report/choose_option/')
@@ -140,7 +140,7 @@ def create_rport_choose_option(site_uid, check_type, checklist_uid):
                     )
 
 
-    return render_template('Checklist/createReportChooseOption.html', data = data)
+    return render_template('checklist/createReportChooseOption.html', data = data)
 
 @blueprint.route('/<int:site_uid>/<int:check_type>/<int:checklist_uid>/report/', methods=['POST'])
 @login_required
@@ -250,7 +250,7 @@ def create_rport(site_uid, check_type, checklist_uid):
                     }
                 if option_attachment.option_uid == checklist_table_option.uid: 
                     data['table'][checklist_table.uid]['options'][checklist_table_option.uid]['attachment'].append(option_attachment.uid)
-    return render_template('Checklist/createReport.html', data = data)
+    return render_template('checklist/createReport.html', data = data)
 
 @blueprint.route('/<int:site_uid>/anomaly_state/')
 @login_required
