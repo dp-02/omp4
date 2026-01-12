@@ -49,15 +49,15 @@ def choose_phase(graph_type,site_uid, group_uid):
             data['phase'].append(SitePhase.to_dict(data_p))
     return render_template('design/choosePhase.html', data = data)
 
-@blueprint.route('/<graph_type>/<int:site_uid>/<int:group_uid>/<int:phase_number>/')
+@blueprint.route('/<graph_type>/<int:site_uid>/<int:group_uid>/<int:phase_uid>/')
 @login_required
-def table(graph_type,site_uid, group_uid, phase_number):
+def table(graph_type,site_uid, group_uid, phase_uid):
     ''' 選擇表 '''
     data = {
         "site_uid":site_uid,
         "graph_type":graph_type,
         "group_uid":group_uid,
-        "phase":phase_number,
+        "phase_uid":phase_uid,
         "group_table":[],
         "options":[]
     }

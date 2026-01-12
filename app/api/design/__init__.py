@@ -6,9 +6,12 @@ from flask import session as flask_session
 from app.models import (
     DesignTableOption,
     DesignChecklist,
-    DesignTableOptionData
+    DesignTableOptionData,
+    DesignTable,
+    SitePhase
 )
 import json
+from datetime import datetime
 
 blueprint = Blueprint('api_design', __name__)
 
@@ -18,7 +21,7 @@ def create(graph_type):
     site_uid = request.form.get('siteUid')
     table_uid = request.form.get('tableUid')
     note = request.form.get('note')
-    phase = request.form.get('phase')
+    phase_uid = request.form.get('phaseUid')
     
     checked_items = request.form.getlist('option_uid') 
 
@@ -30,17 +33,22 @@ def create(graph_type):
     saved_file_cad_path_2 = None
     saved_file_pdf_path = None
 
-    if file_cad_1: saved_file_cad_path_1= save(file_cad_1, "design")
-    if file_cad_2: saved_file_cad_path_2= save(file_cad_2, "design")
-    if file_pdf: saved_file_pdf_path= save(file_pdf, "design")
-
     with session_scope() as session:
+        design_table = DesignTable.get(session, uid = table_uid)
+        phase_table = SitePhase.get(session, uid = phase_uid)
+        now = datetime.now()
+
+        filename = f"{phase_table.name}_{design_table.name}_{now.strftime("%Y%m%d")}"
+
+        if file_cad_1: saved_file_cad_path_1= save(file_cad_1, "design", filename)
+        if file_cad_2: saved_file_cad_path_2= save(file_cad_2, "design", filename)
+        if file_pdf: saved_file_pdf_path= save(file_pdf, "design")
         query1 = DesignChecklist.create(session, 
                                         table_uid = table_uid, 
                                         site_uid = site_uid,
                                         note = note,
                                         type = graph_type,
-                                        phase = phase,
+                                        phase = phase_uid,
                                         file_path_cad_1 = saved_file_cad_path_1,
                                         file_path_cad_2 = saved_file_cad_path_2,
                                         file_path_pdf = saved_file_pdf_path)

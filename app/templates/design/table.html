@@ -12,39 +12,65 @@
 
             <form id="form" 
                   x-data="{ 
-                      updateCheckAll() { 
-                          let checkboxes = $el.querySelectorAll('.item-checkbox');
-                          let allChecked = checkboxes.length > 0 && [...checkboxes].every(c => c.checked);
-                          $refs.checkAllBox.checked = allChecked;
-                          $refs.checkAllBox.indeterminate = !allChecked && [...checkboxes].some(c => c.checked);
-                      },
-                      toggleAll(e) {
-                          let checkboxes = $el.querySelectorAll('.item-checkbox');
-                          checkboxes.forEach(c => c.checked = e.target.checked);
-                      }
-                  }"@change="updateCheckAll()"
-                    @htmx:before-request="isSubmitting = true"
-                    @htmx:after-request="isSubmitting = false"
-                    @response-data.window="
-                        Swal.fire({
-                            title: $event.detail.title,
-                            text: $event.detail.text,
-                            icon: 'success',
-                            confirmButtonText: 'OK',
-                            timer: 2000
-                        }).then( ()=>{
-                            const selectEl = document.getElementById('tableUid');
-                            if (selectEl && selectEl.value) {
-                                htmx.trigger(selectEl, 'change'); 
-                            }
-                        });
-                    "
-                    hx-post="/api/design/{{data.graph_type}}/create"
-                    hx-encoding="multipart/form-data"
-                    hx-swap="none">
+                    updateCheckAll() { 
+                        let checkboxes = $el.querySelectorAll('.item-checkbox');
+                        let allChecked = checkboxes.length > 0 && [...checkboxes].every(c => c.checked);
+                        $refs.checkAllBox.checked = allChecked;
+                        $refs.checkAllBox.indeterminate = !allChecked && [...checkboxes].some(c => c.checked);
+                    },
+                    toggleAll(e) {
+                        let checkboxes = $el.querySelectorAll('.item-checkbox');
+                        checkboxes.forEach(c => c.checked = e.target.checked);
+                    },
+                    validateUpload(evt) {
+                        const cad1 = document.getElementById('file_cad_1').value;
+                        const cad2 = document.getElementById('file_cad_2').value;
+                        const pdf = document.getElementById('file_pdf').value;
+
+                        if ((cad1 || cad2) && !pdf) {
+                            evt.preventDefault(); // 1. 阻止 HTMX 立即送出
+                            
+                            Swal.fire({
+                                title: '缺少 PDF 檔案',
+                                text: '偵測到您上傳了 CAD 檔案，但未上傳 PDF 規劃圖。確定要直接送出嗎？',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#d33',
+                                confirmButtonText: '是的，直接送出',
+                                cancelButtonText: '返回檢查'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    evt.detail.issueRequest(true); 
+                                }
+                            });
+                        }
+                    }
+                  }"
+                @change="updateCheckAll()"
+                @htmx:confirm="validateUpload($event)"
+                @htmx:before-request="isSubmitting = true"
+                @htmx:after-request="isSubmitting = false"
+                @response-data.window="
+                    Swal.fire({
+                        title: $event.detail.title,
+                        text: $event.detail.text,
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        timer: 2000
+                    }).then( ()=>{
+                        const selectEl = document.getElementById('tableUid');
+                        if (selectEl && selectEl.value) {
+                            htmx.trigger(selectEl, 'change'); 
+                        }
+                    });
+                "
+                hx-post="/api/design/{{data.graph_type}}/create"
+                hx-encoding="multipart/form-data"
+                hx-swap="none">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <input type="hidden" id="siteUid" name="siteUid" value="{{data.site_uid}}">
-                    <input type="hidden" id="phase" name="phase" value="{{data.phase}}">
+                    <input type="hidden" id="phaseUid" name="phaseUid" value="{{data.phase_uid}}">
                     
                     <div class="col-span-full bg-base-200 rounded-box p-6">
                         <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
@@ -93,30 +119,24 @@
 
                     <div class="col-span-1 bg-base-200 rounded-box p-4">
                         <label for="file_cad_1" class="label">
-                            <span class="label-text font-bold"><i class="bi bi-file-earmark-code mr-1"></i> CAD / SketchUp（一）</span>
+                            <span class="label-text font-bold"><i class="bi bi-file-earmark-code mr-1"></i> CAD</span>
                         </label>
                         <input type="file" 
                             class="file-input file-input-bordered w-full" 
                             name="file_cad_1" 
                             id="file_cad_1"
                             accept=".dwg,.dxf,.skp">
-                        <label class="label">
-                            <span class="label-text-alt text-warning">支援格式: .dwg, .dxf, .skp</span>
-                        </label>
                     </div>
 
                     <div class="col-span-1 bg-base-200 rounded-box p-4">
                         <label for="file_cad_2" class="label">
-                            <span class="label-text font-bold"><i class="bi bi-file-earmark-code mr-1"></i> CAD / SketchUp（二）</span>
+                            <span class="label-text font-bold"><i class="bi bi-file-earmark-code mr-1"></i> SketchUp</span>
                         </label>
                         <input type="file" 
                             class="file-input file-input-bordered w-full" 
                             name="file_cad_2" 
                             id="file_cad_2"
                             accept=".dwg,.dxf,.skp">
-                        <label class="label">
-                            <span class="label-text-alt text-warning">支援格式: .dwg, .dxf, .skp</span>
-                        </label>
                     </div>
 
                     <div class="col-span-1 bg-base-200 rounded-box p-4">
