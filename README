@@ -14,4 +14,7 @@ docker build -t omp-app .
 
 # 執行容器
 docker run -d   --name omp-app   --restart always   -p 127.0.0.1:8000:8000   --env-file .env   omp-app
+
+# 查看 log
+docker logs omp-app
 ```

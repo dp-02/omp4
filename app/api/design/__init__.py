@@ -38,7 +38,7 @@ def create(graph_type):
         phase_table = SitePhase.get(session, uid = phase_uid)
         now = datetime.now()
 
-        filename = f"{phase_table.name}_{design_table.name}_{now.strftime("%Y%m%d")}"
+        filename = f"{phase_table.name}_{design_table.name}_{now.strftime('%Y%m%d')}"
 
         if file_cad_1: saved_file_cad_path_1= save(file_cad_1, "design", filename)
         if file_cad_2: saved_file_cad_path_2= save(file_cad_2, "design", filename)
