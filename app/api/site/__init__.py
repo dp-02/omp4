@@ -1,6 +1,6 @@
 from flask import Blueprint, request, make_response, url_for, render_template
 from app.database import session_scope
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from flask import session as flask_session
 import json
 from app.models import (
@@ -113,12 +113,14 @@ def site_update():
     structured_phases = parse_site_form_data(request.form)
     with session_scope() as session:
         Site.update(session, uid = site_uid, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack)
+        stmt = delete(SitePhase).where(SitePhase.site_uid == site_uid)
+        result = session.execute(stmt)
         for p_data in structured_phases:
-            SitePhase.update(session, uid = p_data['uid'], name = p_data['name'])
+            site_phase = SitePhase.create(session, site_uid = site_uid,  name = p_data['name'])
             for i_data in p_data['inverters']:
-                SitePhaseInverter.update(session, uid = i_data['uid'], brand = i_data['brand'], model = i_data['model'])
+                SitePhaseInverter.create(session, phase_uid = site_phase.uid, brand = i_data['brand'], model = i_data['model'])
             for m_data in p_data['modules']:
-                SitePhaseModule.update(session, uid = m_data['uid'], brand = m_data['brand'], model = m_data['model'], wattage = m_data['wattage'])
+                SitePhaseModule.create(session, phase_uid = site_phase.uid, brand = m_data['brand'], model = m_data['model'], wattage = m_data['wattage'])
 
     trigger_data = {
             "response-data": {

@@ -86,17 +86,12 @@
                             name="phase" 
                             value="{{data.phase if data.phase else 1}}" 
                             min="1" max="10"
-                            {% if act == 'update' %}
-                                readonly
-                                class="input input-bordered w-full bg-base-200 text-base-content/60 pointer-events-none"
-                            {% else %}
-                                class="input input-bordered w-full"
-                                hx-get="/site/partials/phases/"
-                                hx-target="#phaseDisplay"
-                                hx-include="#form"
-                                hx-trigger="change, keyup delay:500ms changed"
-                                hx-swap="innerHTML"
-                            {% endif %}
+                            class="input input-bordered w-full"
+                            hx-get="/site/partials/phases/"
+                            hx-target="#phaseDisplay"
+                            hx-include="#form"
+                            hx-trigger="change, keyup delay:500ms changed"
+                            hx-swap="innerHTML"
                             >
                 </div>
                 
