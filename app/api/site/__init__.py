@@ -24,7 +24,7 @@ def site_create():
             phase_count = 1
         for i in range(1, phase_count + 1):
             j,k = 1,1
-            phase_obj = {'name': form_data.get(f'phase_name{i}'),'inverters': [],'modules': []}
+            phase_obj = {'name': form_data.get(f'phase_name{i}'),'inverters': [],'modules': [], 'sort': i}
             while True:
                 brand_key = f'inverter_brand{i}_{j}'
                 if brand_key not in form_data: break
@@ -55,7 +55,7 @@ def site_create():
     with session_scope() as session:
         query1 = Site.create(session, region = region, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, phase_number = phase_number, user_uid = user_uid)
         for p_data in structured_phases:
-            query2 = SitePhase.create(session, site_uid = query1.uid,  name = p_data['name'])
+            query2 = SitePhase.create(session, site_uid = query1.uid,  name = p_data['name'], sort = p_data['sort'])
             for i_data in p_data['inverters']:
                 SitePhaseInverter.create(session, phase_uid = query2.uid, brand = i_data['brand'], model = i_data['model'])
             for m_data in p_data['modules']:
@@ -85,7 +85,7 @@ def site_update():
             phase_count = 1
         for i in range(1, phase_count + 1):
             j,k = 1,1
-            phase_obj = {'uid': form_data.get(f'phase_uid{i}'),'name': form_data.get(f'phase_name{i}'),'inverters': [],'modules': []}
+            phase_obj = {'uid': form_data.get(f'phase_uid{i}'),'name': form_data.get(f'phase_name{i}'),'inverters': [],'modules': [], 'sort': i}
             while True:
                 brand_key = f'inverter_brand{i}_{j}'
                 if brand_key not in form_data: break
@@ -116,7 +116,7 @@ def site_update():
         stmt = delete(SitePhase).where(SitePhase.site_uid == site_uid)
         result = session.execute(stmt)
         for p_data in structured_phases:
-            site_phase = SitePhase.create(session, site_uid = site_uid,  name = p_data['name'])
+            site_phase = SitePhase.create(session, site_uid = site_uid,  name = p_data['name'],  sort = p_data['sort'])
             for i_data in p_data['inverters']:
                 SitePhaseInverter.create(session, phase_uid = site_phase.uid, brand = i_data['brand'], model = i_data['model'])
             for m_data in p_data['modules']:

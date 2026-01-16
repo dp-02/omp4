@@ -12,6 +12,7 @@ class SitePhase(Base):
     uid = Column(Integer, primary_key=True, autoincrement=True)
     site_uid = Column(Integer, ForeignKey('site.uid', ondelete='CASCADE'), nullable=False)
     name = Column(String(256))
+    sort = Column(Integer)
     
     site = relationship("Site", back_populates="phases")
     inverters = relationship("SitePhaseInverter", back_populates="phase", cascade="all, delete-orphan")
