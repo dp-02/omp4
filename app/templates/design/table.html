@@ -22,13 +22,21 @@
                         let checkboxes = $el.querySelectorAll('.item-checkbox');
                         checkboxes.forEach(c => c.checked = e.target.checked);
                     },
+                    resetInputs() {
+                        document.getElementById('file_cad_1').value = '';
+                        document.getElementById('file_cad_2').value = '';
+                        document.getElementById('file_pdf').value = '';
+                        document.getElementById('note').value = '';
+                    },
                     validateUpload(evt) {
+                        if (evt.detail.verb !== 'post') return;
+
                         const cad1 = document.getElementById('file_cad_1').value;
                         const cad2 = document.getElementById('file_cad_2').value;
                         const pdf = document.getElementById('file_pdf').value;
 
                         if ((cad1 || cad2) && !pdf) {
-                            evt.preventDefault(); // 1. 阻止 HTMX 立即送出
+                            evt.preventDefault(); // 阻止 HTMX 立即送出
                             
                             Swal.fire({
                                 title: '缺少 PDF 檔案',
@@ -82,6 +90,7 @@
                             <select class="select select-bordered w-full" 
                                     name="tableUid" 
                                     id="tableUid"
+                                    @change="resetInputs()" 
                                     hx-include="#siteUid"
                                     hx-get="/api/design/{{data.graph_type}}/get_table_details" 
                                     hx-target="#option"
@@ -166,7 +175,6 @@
             </form>
 
             <div class="divider">歷史紀錄與下載</div>
-
             <div class="bg-base-200/50 rounded-box p-6 border border-base-200">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     

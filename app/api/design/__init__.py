@@ -8,7 +8,8 @@ from app.models import (
     DesignChecklist,
     DesignTableOptionData,
     DesignTable,
-    SitePhase
+    SitePhase,
+    Site
 )
 import json
 from datetime import datetime
@@ -34,11 +35,12 @@ def create(graph_type):
     saved_file_pdf_path = None
 
     with session_scope() as session:
+        site = Site.get(session, uid = site_uid)
         design_table = DesignTable.get(session, uid = table_uid)
-        phase_table = SitePhase.get(session, uid = phase_uid)
+        phase = SitePhase.get(session, uid = phase_uid)
         now = datetime.now()
 
-        filename = f"{phase_table.name}_{design_table.name}_{now.strftime('%Y%m%d')}"
+        filename = f"{site.name}_{design_table.name}_第{phase.sort}期_{now.strftime('%Y%m%d')}"
 
         if file_cad_1: saved_file_cad_path_1= save(file_cad_1, "design", filename)
         if file_cad_2: saved_file_cad_path_2= save(file_cad_2, "design", filename)
