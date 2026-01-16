@@ -11,7 +11,7 @@
                    :class="record.isSaved ? 'focus:input-success' : 'focus:input-warning'"
                    x-model.number="record.inv"
                    placeholder="---"
-                   :name="record.isSaved ? 'anomaly_update_inv_' + record.id : 'anomaly_create_inv_' + '{{ uid }}_'"
+                   :name="record.isSaved ? 'anomaly_update_inv_' + record.id : 'anomaly_create_inv_' + '{{ uid }}_' + record.id"
             />
         </div>
         {% endif %}
@@ -24,7 +24,7 @@
                    :class="record.isSaved ? 'focus:input-success' : 'focus:input-warning'"
                    x-model.number="record.mppt"
                    placeholder="---"
-                   :name="record.isSaved ? 'anomaly_update_mppt_' + record.id : 'anomaly_create_mppt_' + '{{ uid }}_'"
+                   :name="record.isSaved ? 'anomaly_update_mppt_' + record.id : 'anomaly_create_mppt_' + '{{ uid }}_' + record.id"
             />
         </div>
         {% endif %}
