@@ -2,10 +2,7 @@
     <div class="label pb-1"><span class="label-text font-bold text-xs opacity-70">位置</span></div>
     
     <div class="grid grid-cols-4 gap-2">
-        {% if option_uid in [11,12,13,14,15,16,17,18,19,20,21,22,23,24,
-            42,44,45,48,49,
-            56,58,59,
-            68,70,71,72,73,74,75,76,77,78,79,80,81,82] 
+        {% if option_uid in [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 35, 37, 38, 41, 42, 49, 51, 52, 61, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75]
         %}
         <div>
             <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Inv</label>
@@ -18,9 +15,7 @@
             />
         </div>
         {% endif %}
-        {% if option_uid in [11,12,13,14,15,16,17,18,19,20,21,22,23,24,
-            42,44,45,48,49,
-            79,80] 
+        {% if option_uid in [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 35, 37, 38, 41, 42, 72, 73]
         %}
         <div>
             <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Mppt</label>
@@ -33,9 +28,7 @@
             />
         </div>
         {% endif %}
-        {% if option_uid in [11,12,13,14,15,16,17,18,19,20,21,22,23,24,
-            42,44,45,48,
-            79,80] 
+        {% if option_uid in [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 35, 37, 38, 41, 72, 73]
         %}
         <div>
             <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Str</label>
@@ -48,7 +41,7 @@
             />
         </div>
         {% endif %}
-        {% if option_uid in [11,12,13,14,15,16,17,18,19,20,21,22,23,24] %}
+        {% if option_uid in [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17] %}
         <div>
             <label class="label-text text-[10px] uppercase font-bold opacity-60 block text-center mb-1">Pnl</label>
             <input type="number" min="0"
