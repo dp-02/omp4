@@ -24,9 +24,58 @@
                     if (file) {
                         this.preview = URL.createObjectURL(file);
                     }
+                },
+                removeImage() {
+                    // 情境 1: 移除剛選擇但尚未上傳的預覽
+                    if (this.preview) {
+                        this.preview = null;
+                        $refs.fileInput.value = '';
+                        return;
+                    }
+                    // 情境 2: 移除已儲存到資料庫的圖片
+                    // 檢查是否存在該位置的圖片記錄
+                    if (this.record.isSaved && this.record.damaged_images && this.record.damaged_images['{{ key }}']) {
+                        const recordUid = record.id; 
+                        const fieldName = '{{ key }}'; 
+                        if (!recordUid) {
+                            console.error('缺少 record UID');
+                            return;
+                        }
+
+                        Swal.fire({
+                            title: '確定刪除這張照片？',
+                            text: '檔案將被永久移除',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#ef4444',
+                            confirmButtonText: '刪除',
+                            cancelButtonText: '取消'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                htmx.ajax('DELETE', `/api/optionAttachment/damaged/delete/${recordUid}?field=${fieldName}`, {
+                                    swap: 'none'
+                                }).then(() => {
+                                    if (this.record.damaged_images) {
+                                        this.record.damaged_images[fieldName] = null;
+                                    }
+                                    Swal.fire({
+                                        title: '已刪除',
+                                        icon: 'success',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                });
+                            }
+                        });
+                    }
                 }
              }">
-            
+            <button type="button" 
+                    class="absolute top-1 right-1 z-20 btn btn-circle btn-xs btn-error text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                    x-show="preview || (record.isSaved && record.damaged_images && record.damaged_images['{{ key }}'])"
+                    @click.prevent="removeImage()">
+                <i class="bi bi-trash"></i>
+            </button>
             <label class="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer transition-all overflow-hidden bg-base-100 hover:bg-base-200"
                    :class="[
                        record.isSaved ? 'border-success/40 hover:border-success' : 'border-warning/40 hover:border-warning',
@@ -46,8 +95,8 @@
                 <template x-if="!preview && record.damaged_images && record.damaged_images['{{ key }}']">
                     <img :src="record.damaged_images['{{ key }}']" class="absolute inset-0 w-full h-full object-cover" />
                 </template>
-
                 <input type="file" class="hidden" accept="image/*"
+                       x-ref="fileInput"
                        @change="handleFile($event)"
                        :name="record.isSaved ? 'anomaly_append_damaged_{{ key }}_' + record.id : 'anomaly_create_damaged_{{ key }}_' + '{{ uid }}_' + record.id"
                 />

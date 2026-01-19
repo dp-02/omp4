@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, render_template, current_app
 from app.database import session_scope
 from app.saveFile import save, delete_file
 from sqlalchemy import select
@@ -586,3 +586,46 @@ def delete_attachment_anomaly_image(image_uid):
         delete_file(image_record.file_path)
         OptionAttachmentAnomalyImage.delete(session, uid = image_uid)
     return jsonify({'message': 'Image deleted successfully'}), 200
+
+@blueprint.route('/damaged/delete/<int:record_uid>', methods=['DELETE'])
+def delete_anomaly_damaged_image(record_uid):
+    '''刪除 OptionAttachmentAnomalyDamaged 中特定方位的圖片。'''
+    # 1. 獲取並驗證 field 參數
+    field = request.args.get('field')
+    allowed_fields = ['front', 'on', 'below', 'left', 'right', 'number']
+    
+    if field not in allowed_fields:
+        return jsonify({'error': f'Invalid field. Must be one of {allowed_fields}'}), 400
+
+    target_column = f'file_path_{field}'  # 組合出對應的資料庫欄位名稱
+
+    try:
+        with session_scope() as session:
+            # 2. 查詢該筆記錄
+            stmt = select(OptionAttachmentAnomalyDamaged).where(OptionAttachmentAnomalyDamaged.option_attachment_uid == record_uid)
+            record = session.execute(stmt).scalar_one_or_none()
+
+            if not record:
+                return jsonify({'error': 'Record not found'}), 404
+
+            # 3. 取得目前的檔案路徑
+            current_file_path = getattr(record, target_column)
+
+            if current_file_path:
+                # 4. 刪除實體檔案 (建議包在 try-except 以免檔案已遺失導致報錯)
+                try:
+                    delete_file(current_file_path)
+                except Exception as e:
+                    current_app.logger.warning(f"File delete failed (might not exist): {e}")
+                
+                # 5. 清空資料庫該欄位 (設為 None)
+                setattr(record, target_column, None)
+                
+                # session_scope 結束時會自動 commit
+                return jsonify({'message': f'Image in {field} deleted successfully'}), 200
+            else:
+                return jsonify({'message': 'No image found in this slot'}), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error processing delete: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
