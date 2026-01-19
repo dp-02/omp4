@@ -9,33 +9,61 @@
     :name="record.isSaved ? 'image_append_files_' + record.id + '_[]' : 'image_create_files_' + '{{ uid }}_' + record.id + '_[]'" />
 </div>
 
-<div class="grid grid-cols-3 md:grid-cols-5 gap-2 mt-2" 
+<div class="grid grid-cols-3 md:grid-cols-5 gap-3 mt-3" 
         x-show="record.images_previews && record.images_previews.length > 0">
     
     <template x-for="(img, idx) in record.images_previews" :key="idx">
-        <div class="relative aspect-square rounded-lg overflow-hidden border bg-base-200 group/img"
-                :class="img.isSaved ? 'border-success/50' : 'border-info/50'">
+        <div class="flex flex-col rounded-lg overflow-hidden border bg-base-100 shadow-sm relative group/img break-inside-avoid"
+             :class="img.isSaved ? 'border-success/40' : 'border-info/40'">
             
-            <template x-if="!img.isDoc">
-                <img :src="img.url" class="object-cover w-full h-full transition-transform group-hover/img:scale-110" />
-            </template>
-            
-            <template x-if="img.isDoc">
-                <div class="flex flex-col items-center justify-center w-full h-full text-base-content/50">
-                    <i class="bi bi-file-earmark-text text-2xl"></i>
-                    <span class="text-[10px] truncate w-full px-1 text-center" x-text="img.name"></span>
-                </div>
-            </template>
+            <div class="relative aspect-square bg-base-200 overflow-hidden">
+                <template x-if="!img.isDoc">
+                    <img :src="img.url" class="object-cover w-full h-full transition-transform duration-500 group-hover/img:scale-105" />
+                </template>
+                
+                <template x-if="img.isDoc">
+                    <div class="flex flex-col items-center justify-center w-full h-full text-base-content/50">
+                        <i class="bi bi-file-earmark-text text-2xl"></i>
+                    </div>
+                </template>
 
-            <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] text-center py-0.5 backdrop-blur-sm">
-                <span x-text="img.isSaved ? '已存' : '儲存'"></span>
+                <button type="button" 
+                        @click="removeImage(idx, img, record)"
+                        class="absolute top-1 right-1 btn btn-circle btn-error btn-xs shadow-md scale-90 print:hidden z-10">
+                    <i class="bi bi-x text-lg"></i>
+                </button>
             </div>
 
-            <button type="button" 
-                    @click="removeImage(idx, img, record)"
-                    class="absolute top-1 right-1 btn btn-circle btn-error btn-xs opacity-0 group-hover/img:opacity-100 transition-opacity scale-90">
-                <i class="bi bi-x"></i>
-            </button>
+            <div class="px-2 py-2 bg-base-50 border-t border-base-200 flex flex-col justify-between flex-grow gap-1">
+                
+                <template x-if="img.isDoc">
+                     <span class="text-[10px] truncate w-full text-base-content/70" x-text="img.name"></span>
+                </template>
+
+                <template x-if="img.isSaved">
+                    <div class="flex flex-col gap-0.5">
+                        <div class="flex items-center gap-1.5 overflow-hidden text-base-content/80">
+                            <i class="bi bi-person-fill text-[10px] opacity-60 shrink-0"></i>
+                            <span class="text-[10px] font-bold truncate" x-text="img.userName || '未知'"></span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-base-content/50">
+                            <i class="bi bi-clock text-[9px] shrink-0"></i>
+                            <span class="text-[9px] font-mono tracking-tighter truncate" x-text="img.atCreatedtime"></span>
+                        </div>
+                        <div class="mt-0.5">
+                             <span class="badge badge-xs badge-success/10 text-success border-0 text-[9px] px-1">已存</span>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="!img.isSaved">
+                    <div class="flex flex-col items-center justify-center h-full py-1 gap-1 text-info/80">
+                         <span class="text-[10px] font-bold"><i class="bi bi-cloud-arrow-up"></i> 準備上傳</span>
+                         <span class="text-[9px] opacity-60">點擊儲存以寫入</span>
+                    </div>
+                </template>
+            </div>
+
         </div>
     </template>
 </div>

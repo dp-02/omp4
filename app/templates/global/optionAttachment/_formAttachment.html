@@ -46,7 +46,9 @@
                         images_previews: (item.images || []).map(img => ({
                             uid: img.uid,       
                             url: img.url,       
-                            name: img.name,
+                            name: img.name,   
+                            userName: img.userName,   
+                            atCreatedtime: img.atCreatedtime,
                             isDoc: false,       
                             isSaved: true
                         })),

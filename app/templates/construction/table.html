@@ -8,14 +8,20 @@
 <div class="container mx-auto px-4 py-8"
      x-data="{
         isUploading: false,
+        isSubmitting: false, 
         async handleUploadTrigger(event) {
             console.log('基本資料儲存成功，開始上傳附件與異常紀錄...');
             this.isUploading = true;
+            
+            // 確保鎖定狀態持續，直到上傳完成或失敗
+            // 注意：isSubmitting 已經在 form 的 htmx 事件中被設為 true 了
+
             const formElement = document.getElementById('form');
             if (!formElement) {
                 console.error('找不到表單元素 #form');
                 notyf.error('系統錯誤：找不到表單');
                 this.isUploading = false;
+                this.isSubmitting = false; // 發生錯誤解鎖
                 return;
             }
             
@@ -36,18 +42,26 @@
                 const result = await response.json();
                 console.log('伺服器回應:', result);
                 
-                notyf.success('附件與紀錄儲存成功！');
+                notyf.success('附件與紀錄儲存成功！畫面將自動重新整理...');
+                
+                // 成功後延遲重新整理頁面
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+
             } catch (error) {
                 console.error('上傳過程中發生錯誤:', error);
                 notyf.error(error.message || '資料儲存失敗，請檢查網路或稍後再試');
-            } finally {
+                
+                // 失敗時解鎖按鈕，讓使用者可以重試
                 this.isUploading = false;
-            }
+                this.isSubmitting = false;
+            } 
         }
      }"
      @start-attachment-upload.window="handleUploadTrigger($event)"
 >
-    </div>
+    
     <div class="card bg-base-100 shadow-xl border border-base-200 max-w-4xl mx-auto">
         <div class="card-body">
             
@@ -63,7 +77,10 @@
                   hx-post="/api/construction/save/{{data.site_uid}}"
                   hx-swap="none"
                   hx-encoding="multipart/form-data"
-                  enctype="multipart/form-data">
+                  enctype="multipart/form-data"
+                  @htmx:before-request="isSubmitting = true"
+                  @htmx:response-error="isSubmitting = false; notyf.error('基本資料儲存失敗，請稍後再試');"
+            >
                 <div class="flex flex-col">
                     {% for data_o in data.options %}
                     {% set current_val = data.saved.get(data_o.uid) %}
@@ -118,14 +135,20 @@
                 </div>
 
                 <div class="card-actions mt-8 flex items-center gap-4">
-                    <button type="submit" class="btn btn-primary px-8 text-white shadow-md">
-                        <i class="bi bi-send-fill"></i>
-                        送出
+                    <button type="submit" 
+                            class="btn btn-primary px-8 text-white shadow-md disabled:bg-opacity-70 disabled:cursor-not-allowed"
+                            :disabled="isSubmitting || isUploading">
+                        <i class="bi bi-send-fill" x-show="!isSubmitting && !isUploading"></i>
+                        
+                        <span class="loading loading-spinner loading-sm" x-show="isSubmitting || isUploading" style="display: none;"></span>
+                        
+                        <span x-text="(isSubmitting || isUploading) ? '處理中...' : '送出'">送出</span>
                     </button>
                     
                     <a class="btn btn-neutral btn-outline gap-2" 
                        href="/construction/{{data.site_uid}}/{{data.group_uid}}/" 
-                       role="button">
+                       role="button"
+                       :class="{ 'pointer-events-none opacity-50': isSubmitting || isUploading }">
                         <i class="bi bi-arrow-return-left"></i> 
                         返回
                     </a>

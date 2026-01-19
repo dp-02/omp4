@@ -3,6 +3,7 @@ from app.database import session_scope
 from app.saveFile import save, delete_file
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+from flask import session as flask_session
 import os
 from flask import session as flask_session
 from types import SimpleNamespace
@@ -185,13 +186,13 @@ def save_attachment_image(site_uid, table_type):
                         for f in requset_data.file_list:
                             if f.filename:
                                 file_path = save(f,"optionAttachment")
-                                OptionAttachmentImage.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, file_path = file_path)
+                                OptionAttachmentImage.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, file_path = file_path, user_name = flask_session['user_name'])
                     elif requset_data.act == 'append':
                         requset_data.attachment_uid = parts[3]
                         for f in requset_data.file_list:
                             if f.filename:
                                 file_path = save(f,"optionAttachment")
-                                OptionAttachmentImage.create(session, option_attachment_uid = requset_data.attachment_uid, file_path = file_path)
+                                OptionAttachmentImage.create(session, option_attachment_uid = requset_data.attachment_uid, file_path = file_path, user_name = flask_session['user_name'])
             elif requset_data.attachment_type == 'anomaly':
                 if requset_data.act == 'create':
                     requset_data.temp_id = parts[5]
@@ -400,7 +401,7 @@ def get_saved(table_type, option_uid):
             else:
                 for img in record.images:
                     file_url = f"/download/{img.file_path}"
-                    image_list.append({"uid": img.uid,"url": file_url,"name": os.path.basename(img.file_path),"isDoc": False})
+                    image_list.append({"uid": img.uid,"url": file_url,"name": os.path.basename(img.file_path),"isDoc": False,"userName": img.user_name,"atCreatedtime": img.at_createdtime.strftime('%Y-%m-%d %H:%M') if img.at_createdtime else ""})
             
             # 組裝最終物件 (Flattened structure 對應前端 x-model)
             output_data.append({
@@ -530,7 +531,9 @@ def report_get(attachment_uid):
                 image_list.append({
                     "uid": img.uid,
                     "url": f"/download/{img.file_path}",
-                    "name": os.path.basename(img.file_path)
+                    "name": os.path.basename(img.file_path),
+                    "userName": img.user_name,
+                    "atCreatedtime": img.at_createdtime.strftime('%Y-%m-%d %H:%M') if img.at_createdtime else ""
                 })
             context['images'] = image_list
             

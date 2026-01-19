@@ -1,5 +1,5 @@
 from app.database import Base
-from sqlalchemy import Column, String, Integer, ForeignKey, and_
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
@@ -12,6 +12,8 @@ class OptionAttachmentImage(Base):
     uid = Column(Integer, primary_key=True, autoincrement=True)
     option_attachment_uid =  Column(Integer, ForeignKey('option_attachment.uid', ondelete='CASCADE'), nullable=False)
     file_path = Column(String(256))
+    user_name = Column(String(128))
+    at_createdtime = Column(DateTime, default=datetime.now)
     
     attachment = relationship("OptionAttachment", back_populates="images")
 

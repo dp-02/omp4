@@ -27,18 +27,36 @@
         {% if images %}
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {% for img in images %}
-            <div class="group relative aspect-square bg-base-200 rounded-lg overflow-hidden border border-base-300 shadow-sm">
-                <a href="{{ img.url }}" target="_blank" class="block w-full h-full cursor-zoom-in" title="{{ img.name }}">
-                    <img src="{{ img.url }}" 
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                         loading="lazy"
-                         alt="{{ img.name }}">
-                </a>
+            <div class="group flex flex-col bg-base-100 rounded-lg overflow-hidden border border-base-300 shadow-sm break-inside-avoid">
                 
-                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-end">
-                    <a href="{{ img.url }}" download class="btn btn-circle btn-xs btn-ghost text-white hover:bg-white/20 tooltip tooltip-left" data-tip="下載圖片">
-                        <i class="bi bi-download"></i>
+                <div class="relative aspect-square bg-base-200 overflow-hidden">
+                    <a href="{{ img.url }}" target="_blank" class="block w-full h-full cursor-zoom-in" title="{{ img.name }}">
+                        <img src="{{ img.url }}" 
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                             loading="lazy"
+                             alt="{{ img.name }}">
                     </a>
+                    
+                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 print:hidden">
+                        <a href="{{ img.url }}" download class="btn btn-circle btn-xs btn-neutral text-white shadow-md tooltip tooltip-left" data-tip="下載圖片">
+                            <i class="bi bi-download"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="px-3 py-2 bg-base-50 border-t border-base-200 flex flex-col gap-1">
+                    <div class="flex items-center gap-2 text-base-content/80 overflow-hidden">
+                        <i class="bi bi-person-fill text-xs opacity-60 shrink-0"></i>
+                        <span class="text-xs font-bold truncate" title="{{ img.userName }}">
+                            {{ img.userName }}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2 text-base-content/50">
+                        <i class="bi bi-clock text-[10px] shrink-0"></i>
+                        <span class="text-[10px] font-mono truncate">
+                            {{ img.atCreatedtime }}
+                        </span>
+                    </div>
                 </div>
             </div>
             {% endfor %}
