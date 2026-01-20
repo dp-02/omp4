@@ -8,6 +8,7 @@ from app.models import (
     DesignChecklist,
     DesignTableOptionData,
     DesignTable,
+    DesignTableGroup,
     SitePhase,
     Site
 )
@@ -36,11 +37,16 @@ def create(graph_type):
 
     with session_scope() as session:
         site = Site.get(session, uid = site_uid)
+        graph = DesignTableGroup.get(session, uid = graph_type)
         design_table = DesignTable.get(session, uid = table_uid)
         phase = SitePhase.get(session, uid = phase_uid)
         now = datetime.now()
+        filename = ""
 
-        filename = f"{site.name}_{design_table.name}_第{phase.sort}期_{now.strftime('%Y%m%d')}"
+        if graph.name =="電包設計規範":
+            filename = f"{site.name}_{design_table.name}_第{phase.sort}期_{now.strftime('%Y%m%d')}"
+        else:
+            filename = f"{site.name}_{graph.name}_第{phase.sort}期_{now.strftime('%Y%m%d')}"
 
         if file_cad_1: saved_file_cad_path_1= save(file_cad_1, "design", filename)
         if file_cad_2: saved_file_cad_path_2= save(file_cad_2, "design", filename)

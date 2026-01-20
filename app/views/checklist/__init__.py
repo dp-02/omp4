@@ -195,6 +195,8 @@ def create_rport(site_uid, check_type, checklist_uid):
             ).where(
                 ChecklistTableOptionData.checklist_uid == checklist_uid,
                 ChecklistTable.uid.in_(final_report_data)
+            ).order_by(
+                ChecklistTable.sort
             )
             query = session.execute(stmt).all()
             for data_table in query:
@@ -229,6 +231,8 @@ def create_rport(site_uid, check_type, checklist_uid):
             ).where(
                 ChecklistTableOptionData.checklist_uid == checklist_uid,
                 ChecklistTableOption.uid.in_(all_options)
+            ).order_by(
+                ChecklistTableOption.sort
             )
             query = session.execute(stmt).all()
             for data_table in query:
