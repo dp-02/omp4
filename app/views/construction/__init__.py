@@ -177,4 +177,4 @@ def create_rport(site_uid, group_uid):
                     }
                 if option_attachment.option_uid == construction_table_option.uid: 
                     data['table'][construction_table.uid]['options'][construction_table_option.uid]['attachment'].append(option_attachment.uid)
-    return render_template('Construction/createReport.html', data = data)
+    return render_template('construction/createReport.html', data = data)
