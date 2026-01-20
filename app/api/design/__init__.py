@@ -50,7 +50,7 @@ def create(graph_type):
 
         if file_cad_1: saved_file_cad_path_1= save(file_cad_1, "design", filename)
         if file_cad_2: saved_file_cad_path_2= save(file_cad_2, "design", filename)
-        if file_pdf: saved_file_pdf_path= save(file_pdf, "design")
+        if file_pdf: saved_file_pdf_path= save(file_pdf, "design", filename)
         query1 = DesignChecklist.create(session, 
                                         table_uid = table_uid, 
                                         site_uid = site_uid,
