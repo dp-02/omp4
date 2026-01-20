@@ -91,7 +91,7 @@
                                     name="tableUid" 
                                     id="tableUid"
                                     @change="resetInputs()" 
-                                    hx-include="#siteUid"
+                                    hx-include="#siteUid, #phaseUid"
                                     hx-get="/api/design/{{data.graph_type}}/get_table_details" 
                                     hx-target="#option"
                                     hx-swap="innerHTML"

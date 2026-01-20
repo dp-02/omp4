@@ -78,6 +78,7 @@ def get_table_details(graph_type):
     histories = []
     site_uid = request.args.get('siteUid')
     table_uid = request.args.get('tableUid')
+    phase_uid = request.args.get('phaseUid')
 
     with session_scope() as session:
         stmt = select(DesignTableOption).where(DesignTableOption.table_uid == table_uid)
@@ -88,6 +89,7 @@ def get_table_details(graph_type):
             DesignChecklist.table_uid == table_uid,
             DesignChecklist.site_uid == site_uid,
             DesignChecklist.type == graph_type,
+            DesignChecklist.phase == phase_uid
         ).order_by(DesignChecklist.at_createdtime.desc())
         query = session.execute(stmt).scalars().all()
         for data_d in query:
