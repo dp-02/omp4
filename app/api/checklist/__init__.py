@@ -47,7 +47,7 @@ def get_by_site(site_uid,check_type):
     }
     data_c = []
     with session_scope() as session:
-        stmt = select(Checklist).where(Checklist.site_uid == site_uid, Checklist.check_type == check_type).order_by(Checklist.check_date)
+        stmt = select(Checklist).where(Checklist.site_uid == site_uid, Checklist.check_type == check_type).order_by(Checklist.check_date.desc())
         query = session.scalars(stmt).all()
         for item in query:
             user = User.get(session, uid = item.user_uid)
