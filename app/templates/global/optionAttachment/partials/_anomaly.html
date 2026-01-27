@@ -1,5 +1,6 @@
 <div class="card bg-base-100 border shadow-sm relative group transition-all"
      :class="record.isSaved ? 'border-success/30 bg-success/5' : 'border-warning/30 bg-warning/5'"
+     @check-anomaly-photos.window="if (!record || !record.anomaly_previews || record.anomaly_previews.length === 0) { (window.__anomalyPhotoCheck = window.__anomalyPhotoCheck || { missing: [] }).missing.push(1); }"
      x-data="{
         record: null, 
         init() {

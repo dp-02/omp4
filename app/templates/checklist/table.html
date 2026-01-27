@@ -198,5 +198,34 @@
             }
         ]
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('form');
+        if (!form) return;
+
+        form.addEventListener('htmx:beforeRequest', async function (evt) {
+            if (window.__checklistSkipPhotoCheck) {
+                window.__checklistSkipPhotoCheck = false;
+                return;
+            }
+
+            window.__anomalyPhotoCheck = { missing: [] };
+            window.dispatchEvent(new CustomEvent('check-anomaly-photos'));
+
+            if (!window.__anomalyPhotoCheck.missing.length) return;
+
+            evt.preventDefault();
+
+            await Swal.fire({
+                title: '提醒',
+                text: '您有異常紀錄尚未上傳照片，是否仍要送出？',
+                icon: 'warning',
+                confirmButtonText: '仍要送出'
+            });
+
+            window.__checklistSkipPhotoCheck = true;
+            htmx.trigger(form, 'submit');
+        });
+    });
 </script>
 {% endblock %}
