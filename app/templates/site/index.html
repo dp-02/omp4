@@ -32,12 +32,32 @@
                         <span class="badge badge-primary">{{data.inverter | length}} 台</span>
                     </h3>
                     <div class="space-y-2">
+                        {% set ns = namespace(processed=[], groups=[]) %}
                         {% for item in data.inverter %}
-                        <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
-                            <div class="badge badge-outline">品牌</div> <span class="font-semibold">{{item.brand}}</span>
-                            <div class="divider divider-horizontal m-0 py-1"></div>
-                            <div class="badge badge-outline">型號</div> <span class="font-mono">{{item.model}}</span>
-                        </div>
+                            {% set key = item.brand ~ '|' ~ item.model %}
+                            {% if key not in ns.processed %}
+                                {% set matching_list = [] %}
+                                {% for check_item in data.inverter %}
+                                    {% if check_item.brand == item.brand and check_item.model == item.model %}
+                                        {% set _ = matching_list.append(check_item) %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% set count = matching_list | length %}
+                                {% set _ = ns.processed.append(key) %}
+                                {% set group_dict = {'brand': item.brand, 'model': item.model, 'count': count} %}
+                                {% set _ = ns.groups.append(group_dict) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% for group in ns.groups %}
+                            <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
+                                <div class="badge badge-outline">品牌</div> <span class="font-semibold">{{group.brand}}</span>
+                                <div class="divider divider-horizontal m-0 py-1"></div>
+                                <div class="badge badge-outline">型號</div> <span class="font-mono">{{group.model}}</span>
+                                {% if group.count > 1 %}
+                                    <div class="divider divider-horizontal m-0 py-1"></div>
+                                    <div class="badge badge-primary">數量</div> <span class="font-semibold">{{group.count}} 台</span>
+                                {% endif %}
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
