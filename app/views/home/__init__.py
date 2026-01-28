@@ -27,14 +27,9 @@ def choose_user():
         flash('登入成功！', 'success') 
         return render_template('home/chooseUser.html')
     else:
-        resp = make_response()
-        trigger_data = {
-            "login-error": {
-                "message": "密碼錯誤，請重新輸入！",
-                "type": "error"
-            }
-        }
-        resp.headers['HX-Trigger'] = json.dumps(trigger_data)
+        msg = "密碼錯誤，請重新輸入！"
+        resp = make_response(json.dumps({"message": msg}), 422)
+        resp.headers['Content-Type'] = 'application/json'
         return resp
 
 @blueprint.route('/choose_region/', methods=['POST','GET'])

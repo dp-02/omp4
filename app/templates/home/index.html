@@ -5,16 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="grid min-h-screen place-items-center bg-base-100"
-     x-data
-     @login-error.document="
-        Swal.fire({
-            icon: $event.detail.type,
-            title: '登入失敗',
-            text: $event.detail.message,
-            confirmButtonColor: '#3b82f6'
-        });
-     ">
+<div class="grid min-h-screen place-items-center bg-base-100" x-data>
 
   <div class="card w-96 bg-base-100 shadow-xl border border-base-300">
     <div class="card-body">
@@ -22,7 +13,18 @@
       <form hx-post="/choose_user/" 
             hx-target="body" 
             hx-swap="outerHTML"
-            hx-on::before-swap="if(event.detail.xhr.response.length === 0) event.detail.shouldSwap = false;">
+            hx-indicator=".login-indicator"
+            hx-on::response-error="
+              var xhr = event.detail.xhr;
+              if (xhr && xhr.status === 422) {
+                try {
+                  var d = JSON.parse(xhr.response || xhr.responseText || '{}');
+                  (window.notyf || new Notyf()).error(d.message || '密碼錯誤，請重新輸入！');
+                } catch (e) {
+                  (window.notyf || new Notyf()).error('密碼錯誤，請重新輸入！');
+                }
+              }
+            ">
             
         <h2 class="card-title text-2xl font-bold mb-4">系統登入</h2>
         
@@ -48,7 +50,7 @@
 
         <div class="card-actions flex flex-col gap-4 mt-6">
           <button type="submit" class="btn btn-primary btn-block">
-            登入 <span class="loading loading-spinner loading-sm htmx-indicator"></span>
+            登入 <span class="loading loading-spinner loading-sm login-indicator htmx-indicator"></span>
           </button>
         </div>
       </form>
@@ -56,4 +58,10 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.notyf = window.notyf || new Notyf();
+</script>
 {% endblock %}
