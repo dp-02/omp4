@@ -35,6 +35,25 @@
                         const cad2 = document.getElementById('file_cad_2').value;
                         const pdf = document.getElementById('file_pdf').value;
 
+                        if (!cad1 && !cad2 && !pdf) {
+                            evt.preventDefault();
+                            Swal.fire({
+                                title: '未上傳任何檔案',
+                                text: 'CAD、SketchUp 與 PDF 規劃圖 皆未上傳。確定仍要送出嗎？',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#d33',
+                                confirmButtonText: '仍要送出',
+                                cancelButtonText: '返回檢查'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    evt.detail.issueRequest(true);
+                                }
+                            });
+                            return;
+                        }
+
                         if ((cad1 || cad2) && !pdf) {
                             evt.preventDefault(); // 阻止 HTMX 立即送出
                             
