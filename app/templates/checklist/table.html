@@ -216,15 +216,20 @@
 
             evt.preventDefault();
 
-            await Swal.fire({
+            const result = await Swal.fire({
                 title: '提醒',
                 text: '您有異常紀錄尚未上傳照片，是否仍要送出？',
                 icon: 'warning',
-                confirmButtonText: '仍要送出'
+                showCancelButton: true,
+                confirmButtonText: '仍要送出',
+                cancelButtonText: '返回',
+                reverseButtons: true
             });
 
-            window.__checklistSkipPhotoCheck = true;
-            htmx.trigger(form, 'submit');
+            if (result.isConfirmed) {
+                window.__checklistSkipPhotoCheck = true;
+                htmx.trigger(form, 'submit');
+            }
         });
     });
 </script>
