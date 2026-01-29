@@ -76,7 +76,7 @@
                     <input type="hidden" name="checklist_uid" value="{{data.checklist_uid}}">
                     {% for data_o in data.options %}
                     {% set current_val = data.saved.get(data_o.uid) %}
-                    {% if data.table_name == "熱影像檢測紀錄表" or data.table_name=="其他檢測說明及注意事項" %}
+                    {% if data.table_name == "熱影像檢測紀錄表" %}
                     <div class="form-control py-4 border-b border-base-200 last:border-none hover:bg-base-[var(--b2,hex)] transition-colors px-2 rounded-lg">
                         <div class="mb-3" id="option{{loop.index}}">
                             <span class="font-bold text-lg text-base-content">
