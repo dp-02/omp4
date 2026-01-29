@@ -148,12 +148,17 @@ def create_rport(site_uid, group_uid):
     final_report_data = [item['uid'] for item in selected_items.values() if item['uid']]
 
     with session_scope() as session:
-            stmt = select(ConstructionTableOptionData,ConstructionTableOption,ConstructionTable,OptionAttachment).join(
+            stmt = select(
+                ConstructionTableOptionData,
+                ConstructionTableOption,
+                ConstructionTable,
+                OptionAttachment).join(
                 ConstructionTableOption, ConstructionTableOption.uid == ConstructionTableOptionData.option_uid
             ).join(
                 ConstructionTable, ConstructionTable.uid == ConstructionTableOption.table_uid
             ).where(
                 ConstructionTableOptionData.site_uid == site_uid,
+                OptionAttachment.site_uid == site_uid,
                 ConstructionTable.group_uid == group_uid,
                 ConstructionTable.uid.in_(final_report_data)
             )
