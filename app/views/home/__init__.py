@@ -36,6 +36,8 @@ def choose_user():
 def choose_region():
     ''' 選擇地區 '''
     uid = request.form.get('user_uid')
+    if 'user_uid' in flask_session:
+        uid = flask_session['user_uid']
     with session_scope() as session:
         query = User.get(session, uid=uid)
         if uid: 
