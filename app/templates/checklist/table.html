@@ -223,7 +223,12 @@
                 showCancelButton: true,
                 confirmButtonText: '仍要送出',
                 cancelButtonText: '返回',
-                reverseButtons: true
+                reverseButtons: true,
+                customClass: {
+                    cancelButton: 'btn btn-primary',
+                    confirmButton: 'btn btn-ghost text-base-content/60'
+                },
+                buttonsStyling: false
             });
 
             if (result.isConfirmed) {
