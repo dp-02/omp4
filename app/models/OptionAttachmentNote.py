@@ -1,11 +1,11 @@
-from app.database import Base
+from app.database import db
 from sqlalchemy import Column, String, Integer, ForeignKey, and_
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class OptionAttachmentNote(Base):
+class OptionAttachmentNote(db.Model):
     ''' 選項資料附件說明 '''
     __tablename__ = 'option_attachment_note'
 

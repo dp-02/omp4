@@ -1,11 +1,11 @@
-from app.database import Base
+from app.database import db
 from sqlalchemy import Column, String, Integer, ForeignKey, and_
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class ConstructionTableOptionData(Base):
+class ConstructionTableOptionData(db.Model):
     ''' 施工規範表格選項資料 '''
     __tablename__ = 'construction_table_option_data'
 

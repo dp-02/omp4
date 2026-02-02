@@ -6,7 +6,7 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'a-default-secret-key-for-dev')
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
-    DATABASE_URL = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     FLASK_DEBUG = os.environ.get('FLASK_DEBUG') or '1'
     PROD_HOST = '0.0.0.0' # 生產環境通常監聽所有 IP
     PROD_PORT = 8000

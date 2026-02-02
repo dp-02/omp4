@@ -1,11 +1,11 @@
-from app.database import Base
+from app.database import db
 from sqlalchemy import Column, String, Integer
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class ConstructionTableGroup(Base):
+class ConstructionTableGroup(db.Model):
     ''' 施工規範表格群組 '''
     __tablename__ = 'construction_table_group'
 

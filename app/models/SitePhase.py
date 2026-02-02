@@ -1,11 +1,11 @@
-from app.database import Base
+from app.database import db
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class SitePhase(Base):
+class SitePhase(db.Model):
     ''' 案場期數 '''
     __tablename__ = 'site_phase'
 
@@ -13,6 +13,7 @@ class SitePhase(Base):
     site_uid = Column(Integer, ForeignKey('site.uid', ondelete='CASCADE'), nullable=False)
     name = Column(String(256))
     sort = Column(Integer)
+    taipower_rate = Column(Integer)
     
     site = relationship("Site", back_populates="phases")
     inverters = relationship("SitePhaseInverter", back_populates="phase", cascade="all, delete-orphan")

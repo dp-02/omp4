@@ -1,11 +1,11 @@
-from app.database import Base
+from app.database import db
 from sqlalchemy import Column, Boolean, DateTime, Integer
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class Auth(Base):
+class Auth(db.Model):
     ''' 權限 '''
     __tablename__ = 'auth'
 

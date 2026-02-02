@@ -1,11 +1,11 @@
-from app.database import Base
+from app.database import db
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class SitePhaseModule(Base):
+class SitePhaseModule(db.Model):
     ''' 案場期數模組 '''
     __tablename__ = 'site_phase_module'
 

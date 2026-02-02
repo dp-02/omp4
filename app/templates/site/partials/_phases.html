@@ -20,6 +20,13 @@
                        value="{{ data.get('phase_uid' ~ i, '') }}">
             </div>
 
+            <div class="form-control w-full mb-3">
+                <label class="label py-0" for="phase_taipower_rate{{ i }}">
+                    <span class="label-text text-sm">台電費率</span>
+                </label>
+                <input type="number" class="input input-bordered input-sm w-full" id="phase_taipower_rate{{ i }}" name="phase_taipower_rate{{ i }}" value="{{ data.get('phase_taipower_rate' ~ i, '') }}" min="0" step="1" placeholder="台電費率">
+            </div>
+
             <div class="divider text-xs text-base-content/50">逆變器與模組</div>
             <div class="mb-6">
                 <div class="flex justify-between items-center mb-2">

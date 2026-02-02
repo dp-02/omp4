@@ -3,3 +3,4 @@ SQLAlchemy
 mysql-connector-python
 python-dotenv
 waitress
+Flask-Migrate

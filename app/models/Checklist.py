@@ -1,11 +1,11 @@
-from app.database import Base
+from app.database import db
 from sqlalchemy import Column, Date, Integer, ForeignKey
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class Checklist(Base):
+class Checklist(db.Model):
     ''' 電廠檢測表 '''
     __tablename__ = 'checklist'
 
