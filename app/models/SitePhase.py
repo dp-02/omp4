@@ -1,5 +1,5 @@
 from app.database import db
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, Float
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
@@ -13,7 +13,7 @@ class SitePhase(db.Model):
     site_uid = Column(Integer, ForeignKey('site.uid', ondelete='CASCADE'), nullable=False)
     name = Column(String(256))
     sort = Column(Integer)
-    taipower_rate = Column(Integer)
+    taipower_rate = Column(Float)
     
     site = relationship("Site", back_populates="phases")
     inverters = relationship("SitePhaseInverter", back_populates="phase", cascade="all, delete-orphan")

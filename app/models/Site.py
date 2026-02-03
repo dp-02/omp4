@@ -1,5 +1,5 @@
 from app.database import db
-from sqlalchemy import Column, String, Integer, Date, Boolean
+from sqlalchemy import Column, String, Integer, Date, Boolean, Float
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.inspection import inspect
@@ -18,7 +18,7 @@ class Site(db.Model):
     wait_cheack = Column(Boolean)
     phase_number = Column(Integer)
     user_uid = Column(Integer)
-    greenpower_rate = Column(Integer)
+    greenpower_rate = Column(Float)
 
     phases = relationship("SitePhase", back_populates="site", cascade="all, delete-orphan", order_by="SitePhase.uid")
     

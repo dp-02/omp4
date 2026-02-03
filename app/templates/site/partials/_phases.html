@@ -24,7 +24,7 @@
                 <label class="label py-0" for="phase_taipower_rate{{ i }}">
                     <span class="label-text text-sm">台電費率</span>
                 </label>
-                <input type="number" class="input input-bordered input-sm w-full" id="phase_taipower_rate{{ i }}" name="phase_taipower_rate{{ i }}" value="{{ data.get('phase_taipower_rate' ~ i, '') }}" min="0" step="1" placeholder="台電費率">
+                <input type="number" class="input input-bordered input-sm w-full" id="phase_taipower_rate{{ i }}" name="phase_taipower_rate{{ i }}" value="{{ data.get('phase_taipower_rate' ~ i, '') }}" min="0" step="0.01" placeholder="台電費率">
             </div>
 
             <div class="divider text-xs text-base-content/50">逆變器與模組</div>

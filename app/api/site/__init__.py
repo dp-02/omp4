@@ -25,7 +25,7 @@ def site_create():
         for i in range(1, phase_count + 1):
             j,k = 1,1
             _tr = form_data.get(f'phase_taipower_rate{i}')
-            phase_obj = {'name': form_data.get(f'phase_name{i}'), 'taipower_rate': int(_tr) if _tr and str(_tr).strip() else None, 'inverters': [],'modules': [], 'sort': i}
+            phase_obj = {'name': form_data.get(f'phase_name{i}'), 'taipower_rate': float(_tr) if _tr and str(_tr).strip() else None, 'inverters': [],'modules': [], 'sort': i}
             while True:
                 brand_key = f'inverter_brand{i}_{j}'
                 if brand_key not in form_data: break
@@ -51,7 +51,7 @@ def site_create():
     user_uid = flask_session['user_uid']
     phase_number = int(request.form.get('phase', 1))
     _greenpower = request.form.get('greenpower_rate')
-    greenpower_rate = int(_greenpower) if _greenpower and str(_greenpower).strip() else None
+    greenpower_rate = float(_greenpower) if _greenpower and str(_greenpower).strip() else None
 
     structured_phases = parse_site_form_data(request.form)
 
@@ -89,7 +89,7 @@ def site_update():
         for i in range(1, phase_count + 1):
             j,k = 1,1
             _tr = form_data.get(f'phase_taipower_rate{i}')
-            phase_obj = {'uid': form_data.get(f'phase_uid{i}'), 'name': form_data.get(f'phase_name{i}'), 'taipower_rate': int(_tr) if _tr and str(_tr).strip() else None, 'inverters': [],'modules': [], 'sort': i}
+            phase_obj = {'uid': form_data.get(f'phase_uid{i}'), 'name': form_data.get(f'phase_name{i}'), 'taipower_rate': float(_tr) if _tr and str(_tr).strip() else None, 'inverters': [],'modules': [], 'sort': i}
             while True:
                 brand_key = f'inverter_brand{i}_{j}'
                 if brand_key not in form_data: break
@@ -114,7 +114,7 @@ def site_update():
     build_date = request.form.get('build_date')
     wait_cheack = True if request.form.get('wait_cheack') else False
     _greenpower = request.form.get('greenpower_rate')
-    greenpower_rate = int(_greenpower) if _greenpower and str(_greenpower).strip() else None
+    greenpower_rate = float(_greenpower) if _greenpower and str(_greenpower).strip() else None
 
     structured_phases = parse_site_form_data(request.form)
     with session_scope() as session:
