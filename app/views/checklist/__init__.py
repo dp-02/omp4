@@ -184,7 +184,8 @@ def create_rport(site_uid, check_type, checklist_uid):
 
     with session_scope() as session:
         if check_type == 1: # 檢測
-            stmt = select(ChecklistTableOptionData,ChecklistTableOption,ChecklistTable,OptionAttachment).join(
+            stmt = select(ChecklistTableOptionData,ChecklistTableOption,ChecklistTable,OptionAttachment
+            ).join(
                 ChecklistTableOption, ChecklistTableOption.uid == ChecklistTableOptionData.option_uid
             ).join(
                 ChecklistTable, ChecklistTable.uid == ChecklistTableOption.table_uid
@@ -220,7 +221,8 @@ def create_rport(site_uid, check_type, checklist_uid):
                     data['table'][checklist_table.uid]['options'][checklist_table_option.uid]['attachment'].append(option_attachment.uid)
         elif check_type == 2: # 維修
             all_options = [opt['uid'] for item in final_report_data for opt in item['selected_options']]
-            stmt = select(ChecklistTableOptionData,ChecklistTableOption,ChecklistTable,OptionAttachment).join(
+            stmt = select(ChecklistTableOptionData,ChecklistTableOption,ChecklistTable,OptionAttachment
+            ).join(
                 ChecklistTableOption, ChecklistTableOption.uid == ChecklistTableOptionData.option_uid
             ).join(
                 ChecklistTable, ChecklistTable.uid == ChecklistTableOption.table_uid

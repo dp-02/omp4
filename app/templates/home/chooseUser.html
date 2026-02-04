@@ -22,7 +22,7 @@
               <option :value="user.uid" x-text="user.name"></option>
             </template>
           </select>
-          <button type="submit" class="btn btn-primary btn-block" >登入</button>
+          <button type="submit" class="btn btn-primary btn-block" :disabled="!selectedUser">登入</button>
         </div>
       </form>
     </div>
