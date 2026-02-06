@@ -37,7 +37,7 @@ def create(site_uid, check_type):
 @blueprint.route('/<int:checklist_uid>/update/')
 @login_required
 def update(checklist_uid):
-    ''' 建立 '''
+    ''' 更新 '''
     with session_scope() as session:
         checklist_obj = Checklist.get(session, uid = checklist_uid)
         if not checklist_obj:

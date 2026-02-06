@@ -150,7 +150,7 @@ def get_anomaly_state_list_partial(site_uid):
                 Checklist.uid == OptionAttachmentForChecklist.checklist_uid,
                 Checklist.site_uid == site_uid,
                 OptionAttachment.type == "anomaly"
-            )
+            ).order_by(Checklist.check_date.desc())
         else:
             stmt = select(OptionAttachment,
                           OptionAttachmentAnomalyState.value,
@@ -179,7 +179,7 @@ def get_anomaly_state_list_partial(site_uid):
                 Checklist.uid == OptionAttachmentForChecklist.checklist_uid,
                 Checklist.site_uid == site_uid,
                 OptionAttachment.type == "anomaly"
-            )
+            ).order_by(Checklist.check_date.desc())
         options = session.execute(stmt).all()
         for data_o in options:
             data_options.append({
