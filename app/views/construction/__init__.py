@@ -7,7 +7,11 @@ from app.models import (
     ConstructionTableGroup,
     ConstructionTableOption,
     ConstructionTableOptionData,
-    OptionAttachment
+    OptionAttachment,
+    Site,
+    SitePhase,
+    SitePhaseInverter,
+    SitePhaseModule
 )
 blueprint = Blueprint('view_construction', __name__)
 
@@ -148,7 +152,24 @@ def create_rport(site_uid, group_uid):
     final_report_data = [item['uid'] for item in selected_items.values() if item['uid']]
 
     with session_scope() as session:
-            stmt = select(
+        # 案場、逆變器、模組資料（報告頂部顯示用）
+        inverter = []
+        module = []
+        query_site = Site.get(session, uid=site_uid)
+        if query_site:
+            data['site'] = Site.to_dict(query_site)
+            stmt_phase = select(SitePhase).where(SitePhase.site_uid == site_uid)
+            for sp_data in session.scalars(stmt_phase).all():
+                for spi_data in session.scalars(select(SitePhaseInverter).where(SitePhaseInverter.phase_uid == sp_data.uid)).all():
+                    inverter.append(SitePhaseInverter.to_dict(spi_data))
+                for spm_data in session.scalars(select(SitePhaseModule).where(SitePhaseModule.phase_uid == sp_data.uid)).all():
+                    module.append(SitePhaseModule.to_dict(spm_data))
+        else:
+            data['site'] = None
+        data['inverter'] = inverter
+        data['module'] = module
+
+        stmt = select(
                 ConstructionTableOptionData,
                 ConstructionTableOption,
                 ConstructionTable,
@@ -162,24 +183,24 @@ def create_rport(site_uid, group_uid):
                 ConstructionTable.group_uid == group_uid,
                 ConstructionTable.uid.in_(final_report_data)
             )
-            query = session.execute(stmt).all()
-            for data_table in query:
-                construction_table_option_data = data_table[0]
-                construction_table_option = data_table[1]
-                construction_table = data_table[2]
-                option_attachment = data_table[3]
-                if construction_table.uid not in data['table']: 
-                    data['table'][construction_table.uid]  = {
-                        "name":construction_table.name,
-                        "options":{}
-                    }
-                if construction_table_option.uid not in data['table'][construction_table.uid]['options']: 
-                    data['table'][construction_table.uid]['options'][construction_table_option.uid] = {
-                        "name":construction_table_option.name,
-                        "sort":construction_table_option.sort,
-                        "value":construction_table_option_data.value,
-                        "attachment":[]
-                    }
-                if option_attachment.option_uid == construction_table_option.uid: 
+        query = session.execute(stmt).all()
+        for data_table in query:
+            construction_table_option_data = data_table[0]
+            construction_table_option = data_table[1]
+            construction_table = data_table[2]
+            option_attachment = data_table[3]
+            if construction_table.uid not in data['table']: 
+                data['table'][construction_table.uid]  = {
+                    "name":construction_table.name,
+                    "options":{}
+                }
+            if construction_table_option.uid not in data['table'][construction_table.uid]['options']: 
+                data['table'][construction_table.uid]['options'][construction_table_option.uid] = {
+                    "name":construction_table_option.name,
+                    "sort":construction_table_option.sort,
+                    "value":construction_table_option_data.value,
+                    "attachment":[]
+                }
+            if option_attachment.option_uid == construction_table_option.uid: 
                     data['table'][construction_table.uid]['options'][construction_table_option.uid]['attachment'].append(option_attachment.uid)
     return render_template('construction/createReport.html', data = data)

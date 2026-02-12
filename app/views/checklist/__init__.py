@@ -9,7 +9,11 @@ from app.models import (
     ChecklistTableOptionData,
     ChecklistTableOption,
     OptionAttachment,
-    OptionAttachmentForChecklist
+    OptionAttachmentForChecklist,
+    Site,
+    SitePhase,
+    SitePhaseInverter,
+    SitePhaseModule
 )
 blueprint = Blueprint('view_checklist', __name__)
 
@@ -183,6 +187,23 @@ def create_rport(site_uid, check_type, checklist_uid):
             })
 
     with session_scope() as session:
+        # 案場、逆變器、模組資料（報告頂部顯示用）
+        inverter = []
+        module = []
+        query_site = Site.get(session, uid=site_uid)
+        if query_site:
+            data['site'] = Site.to_dict(query_site)
+            stmt_phase = select(SitePhase).where(SitePhase.site_uid == site_uid)
+            for sp_data in session.scalars(stmt_phase).all():
+                for spi_data in session.scalars(select(SitePhaseInverter).where(SitePhaseInverter.phase_uid == sp_data.uid)).all():
+                    inverter.append(SitePhaseInverter.to_dict(spi_data))
+                for spm_data in session.scalars(select(SitePhaseModule).where(SitePhaseModule.phase_uid == sp_data.uid)).all():
+                    module.append(SitePhaseModule.to_dict(spm_data))
+        else:
+            data['site'] = None
+        data['inverter'] = inverter
+        data['module'] = module
+
         if check_type == 1: # 檢測
             stmt = select(ChecklistTableOptionData,ChecklistTableOption,ChecklistTable,OptionAttachment
             ).join(

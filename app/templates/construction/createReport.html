@@ -8,7 +8,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="card bg-base-100 shadow-xl border border-base-200 max-w-4xl mx-auto">
         <div class="card-body p-6 md:p-10">
-            <h1 class="card-title text-2xl md:text-3xl font-bold mb-8 pb-4 border-b border-base-200 flex items-center gap-3">
+            <h1 class="card-title text-2xl md:text-3xl font-bold mb-6 pb-4 border-b border-base-200 flex items-center gap-3">
                 <div class="p-3 bg-primary/10 rounded-lg text-primary">
                     <i class="bi bi-file-earmark-text text-2xl"></i>
                 </div>
@@ -16,6 +16,81 @@
                     <span class="text-primary">{{data.table_name}}</span>報告
                 </span>
             </h1>
+
+            {% if data.site %}
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-base-200 pb-6">
+                <div>
+                    <h2 class="text-xl font-bold mb-2">{{ data.site.name }}</h2>
+                    <p class="text-base-content/70 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                        </svg>
+                        {{ data.site.address | default('-', true) }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-base-200 rounded-box p-4">
+                    <h3 class="font-bold text-lg mb-3 flex justify-between">
+                        逆變器
+                        <span class="badge badge-primary">{{ data.inverter | length }} 台</span>
+                    </h3>
+                    <div class="space-y-2">
+                        {% set ns_inv = namespace(processed=[], groups=[]) %}
+                        {% for item in data.inverter %}
+                            {% set key_inv = item.brand ~ '|' ~ item.model %}
+                            {% if key_inv not in ns_inv.processed %}
+                                {% set matching_list = [] %}
+                                {% for check_item in data.inverter %}
+                                    {% if check_item.brand == item.brand and check_item.model == item.model %}
+                                        {% set _ = matching_list.append(check_item) %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% set count_inv = matching_list | length %}
+                                {% set _ = ns_inv.processed.append(key_inv) %}
+                                {% set group_dict = {'brand': item.brand, 'model': item.model, 'count': count_inv} %}
+                                {% set _ = ns_inv.groups.append(group_dict) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% for group in ns_inv.groups %}
+                            <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
+                                <div class="badge badge-outline">型號</div>
+                                <span class="font-mono">{{ group.model }}</span>
+                                {% if group.count > 1 %}
+                                    <div class="divider divider-horizontal m-0 py-1"></div>
+                                    <span class="font-semibold">{{ group.count }} 台</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        {% if not ns_inv.groups %}
+                            <p class="text-base-content/50 text-sm">尚無逆變器資料</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="bg-base-200 rounded-box p-4">
+                    <h3 class="font-bold text-lg mb-3 flex justify-between">
+                        模組
+                        <span class="badge badge-secondary">{{ data.module | length }} 種</span>
+                    </h3>
+                    <div class="space-y-2">
+                        {% for item in data.module %}
+                        <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
+                            <div class="badge badge-outline">型號</div>
+                            <span class="font-mono">{{ item.model }}</span>
+                            <div class="divider divider-horizontal m-0 py-1"></div>
+                            <div class="badge badge-ghost">瓦數</div>
+                            <span class="font-mono">{{ item.wattage | default('-', true) }}</span>
+                        </div>
+                        {% endfor %}
+                        {% if not data.module %}
+                            <p class="text-base-content/50 text-sm">尚無模組資料</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
             <div class="space-y-8">
                 {% for key, value in data.table.items() %}
