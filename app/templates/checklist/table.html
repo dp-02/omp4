@@ -85,16 +85,6 @@
                             </span>
                         </div>
                         <div class="flex flex-wrap gap-6 items-center pl-2 md:pl-10">
-
-                            <label class="label cursor-pointer justify-start gap-2 hover:opacity-80">
-                                <input type="radio" 
-                                       class="radio radio-success" 
-                                       name="{{ data_o.uid }}" 
-                                       id="{{ data_o.uid }}_1" 
-                                       value="無"
-                                       {% if current_val == '無' %}checked{% endif %}>
-                                <span class="label-text font-medium text-success-content/90">無</span>
-                            </label>
                             
                             <label class="label cursor-pointer justify-start gap-2 hover:opacity-80">
                                 <input type="radio" 
@@ -106,6 +96,15 @@
                                 <span class="label-text text-base-content/70">有</span>
                             </label>
 
+                            <label class="label cursor-pointer justify-start gap-2 hover:opacity-80">
+                                <input type="radio" 
+                                       class="radio radio-success" 
+                                       name="{{ data_o.uid }}" 
+                                       id="{{ data_o.uid }}_1" 
+                                       value="無"
+                                       {% if current_val == '無' %}checked{% endif %}>
+                                <span class="label-text font-medium text-success-content/90">無</span>
+                            </label>
                         </div>
                         {% set table_type = 'checklist' %}
                         {% set option_uid = data_o.uid %}
