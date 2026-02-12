@@ -204,6 +204,9 @@ def create_rport(site_uid, check_type, checklist_uid):
         data['inverter'] = inverter
         data['module'] = module
 
+        checklist_obj = Checklist.get(session, uid=checklist_uid)
+        data['checklist'] = Checklist.to_dict(checklist_obj) if checklist_obj else None
+
         if check_type == 1: # 檢測
             stmt = select(ChecklistTableOptionData,ChecklistTableOption,ChecklistTable,OptionAttachment
             ).join(

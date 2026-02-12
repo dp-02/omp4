@@ -1,7 +1,7 @@
 {% extends 'global/base.html' %}
 
 {% block title %}
-電廠{% if data.check_type == '1' %}檢測{% else %}維修{% endif %}報告
+電廠{% if data.check_type == '1' %}檢測{% else %}檢測{% endif %}報告
 {% endblock %}
 
 {% block content %}
@@ -13,13 +13,14 @@
                     <i class="bi bi-file-earmark-text text-2xl"></i>
                 </div>
                 <span>
-                    電廠<span class="text-primary">{% if data.check_type == '1' %}檢測{% else %}維修{% endif %}</span>報告
+                    電廠<span class="text-primary">{% if data.check_type == '1' %}檢測{% else %}檢測{% endif %}</span>報告
                 </span>
             </h1>
 
-            {% if data.site %}
+            {% if data.site or data.checklist %}
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-base-200 pb-6">
                 <div>
+                    {% if data.site %}
                     <h2 class="text-xl font-bold mb-2">{{ data.site.name }}</h2>
                     <p class="text-base-content/70 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -27,7 +28,13 @@
                         </svg>
                         {{ data.site.address | default('-', true) }}
                     </p>
+                    {% endif %}
                 </div>
+                {% if data.checklist and data.checklist.check_date %}
+                <div class="mt-4 md:mt-0 badge badge-lg p-4 badge-neutral">
+                    檢測日期：{{ data.checklist.check_date }}
+                </div>
+                {% endif %}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

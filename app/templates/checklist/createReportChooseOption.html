@@ -1,7 +1,7 @@
 {% extends 'global/base.html' %}
 
 {% block title %}
-電廠{% if data.check_type == '1' %}檢測{% else %}維修{% endif %}生成報告
+電廠{% if data.check_type == '1' %}檢測{% else %}檢測{% endif %}生成報告
 {% endblock %}
 
 {% block content %}
@@ -10,7 +10,7 @@
         <div class="card-body">
             <h1 class="card-title text-3xl font-bold mb-6 pb-2 border-b border-base-200 flex items-center gap-2">
                 <i class="bi bi-file-earmark-text text-primary"></i>
-                電廠{% if data.check_type == '1' %}檢測{% else %}維修{% endif %}生成報告
+                電廠{% if data.check_type == '1' %}檢測{% else %}檢測{% endif %}生成報告
             </h1>
             <form method="post" 
                   action="/checklist/{{data.site_uid}}/{{data.check_type}}/{{data.checklist_uid}}/report/"
