@@ -13,7 +13,8 @@ from app.models import (
     Site,
     SitePhase,
     SitePhaseInverter,
-    SitePhaseModule
+    SitePhaseModule,
+    User
 )
 blueprint = Blueprint('view_checklist', __name__)
 
@@ -206,6 +207,11 @@ def create_rport(site_uid, check_type, checklist_uid):
 
         checklist_obj = Checklist.get(session, uid=checklist_uid)
         data['checklist'] = Checklist.to_dict(checklist_obj) if checklist_obj else None
+        if checklist_obj and checklist_obj.user_uid:
+            user = User.get(session, uid=checklist_obj.user_uid)
+            data['inspector_name'] = user.name if user else None
+        else:
+            data['inspector_name'] = None
 
         if check_type == 1: # 檢測
             stmt = select(ChecklistTableOptionData,ChecklistTableOption,ChecklistTable,OptionAttachment
