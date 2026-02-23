@@ -25,7 +25,8 @@ def site_create():
         for i in range(1, phase_count + 1):
             j,k = 1,1
             _tr = form_data.get(f'phase_taipower_rate{i}')
-            phase_obj = {'name': form_data.get(f'phase_name{i}'), 'taipower_rate': float(_tr) if _tr and str(_tr).strip() else None, 'inverters': [],'modules': [], 'sort': i}
+            _gr = form_data.get(f'phase_greenpower_rate{i}')
+            phase_obj = {'name': form_data.get(f'phase_name{i}'), 'taipower_rate': float(_tr) if _tr and str(_tr).strip() else None, 'greenpower_rate': float(_gr) if _gr and str(_gr).strip() else None, 'inverters': [],'modules': [], 'sort': i}
             while True:
                 brand_key = f'inverter_brand{i}_{j}'
                 if brand_key not in form_data: break
@@ -50,15 +51,13 @@ def site_create():
     wait_cheack = True if request.form.get('wait_cheack') else False
     user_uid = flask_session['user_uid']
     phase_number = int(request.form.get('phase', 1))
-    _greenpower = request.form.get('greenpower_rate')
-    greenpower_rate = float(_greenpower) if _greenpower and str(_greenpower).strip() else None
 
     structured_phases = parse_site_form_data(request.form)
 
     with session_scope() as session:
-        query1 = Site.create(session, region = region, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, phase_number = phase_number, user_uid = user_uid, greenpower_rate = greenpower_rate)
+        query1 = Site.create(session, region = region, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, phase_number = phase_number, user_uid = user_uid)
         for p_data in structured_phases:
-            query2 = SitePhase.create(session, site_uid = query1.uid,  name = p_data['name'], sort = p_data['sort'], taipower_rate = p_data.get('taipower_rate'))
+            query2 = SitePhase.create(session, site_uid = query1.uid,  name = p_data['name'], sort = p_data['sort'], taipower_rate = p_data.get('taipower_rate'), greenpower_rate = p_data.get('greenpower_rate'))
             for i_data in p_data['inverters']:
                 SitePhaseInverter.create(session, phase_uid = query2.uid, brand = i_data['brand'], model = i_data['model'])
             for m_data in p_data['modules']:
@@ -89,7 +88,8 @@ def site_update():
         for i in range(1, phase_count + 1):
             j,k = 1,1
             _tr = form_data.get(f'phase_taipower_rate{i}')
-            phase_obj = {'uid': form_data.get(f'phase_uid{i}'), 'name': form_data.get(f'phase_name{i}'), 'taipower_rate': float(_tr) if _tr and str(_tr).strip() else None, 'inverters': [],'modules': [], 'sort': i}
+            _gr = form_data.get(f'phase_greenpower_rate{i}')
+            phase_obj = {'uid': form_data.get(f'phase_uid{i}'), 'name': form_data.get(f'phase_name{i}'), 'taipower_rate': float(_tr) if _tr and str(_tr).strip() else None, 'greenpower_rate': float(_gr) if _gr and str(_gr).strip() else None, 'inverters': [],'modules': [], 'sort': i}
             while True:
                 brand_key = f'inverter_brand{i}_{j}'
                 if brand_key not in form_data: break
@@ -113,16 +113,14 @@ def site_update():
     company = request.form.get('company')
     build_date = request.form.get('build_date')
     wait_cheack = True if request.form.get('wait_cheack') else False
-    _greenpower = request.form.get('greenpower_rate')
-    greenpower_rate = float(_greenpower) if _greenpower and str(_greenpower).strip() else None
 
     structured_phases = parse_site_form_data(request.form)
     with session_scope() as session:
-        Site.update(session, uid = site_uid, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, greenpower_rate = greenpower_rate)
+        Site.update(session, uid = site_uid, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack)
         stmt = delete(SitePhase).where(SitePhase.site_uid == site_uid)
         result = session.execute(stmt)
         for p_data in structured_phases:
-            site_phase = SitePhase.create(session, site_uid = site_uid,  name = p_data['name'],  sort = p_data['sort'], taipower_rate = p_data.get('taipower_rate'))
+            site_phase = SitePhase.create(session, site_uid = site_uid,  name = p_data['name'],  sort = p_data['sort'], taipower_rate = p_data.get('taipower_rate'), greenpower_rate = p_data.get('greenpower_rate'))
             for i_data in p_data['inverters']:
                 SitePhaseInverter.create(session, phase_uid = site_phase.uid, brand = i_data['brand'], model = i_data['model'])
             for m_data in p_data['modules']:

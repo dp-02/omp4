@@ -14,7 +14,8 @@ class SitePhase(db.Model):
     name = Column(String(256))
     sort = Column(Integer)
     taipower_rate = Column(Float)
-    
+    greenpower_rate = Column(Float)
+
     site = relationship("Site", back_populates="phases")
     inverters = relationship("SitePhaseInverter", back_populates="phase", cascade="all, delete-orphan")
     modules = relationship("SitePhaseModule", back_populates="phase", cascade="all, delete-orphan")

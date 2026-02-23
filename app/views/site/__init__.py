@@ -75,6 +75,7 @@ def update(site_uid):
             form_data[f'phase_uid{i}'] = phase.uid
             form_data[f'phase_name{i}'] = phase.name
             form_data[f'phase_taipower_rate{i}'] = phase.taipower_rate if phase.taipower_rate is not None else ''
+            form_data[f'phase_greenpower_rate{i}'] = phase.greenpower_rate if phase.greenpower_rate is not None else ''
             stmt_inv = select(SitePhaseInverter).where(SitePhaseInverter.phase_uid == phase.uid)
             inverters = session.scalars(stmt_inv).all()
             for j, inv in enumerate(inverters, start=1):
