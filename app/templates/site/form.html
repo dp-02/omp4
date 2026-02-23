@@ -87,6 +87,58 @@
                     <input type="number" class="input input-bordered w-full" id="total_capacity" name="total_capacity" placeholder="請輸入總裝置容量" value="{{ data.get('total_capacity', '') }}" min="0" step="0.01">
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="form-control w-full">
+                        <label for="latitude" class="label">
+                            <span class="label-text font-semibold">緯度</span>
+                        </label>
+                        <input type="text" class="input input-bordered w-full" id="latitude" name="latitude" placeholder="緯度" value="{{ data.get('latitude', '') }}">
+                    </div>
+                    <div class="form-control w-full">
+                        <label for="longitude" class="label">
+                            <span class="label-text font-semibold">經度</span>
+                        </label>
+                        <input type="text" class="input input-bordered w-full" id="longitude" name="longitude" placeholder="經度" value="{{ data.get('longitude', '') }}">
+                    </div>
+                </div>
+
+                <div class="form-control w-full mb-4">
+                    <label for="installation_mode" class="label">
+                        <span class="label-text font-semibold">設置模式</span>
+                    </label>
+                    <select class="select select-bordered w-full" id="installation_mode" name="installation_mode">
+                        <option value="">請選擇</option>
+                        <option value="平舖" {% if data.get('installation_mode') == '平舖' %}selected{% endif %}>平舖</option>
+                        <option value="鋼構" {% if data.get('installation_mode') == '鋼構' %}selected{% endif %}>鋼構</option>
+                        <option value="平舖+鋼構" {% if data.get('installation_mode') == '平舖+鋼構' %}selected{% endif %}>平舖+鋼構</option>
+                    </select>
+                </div>
+
+                <div class="form-control w-full mb-4">
+                    <label for="installation_env" class="label">
+                        <span class="label-text font-semibold">設置環境</span>
+                    </label>
+                    <select class="select select-bordered w-full" id="installation_env" name="installation_env">
+                        <option value="">請選擇</option>
+                        <option value="金屬粉塵" {% if data.get('installation_env') == '金屬粉塵' %}selected{% endif %}>金屬粉塵</option>
+                        <option value="灰塵" {% if data.get('installation_env') == '灰塵' %}selected{% endif %}>灰塵</option>
+                        <option value="農地" {% if data.get('installation_env') == '農地' %}selected{% endif %}>農地</option>
+                        <option value="無" {% if data.get('installation_env') == '無' %}selected{% endif %}>無</option>
+                    </select>
+                </div>
+
+                <div class="form-control w-full mb-4">
+                    <label for="power_structure" class="label">
+                        <span class="label-text font-semibold">電力結構</span>
+                    </label>
+                    <select class="select select-bordered w-full" id="power_structure" name="power_structure">
+                        <option value="">請選擇</option>
+                        <option value="全額躉售" {% if data.get('power_structure') == '全額躉售' %}selected{% endif %}>全額躉售</option>
+                        <option value="餘電躉售" {% if data.get('power_structure') == '餘電躉售' %}selected{% endif %}>餘電躉售</option>
+                        <option value="併內線不躉售" {% if data.get('power_structure') == '併內線不躉售' %}selected{% endif %}>併內線不躉售</option>
+                    </select>
+                </div>
+
                 <div class="form-control w-full mb-4">
                     <label for="phase" class="label"><span class="label-text font-semibold">期數</span></label>
                     <input type="number" 

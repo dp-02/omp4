@@ -19,6 +19,11 @@ class Site(db.Model):
     phase_number = Column(Integer)
     user_uid = Column(Integer)
     total_capacity = Column(Float)
+    latitude = Column(String(64))   # 緯度
+    longitude = Column(String(64))  # 經度
+    installation_mode = Column(String(64))   # 設置模式：平舖、鋼構、平舖+鋼構
+    installation_env = Column(String(64))   # 設置環境：金屬粉塵、灰塵、農地、無
+    power_structure = Column(String(64))    # 電力結構：全額躉售、餘電躉售、併內線不躉售
 
     phases = relationship("SitePhase", back_populates="site", cascade="all, delete-orphan", order_by="SitePhase.uid")
     
