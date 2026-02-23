@@ -18,6 +18,7 @@ class Site(db.Model):
     wait_cheack = Column(Boolean)
     phase_number = Column(Integer)
     user_uid = Column(Integer)
+    total_capacity = Column(Float)
 
     phases = relationship("SitePhase", back_populates="site", cascade="all, delete-orphan", order_by="SitePhase.uid")
     

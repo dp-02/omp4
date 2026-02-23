@@ -51,11 +51,13 @@ def site_create():
     wait_cheack = True if request.form.get('wait_cheack') else False
     user_uid = flask_session['user_uid']
     phase_number = int(request.form.get('phase', 1))
+    _total_cap = request.form.get('total_capacity')
+    total_capacity = float(_total_cap) if _total_cap and str(_total_cap).strip() else None
 
     structured_phases = parse_site_form_data(request.form)
 
     with session_scope() as session:
-        query1 = Site.create(session, region = region, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, phase_number = phase_number, user_uid = user_uid)
+        query1 = Site.create(session, region = region, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, phase_number = phase_number, user_uid = user_uid, total_capacity = total_capacity)
         for p_data in structured_phases:
             query2 = SitePhase.create(session, site_uid = query1.uid,  name = p_data['name'], sort = p_data['sort'], taipower_rate = p_data.get('taipower_rate'), greenpower_rate = p_data.get('greenpower_rate'))
             for i_data in p_data['inverters']:
@@ -113,10 +115,12 @@ def site_update():
     company = request.form.get('company')
     build_date = request.form.get('build_date')
     wait_cheack = True if request.form.get('wait_cheack') else False
+    _total_cap = request.form.get('total_capacity')
+    total_capacity = float(_total_cap) if _total_cap and str(_total_cap).strip() else None
 
     structured_phases = parse_site_form_data(request.form)
     with session_scope() as session:
-        Site.update(session, uid = site_uid, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack)
+        Site.update(session, uid = site_uid, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, total_capacity = total_capacity)
         stmt = delete(SitePhase).where(SitePhase.site_uid == site_uid)
         result = session.execute(stmt)
         for p_data in structured_phases:
