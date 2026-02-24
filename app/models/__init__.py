@@ -30,3 +30,4 @@ from .Site import Site
 from .SitePhase import SitePhase
 from .SitePhaseInverter import SitePhaseInverter
 from .SitePhaseModule import SitePhaseModule
+from .SitePhaseInverterSld import SitePhaseInverterSld

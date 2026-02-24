@@ -1,5 +1,5 @@
-{% from 'site/partials/_site_sub_items.html' import render_inverter, render_module %}
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+{% from 'site/partials/_site_sub_items.html' import render_inverter, render_module, render_sld %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
     {% for i in range(1, phase_count + 1) %}
     <div class="card bg-base-100 border border-base-300 shadow-sm">
         <div class="card-body p-4">
@@ -56,7 +56,7 @@
                     </div>
                 </div>
 
-                <div id="inverter-area-{{ i }}" class="space-y-2">
+                <div id="inverter-area-{{ i }}" class="space-y-4">
                     {% set ns = namespace(inv_count=0) %}
                     {% for key in data.keys() %}
                          {% if key.startswith('inverter_brand' ~ i ~ '_') %}
@@ -64,9 +64,43 @@
                             {% if idx > ns.inv_count %}{% set ns.inv_count = idx %}{% endif %}
                          {% endif %}
                     {% endfor %}
-                    
                     {% for j in range(1, ns.inv_count + 1) %}
+                    <div class="border border-base-300 rounded-lg p-3 bg-base-50 space-y-2">
                         {{ render_inverter(i, j, data) }}
+                        <div class="pl-2 border-l-2 border-primary/30">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-semibold text-sm text-base-content/80"><i class="bi bi-diagram-3 mr-1"></i> 單線圖</span>
+                                <div class="join">
+                                    <button type="button" class="btn btn-xs btn-ghost btn-sm join-item"
+                                            hx-post="/site/partials/sub-items/sld/{{ i }}/{{ j }}/?op=add"
+                                            hx-target="#sld-area-{{ i }}-{{ j }}"
+                                            hx-include="#form"
+                                            hx-swap="innerHTML">
+                                        <i class="bi bi-plus"></i> 增
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-ghost btn-sm join-item"
+                                            hx-post="/site/partials/sub-items/sld/{{ i }}/{{ j }}/?op=reduce"
+                                            hx-target="#sld-area-{{ i }}-{{ j }}"
+                                            hx-include="#form"
+                                            hx-swap="innerHTML">
+                                        <i class="bi bi-dash"></i> 減
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="sld-area-{{ i }}-{{ j }}" class="space-y-1">
+                                {% set ns_sld = namespace(sld_count=0) %}
+                                {% for key in data.keys() %}
+                                    {% if key.startswith('sld_inv' ~ i ~ '_' ~ j ~ '_') %}
+                                        {% set sk = key|replace('sld_inv' ~ i ~ '_' ~ j ~ '_', '') %}
+                                        {% if sk|int > ns_sld.sld_count %}{% set ns_sld.sld_count = sk|int %}{% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% for k in range(1, ns_sld.sld_count + 1) %}
+                                    {{ render_sld(i, j, k, data) }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                     {% endfor %}
                 </div>
             </div>

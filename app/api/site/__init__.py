@@ -7,7 +7,8 @@ from app.models import (
     Site,
     SitePhase,
     SitePhaseInverter,
-    SitePhaseModule
+    SitePhaseModule,
+    SitePhaseInverterSld,
 )
 
 blueprint = Blueprint('api_site', __name__)
@@ -26,11 +27,34 @@ def site_create():
             j,k = 1,1
             _tr = form_data.get(f'phase_taipower_rate{i}')
             _gr = form_data.get(f'phase_greenpower_rate{i}')
-            phase_obj = {'name': form_data.get(f'phase_name{i}'), 'taipower_rate': float(_tr) if _tr and str(_tr).strip() else None, 'greenpower_rate': float(_gr) if _gr and str(_gr).strip() else None, 'inverters': [],'modules': [], 'sort': i}
+            phase_obj = {'name': form_data.get(f'phase_name{i}'), 'taipower_rate': float(_tr) if _tr and str(_tr).strip() else None, 'greenpower_rate': float(_gr) if _gr and str(_gr).strip() else None, 'inverters': [], 'modules': [], 'sort': i}
             while True:
                 brand_key = f'inverter_brand{i}_{j}'
                 if brand_key not in form_data: break
-                inverter = {'brand': form_data.get(f'inverter_brand{i}_{j}'),'model': form_data.get(f'inverter_model{i}_{j}')}
+                inverter = {'brand': form_data.get(f'inverter_brand{i}_{j}'), 'model': form_data.get(f'inverter_model{i}_{j}'), 'slds': []}
+                k = 1
+                while f'sld_inv{i}_{j}_{k}' in form_data:
+                    inv_val = form_data.get(f'sld_inv{i}_{j}_{k}')
+                    mppt_val = form_data.get(f'sld_mppt{i}_{j}_{k}')
+                    string_val = form_data.get(f'sld_string{i}_{j}_{k}')
+                    orientation_val = form_data.get(f'sld_orientation{i}_{j}_{k}')
+                    tilt_val = form_data.get(f'sld_tilt_angle{i}_{j}_{k}')
+                    tilt_angle = float(tilt_val) if tilt_val and str(tilt_val).strip() else None
+                    watt_val = form_data.get(f'sld_module_wattage{i}_{j}_{k}')
+                    module_wattage = float(watt_val) if watt_val and str(watt_val).strip() else None
+                    count_val = form_data.get(f'sld_module_count{i}_{j}_{k}')
+                    module_count = int(count_val) if count_val and str(count_val).strip() else None
+                    inverter['slds'].append({
+                        'uid': form_data.get(f'sld_uid{i}_{j}_{k}'),
+                        'inv': inv_val,
+                        'mppt': mppt_val,
+                        'string': string_val,
+                        'orientation': orientation_val,
+                        'tilt_angle': tilt_angle,
+                        'module_wattage': module_wattage,
+                        'module_count': module_count,
+                    })
+                    k += 1
                 phase_obj['inverters'].append(inverter)
                 j += 1
             while True:
@@ -66,7 +90,9 @@ def site_create():
         for p_data in structured_phases:
             query2 = SitePhase.create(session, site_uid = query1.uid,  name = p_data['name'], sort = p_data['sort'], taipower_rate = p_data.get('taipower_rate'), greenpower_rate = p_data.get('greenpower_rate'))
             for i_data in p_data['inverters']:
-                SitePhaseInverter.create(session, phase_uid = query2.uid, brand = i_data['brand'], model = i_data['model'])
+                inv_row = SitePhaseInverter.create(session, phase_uid=query2.uid, brand=i_data['brand'], model=i_data['model'])
+                for sld_data in i_data.get('slds', []):
+                    SitePhaseInverterSld.create(session, inverter_uid=inv_row.uid, inv=sld_data.get('inv'), mppt=sld_data.get('mppt'), string=sld_data.get('string'), orientation=sld_data.get('orientation'), tilt_angle=sld_data.get('tilt_angle'), module_wattage=sld_data.get('module_wattage'), module_count=sld_data.get('module_count'))
             for m_data in p_data['modules']:
                 SitePhaseModule.create(session, phase_uid = query2.uid, brand = m_data['brand'], model = m_data['model'], wattage = m_data['wattage'])
 
@@ -100,7 +126,23 @@ def site_update():
             while True:
                 brand_key = f'inverter_brand{i}_{j}'
                 if brand_key not in form_data: break
-                inverter = {'uid': form_data.get(f'inverter_uid{i}_{j}'),'brand': form_data.get(f'inverter_brand{i}_{j}'),'model': form_data.get(f'inverter_model{i}_{j}')}
+                inverter = {'uid': form_data.get(f'inverter_uid{i}_{j}'), 'brand': form_data.get(f'inverter_brand{i}_{j}'), 'model': form_data.get(f'inverter_model{i}_{j}'), 'slds': []}
+                sld_idx = 1
+                while f'sld_inv{i}_{j}_{sld_idx}' in form_data:
+                    tilt_val = form_data.get(f'sld_tilt_angle{i}_{j}_{sld_idx}')
+                    watt_val = form_data.get(f'sld_module_wattage{i}_{j}_{sld_idx}')
+                    count_val = form_data.get(f'sld_module_count{i}_{j}_{sld_idx}')
+                    inverter['slds'].append({
+                        'uid': form_data.get(f'sld_uid{i}_{j}_{sld_idx}'),
+                        'inv': form_data.get(f'sld_inv{i}_{j}_{sld_idx}'),
+                        'mppt': form_data.get(f'sld_mppt{i}_{j}_{sld_idx}'),
+                        'string': form_data.get(f'sld_string{i}_{j}_{sld_idx}'),
+                        'orientation': form_data.get(f'sld_orientation{i}_{j}_{sld_idx}'),
+                        'tilt_angle': float(tilt_val) if tilt_val and str(tilt_val).strip() else None,
+                        'module_wattage': float(watt_val) if watt_val and str(watt_val).strip() else None,
+                        'module_count': int(count_val) if count_val and str(count_val).strip() else None,
+                    })
+                    sld_idx += 1
                 phase_obj['inverters'].append(inverter)
                 j += 1
             while True:
@@ -136,7 +178,9 @@ def site_update():
         for p_data in structured_phases:
             site_phase = SitePhase.create(session, site_uid = site_uid,  name = p_data['name'],  sort = p_data['sort'], taipower_rate = p_data.get('taipower_rate'), greenpower_rate = p_data.get('greenpower_rate'))
             for i_data in p_data['inverters']:
-                SitePhaseInverter.create(session, phase_uid = site_phase.uid, brand = i_data['brand'], model = i_data['model'])
+                inv_row = SitePhaseInverter.create(session, phase_uid=site_phase.uid, brand=i_data['brand'], model=i_data['model'])
+                for sld_data in i_data.get('slds', []):
+                    SitePhaseInverterSld.create(session, inverter_uid=inv_row.uid, inv=sld_data.get('inv'), mppt=sld_data.get('mppt'), string=sld_data.get('string'), orientation=sld_data.get('orientation'), tilt_angle=sld_data.get('tilt_angle'), module_wattage=sld_data.get('module_wattage'), module_count=sld_data.get('module_count'))
             for m_data in p_data['modules']:
                 SitePhaseModule.create(session, phase_uid = site_phase.uid, brand = m_data['brand'], model = m_data['model'], wattage = m_data['wattage'])
 

@@ -25,6 +25,41 @@
 </div>
 {% endmacro %}
 
+{% macro render_sld(phase_idx, inverter_idx, sld_idx, data) %}
+{% set p, inv, s = phase_idx, inverter_idx, sld_idx %}
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-2 p-2 rounded-lg bg-base-200/50 border border-base-300 text-sm">
+    <div class="form-control">
+        <label class="label py-0"><span class="label-text text-xs">inv</span></label>
+        <input type="text" class="input input-bordered input-xs w-full" name="sld_inv{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_inv' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}">
+    </div>
+    <div class="form-control">
+        <label class="label py-0"><span class="label-text text-xs">mppt</span></label>
+        <input type="text" class="input input-bordered input-xs w-full" name="sld_mppt{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_mppt' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}">
+    </div>
+    <div class="form-control">
+        <label class="label py-0"><span class="label-text text-xs">string</span></label>
+        <input type="text" class="input input-bordered input-xs w-full" name="sld_string{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_string' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}">
+    </div>
+    <div class="form-control">
+        <label class="label py-0"><span class="label-text text-xs">方位</span></label>
+        <input type="text" class="input input-bordered input-xs w-full" name="sld_orientation{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_orientation' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}">
+    </div>
+    <div class="form-control">
+        <label class="label py-0"><span class="label-text text-xs">角度</span></label>
+        <input type="number" class="input input-bordered input-xs w-full" name="sld_tilt_angle{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_tilt_angle' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}" step="0.01">
+    </div>
+    <div class="form-control">
+        <label class="label py-0"><span class="label-text text-xs">模組瓦數</span></label>
+        <input type="number" class="input input-bordered input-xs w-full" name="sld_module_wattage{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_module_wattage' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}" step="0.01">
+    </div>
+    <div class="form-control">
+        <label class="label py-0"><span class="label-text text-xs">模組片數</span></label>
+        <input type="number" class="input input-bordered input-xs w-full" name="sld_module_count{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_module_count' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}" min="0">
+    </div>
+    <input type="hidden" name="sld_uid{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_uid' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}">
+</div>
+{% endmacro %}
+
 {% macro render_module(phase_idx, item_idx, data) %}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3 border p-3 rounded-lg bg-base-50 hover:bg-base-100 transition-colors">
     <div class="form-control">
@@ -63,10 +98,49 @@
 
 {% if item_type == 'inverter' %}
     {% for j in range(1, count + 1) %}
+    <div class="border border-base-300 rounded-lg p-3 bg-base-50 space-y-2">
         {{ render_inverter(phase_idx, j, data) }}
+        <div class="pl-2 border-l-2 border-primary/30">
+            <div class="flex justify-between items-center mb-1">
+                <span class="font-semibold text-sm text-base-content/80"><i class="bi bi-diagram-3 mr-1"></i> 單線圖</span>
+                <div class="join">
+                    <button type="button" class="btn btn-xs btn-ghost btn-sm join-item"
+                            hx-post="/site/partials/sub-items/sld/{{ phase_idx }}/{{ j }}/?op=add"
+                            hx-target="#sld-area-{{ phase_idx }}-{{ j }}"
+                            hx-include="#form"
+                            hx-swap="innerHTML">
+                        <i class="bi bi-plus"></i> 增
+                    </button>
+                    <button type="button" class="btn btn-xs btn-ghost btn-sm join-item"
+                            hx-post="/site/partials/sub-items/sld/{{ phase_idx }}/{{ j }}/?op=reduce"
+                            hx-target="#sld-area-{{ phase_idx }}-{{ j }}"
+                            hx-include="#form"
+                            hx-swap="innerHTML">
+                        <i class="bi bi-dash"></i> 減
+                    </button>
+                </div>
+            </div>
+            <div id="sld-area-{{ phase_idx }}-{{ j }}" class="space-y-1">
+                {% set ns_sld = namespace(sld_count=0) %}
+                {% for key in data.keys() %}
+                    {% if key.startswith('sld_inv' ~ phase_idx ~ '_' ~ j ~ '_') %}
+                        {% set sk = key|replace('sld_inv' ~ phase_idx ~ '_' ~ j ~ '_', '') %}
+                        {% if sk|int > ns_sld.sld_count %}{% set ns_sld.sld_count = sk|int %}{% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% for k in range(1, ns_sld.sld_count + 1) %}
+                    {{ render_sld(phase_idx, j, k, data) }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
     {% endfor %}
 {% elif item_type == 'module' %}
     {% for j in range(1, count + 1) %}
         {{ render_module(phase_idx, j, data) }}
+    {% endfor %}
+{% elif item_type == 'sld' %}
+    {% for k in range(1, count + 1) %}
+        {{ render_sld(phase_idx, inverter_idx, k, data) }}
     {% endfor %}
 {% endif %}

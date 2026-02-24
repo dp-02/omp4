@@ -16,6 +16,7 @@ class SitePhaseInverter(db.Model):
     
     phase_uid = Column(Integer, ForeignKey('site_phase.uid', ondelete='CASCADE'), nullable=False)
     phase = relationship("SitePhase", back_populates="inverters")
+    slds = relationship("SitePhaseInverterSld", back_populates="inverter", cascade="all, delete-orphan")
 
     # region CRUD
 

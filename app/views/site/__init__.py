@@ -6,7 +6,8 @@ from app.models import (
     Site,
     SitePhase,
     SitePhaseInverter,
-    SitePhaseModule
+    SitePhaseModule,
+    SitePhaseInverterSld,
 )
 blueprint = Blueprint('view_site', __name__)
 
@@ -82,6 +83,15 @@ def update(site_uid):
                 form_data[f'inverter_uid{i}_{j}'] = inv.uid
                 form_data[f'inverter_brand{i}_{j}'] = inv.brand
                 form_data[f'inverter_model{i}_{j}'] = inv.model
+                for k, sld in enumerate(inv.slds, start=1):
+                    form_data[f'sld_uid{i}_{j}_{k}'] = sld.uid
+                    form_data[f'sld_inv{i}_{j}_{k}'] = sld.inv or ''
+                    form_data[f'sld_mppt{i}_{j}_{k}'] = sld.mppt or ''
+                    form_data[f'sld_string{i}_{j}_{k}'] = sld.string or ''
+                    form_data[f'sld_orientation{i}_{j}_{k}'] = sld.orientation or ''
+                    form_data[f'sld_tilt_angle{i}_{j}_{k}'] = sld.tilt_angle if sld.tilt_angle is not None else ''
+                    form_data[f'sld_module_wattage{i}_{j}_{k}'] = sld.module_wattage if sld.module_wattage is not None else ''
+                    form_data[f'sld_module_count{i}_{j}_{k}'] = sld.module_count if sld.module_count is not None else ''
             stmt_mod = select(SitePhaseModule).where(SitePhaseModule.phase_uid == phase.uid)
             modules = session.scalars(stmt_mod).all()
             for k, mod in enumerate(modules, start=1):
@@ -104,6 +114,33 @@ def get_site_phases():
         phase_count = 1
     form_data = request.args 
     return render_template('site/partials/_phases.html', phase_count=phase_count, data=form_data)
+
+@blueprint.route('/partials/sub-items/sld/<int:phase_idx>/<int:inverter_idx>/', methods=['POST'])
+def update_sub_items_sld(phase_idx, inverter_idx):
+    ''' 處理單線圖(SLD)的新增/減少 '''
+    form_data = request.form
+    op = request.args.get('op', 'add')
+    prefix = f"sld_inv{phase_idx}_{inverter_idx}_"
+    current_count = 0
+    for key in form_data.keys():
+        if key.startswith(prefix):
+            try:
+                idx = int(key.replace(prefix, ""))
+                if idx > current_count:
+                    current_count = idx
+            except ValueError:
+                continue
+    if op == 'add':
+        current_count += 1
+    elif op == 'reduce' and current_count > 0:
+        current_count -= 1
+    return render_template('site/partials/_site_sub_items.html',
+                           item_type='sld',
+                           phase_idx=phase_idx,
+                           inverter_idx=inverter_idx,
+                           count=current_count,
+                           data=form_data)
+
 
 @blueprint.route('/partials/sub-items/<item_type>/<int:phase_idx>/', methods=['POST'])
 def update_sub_items(item_type, phase_idx):
