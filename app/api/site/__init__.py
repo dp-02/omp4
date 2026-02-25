@@ -76,7 +76,7 @@ def site_create():
     user_uid = flask_session['user_uid']
     phase_number = int(request.form.get('phase', 1))
     _total_cap = request.form.get('total_capacity')
-    total_capacity = float(_total_cap) if _total_cap and str(_total_cap).strip() else None
+    total_capacity = round(float(_total_cap), 5) if _total_cap and str(_total_cap).strip() else None
     latitude = request.form.get('latitude') or None
     longitude = request.form.get('longitude') or None
     installation_mode = request.form.get('installation_mode') or None
@@ -163,7 +163,7 @@ def site_update():
     build_date = request.form.get('build_date')
     wait_cheack = True if request.form.get('wait_cheack') else False
     _total_cap = request.form.get('total_capacity')
-    total_capacity = float(_total_cap) if _total_cap and str(_total_cap).strip() else None
+    total_capacity = round(float(_total_cap), 5) if _total_cap and str(_total_cap).strip() else None
     latitude = request.form.get('latitude') or None
     longitude = request.form.get('longitude') or None
     installation_mode = request.form.get('installation_mode') or None
