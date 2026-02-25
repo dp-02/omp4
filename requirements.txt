@@ -1,10 +1,10 @@
 flask
 SQLAlchemy
 mysql-connector-python
+mysqlclient
 python-dotenv
 waitress
 Flask-Migrate
 flask-sqlalchemy
-mysqlclient
 gunicorn
 cryptography
