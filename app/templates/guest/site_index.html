@@ -1,0 +1,135 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+訪客 - {{ data.site.name }}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body">
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-base-200 pb-4">
+                <div>
+                    <h2 class="card-title text-3xl mb-2">{{ data.site.name }}</h2>
+                    <p class="text-base-content/70 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                        </svg>
+                        {{ data.site.address }}
+                    </p>
+                </div>
+                <div class="mt-4 md:mt-0 badge badge-lg p-4 {% if not data.site.build_date or data.site.wait_cheack %}badge-warning{% else %}badge-neutral{% endif %}">
+                    掛表日期：{% if not data.site.build_date or data.site.wait_cheack %}待確認{% else %}{{ data.site.build_date }}{% endif %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                
+                <div class="bg-base-200 rounded-box p-4">
+                    <h3 class="font-bold text-lg mb-3 flex justify-between">
+                        逆變器數量
+                        <span class="badge badge-primary">{{ data.inverter | length }} 台</span>
+                    </h3>
+                    <div class="space-y-2">
+                        {% set ns = namespace(processed=[], groups=[]) %}
+                        {% for item in data.inverter %}
+                            {% set key = item.brand ~ '|' ~ item.model %}
+                            {% if key not in ns.processed %}
+                                {% set matching_list = [] %}
+                                {% for check_item in data.inverter %}
+                                    {% if check_item.brand == item.brand and check_item.model == item.model %}
+                                        {% set _ = matching_list.append(check_item) %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% set count = matching_list | length %}
+                                {% set _ = ns.processed.append(key) %}
+                                {% set group_dict = {'brand': item.brand, 'model': item.model, 'count': count} %}
+                                {% set _ = ns.groups.append(group_dict) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% for group in ns.groups %}
+                            <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
+                                <div class="badge badge-outline">品牌</div> <span class="font-semibold">{{ group.brand }}</span>
+                                <div class="divider divider-horizontal m-0 py-1"></div>
+                                <div class="badge badge-outline">型號</div> <span class="font-mono">{{ group.model }}</span>
+                                {% if group.count > 1 %}
+                                    <div class="divider divider-horizontal m-0 py-1"></div>
+                                    <div class="badge badge-primary">數量</div> <span class="font-semibold">{{ group.count }} 台</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="bg-base-200 rounded-box p-4">
+                    <h3 class="font-bold text-lg mb-3 flex justify-between">
+                        模組種類
+                        <span class="badge badge-secondary">{{ data.module | length }} 種</span>
+                    </h3>
+                    <div class="space-y-2">
+                        {% for item in data.module %}
+                        <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
+                            <div class="badge badge-outline">品牌</div> <span class="font-semibold">{{ item.brand }}</span>
+                            <div class="divider divider-horizontal m-0 py-1"></div>
+                            <div class="badge badge-outline">型號</div> <span class="font-mono">{{ item.model }}</span>
+                            <div class="divider divider-horizontal m-0 py-1"></div>
+                            <div class="badge badge-ghost">瓦數</div><span class="font-mono">{{ item.wattage }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div>
+                <h3 class="text-xl font-bold mb-4 text-base-content/80 flex items-center gap-2">
+                    <i class="bi bi-file-earmark-text"></i>
+                    電廠檢測 / 維護報告
+                </h3>
+                <p class="text-sm text-base-content/60 mb-4">依年份列出報告，點擊可檢視該次「全部項目」報告（唯讀）。</p>
+                {% if data.reports_by_year %}
+                <div class="space-y-6">
+                    {% for year_group in data.reports_by_year %}
+                    <div class="bg-base-200 rounded-box p-4">
+                        <h4 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="badge badge-primary badge-lg">{{ year_group.year }}</span>
+                            年度
+                        </h4>
+                        <ul class="space-y-2">
+                            {% for report in year_group.reports %}
+                            <li>
+                                <a href="{{ url_for('view_guest.report', site_uid=data.site.uid, checklist_uid=report.checklist_uid) }}"
+                                   class="btn btn-sm btn-ghost justify-start w-full md:w-auto gap-2 text-left hover:bg-base-300">
+                                    <i class="bi bi-file-earmark-pdf text-primary"></i>
+                                    <span>{{ report.check_date }}</span>
+                                    <span class="badge badge-ghost badge-sm">{{ report.type_name }}</span>
+                                    {% if report.user_name %}
+                                    <span class="text-base-content/60 text-sm">檢測員：{{ report.user_name }}</span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-8 text-base-content/50 rounded-box bg-base-200">
+                    <i class="bi bi-inbox text-4xl mb-2"></i>
+                    <p>目前尚無電廠檢測或維護報告</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card-actions mt-8 justify-end">
+                <a class="btn btn-neutral btn-ghost" href="{{ url_for('view_guest.region', region_index=data.site.region) }}" role="button">
+                    <i class="bi bi-arrow-return-left"></i> 返回列表
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

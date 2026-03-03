@@ -1,0 +1,37 @@
+{% if data_s %}
+<div class="overflow-x-auto w-full">
+    <table class="table table-zebra bg-base-100 rounded-lg shadow-sm">
+        <thead>
+            <tr>
+                <th>名稱</th>
+                <th class="hidden md:table-cell">地址</th>
+                <th class="hidden md:table-cell">掛表日</th>
+                <th class="text-center">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data_s_s in data_s %}
+            <tr class="hover">
+                <td>
+                    <div class="font-bold">{{ data_s_s.name }}</div>
+                    <div class="text-xs opacity-50 md:hidden">{{ data_s_s.company }}</div>
+                </td>
+                <td class="hidden md:table-cell">{{ data_s_s.address }}</td>
+                <td class="hidden md:table-cell">{% if data_s_s.build_date %}{{ data_s_s.build_date }}{% else %}待確認{% endif %}</td>
+                <td class="text-center">
+                    <a href="{{ url_for('view_guest.site', site_uid=data_s_s.uid) }}" class="btn btn-sm btn-ghost text-success">
+                        <i class="bi bi-eye"></i> 查看
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<div class="flex flex-col items-center justify-center py-10 text-base-content/50">
+    <i class="bi bi-inbox text-4xl mb-2"></i>
+    <p>目前此區域尚無案場資料</p>
+</div>
+{% endif %}

@@ -206,6 +206,19 @@ def get_by_region(region_index):
             data_s.append(Site.to_dict(item))
     return render_template('site/partials/_site_list_items.html', data_s=data_s)
 
+
+@blueprint.route('/get/region/<int:region_index>/guest', methods=['GET'])
+def get_by_region_guest(region_index):
+    ''' 訪客用：地區案場列表（唯讀，僅顯示查看） '''
+    data_s = []
+    with session_scope() as session:
+        stmt = select(Site).where(Site.region == region_index).order_by(Site.name)
+        query = session.scalars(stmt).all()
+        for item in query:
+            data_s.append(Site.to_dict(item))
+    return render_template('site/partials/_site_list_items_guest.html', data_s=data_s)
+
+
 @blueprint.route('/delete/<int:site_uid>', methods=['DELETE'])
 def api_delete_site(site_uid):
     with session_scope() as session:

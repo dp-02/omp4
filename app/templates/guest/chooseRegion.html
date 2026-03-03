@@ -1,0 +1,69 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+訪客 - 選擇地區
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body">
+            <h1 class="card-title text-3xl font-bold justify-center mb-2 text-base-content">
+                選擇地區
+            </h1>
+            <p class="text-center text-base-content/70 mb-6">訪客模式（唯讀）</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div>
+                    <a class="btn btn-primary btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200" 
+                       href="{{ url_for('view_guest.region', region_index=1) }}" 
+                       role="button">
+                       北部
+                    </a>
+                </div>
+
+                <div>
+                    <a class="btn btn-secondary btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200" 
+                       href="{{ url_for('view_guest.region', region_index=2) }}" 
+                       role="button">
+                       中彰投
+                    </a>
+                </div>
+
+                <div>
+                    <a class="btn btn-accent btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200 text-white" 
+                       href="{{ url_for('view_guest.region', region_index=3) }}" 
+                       role="button">
+                       雲嘉南
+                    </a>
+                </div>
+
+                <div>
+                    <a class="btn btn-info btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200 text-white" 
+                       href="{{ url_for('view_guest.region', region_index=4) }}" 
+                       role="button">
+                       高屏
+                    </a>
+                </div>
+
+                <div>
+                    <a class="btn btn-success btn-lg w-full text-xl h-20 shadow-md hover:scale-105 transition-transform duration-200 text-white" 
+                       href="{{ url_for('view_guest.region', region_index=5) }}" 
+                       role="button">
+                       東部
+                    </a>
+                </div>
+
+            </div>
+
+            <div class="card-actions justify-center mt-8">
+                <a class="btn btn-ghost btn-outline" href="{{ url_for('view_home.index') }}" role="button">
+                    <i class="bi bi-arrow-return-left"></i>
+                    返回登入頁
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

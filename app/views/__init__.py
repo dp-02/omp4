@@ -4,6 +4,7 @@ from .checklist import blueprint as checklist
 from .construction import blueprint as construction
 from .design import blueprint as design
 from .download import blueprint as download
+from .guest import blueprint as guest
 from .home import blueprint as home
 from .site import blueprint as site
 
@@ -13,5 +14,6 @@ def init(app:Flask):
     app.register_blueprint(construction, url_prefix= '/construction')
     app.register_blueprint(design, url_prefix= '/design')
     app.register_blueprint(download, url_prefix= '/download')
+    app.register_blueprint(guest, url_prefix='/guest')
     app.register_blueprint(home)
     app.register_blueprint(site, url_prefix= '/site')

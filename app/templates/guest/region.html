@@ -1,0 +1,40 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+訪客 - 選擇案場
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body">
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h1 id="region" 
+                    data-region-index="{{ region_index }}" 
+                    class="card-title text-3xl font-bold">
+                    {{ region_name }}
+                    <span class="badge badge-ghost text-sm font-normal">訪客唯讀</span>
+                </h1>
+            </div>
+
+            <div id="siteList" 
+                 class="bg-base-200 rounded-box p-4 mb-6 min-h-[100px] flex justify-center items-center"
+                 hx-get="/api/site/get/region/{{ region_index }}/guest"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+                 
+                <span class="loading loading-dots loading-lg text-primary htmx-indicator"></span>
+            </div>
+
+            <div class="card-actions">
+                <a class="btn btn-neutral btn-outline gap-2" href="{{ url_for('view_guest.choose_region') }}" role="button">
+                    <i class="bi bi-arrow-return-left"></i>
+                    返回
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
