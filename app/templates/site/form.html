@@ -62,6 +62,16 @@
                 </div>
 
                 <div class="form-control w-full mb-4">
+                    <label for="guest_password" class="label">
+                        <span class="label-text font-semibold">訪客密碼</span>
+                    </label>
+                    <input type="text" class="input input-bordered w-full font-mono" id="guest_password" name="guest_password" placeholder="請輸入訪客密碼" value="{{ data.get('guest_password', '') }}">
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">提供訪客登入使用（不會隱藏文字）</span>
+                    </label>
+                </div>
+
+                <div class="form-control w-full mb-4">
                     <label for="build_date" class="label">
                         <span class="label-text font-semibold">掛表日</span>
                     </label>

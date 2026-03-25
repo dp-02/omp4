@@ -24,6 +24,7 @@ class Site(db.Model):
     installation_mode = Column(String(64))
     installation_env = Column(String(64))
     power_structure = Column(String(64))
+    guest_password = Column(String(64), default="24991277")
 
     phases = relationship("SitePhase", back_populates="site", cascade="all, delete-orphan", order_by="SitePhase.uid")
     

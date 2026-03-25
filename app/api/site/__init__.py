@@ -216,7 +216,12 @@ def get_by_region_guest(region_index):
         query = session.scalars(stmt).all()
         for item in query:
             data_s.append(Site.to_dict(item))
-    return render_template('site/partials/_site_list_items_guest.html', data_s=data_s)
+    unlocked_site_uids = set(flask_session.get('guest_site_access', []))
+    return render_template(
+        'site/partials/_site_list_items_guest.html',
+        data_s=data_s,
+        unlocked_site_uids=unlocked_site_uids,
+    )
 
 
 @blueprint.route('/delete/<int:site_uid>', methods=['DELETE'])

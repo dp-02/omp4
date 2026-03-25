@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, render_template, abort, request, session, redirect, url_for
 from app.database import session_scope
 from sqlalchemy import select
 from collections import defaultdict
@@ -44,6 +44,41 @@ def region(region_index):
         region_index=region_index,
     )
 
+def _guest_has_access(site_uid: int) -> bool:
+    access_list = session.get('guest_site_access', [])
+    try:
+        return int(site_uid) in set(int(x) for x in access_list)
+    except Exception:
+        return False
+
+
+def _guest_grant_access(site_uid: int) -> None:
+    access_list = session.get('guest_site_access', [])
+    try:
+        access_set = set(int(x) for x in access_list)
+    except Exception:
+        access_set = set()
+    access_set.add(int(site_uid))
+    session['guest_site_access'] = sorted(access_set)
+
+
+@blueprint.route('/site/<int:site_uid>/unlock/', methods=['POST'])
+def unlock_site(site_uid):
+    ''' 訪客：輸入案場訪客密碼後解鎖檢視 '''
+    guest_password = (request.form.get('guest_password') or '').strip()
+    with session_scope() as db_session:
+        site_obj = Site.get(db_session, uid=site_uid)
+        if not site_obj:
+            return abort(404)
+        expected = (site_obj.guest_password or '').strip()
+        region_index = site_obj.region
+
+    if expected and guest_password == expected:
+        _guest_grant_access(site_uid)
+        return redirect(url_for('view_guest.site', site_uid=site_uid))
+
+    return redirect(url_for('view_guest.region', region_index=region_index, error='bad_password', site_uid=site_uid))
+
 
 def _reports_by_year(session, site_uid):
     ''' 依年份分組的電廠檢測/維護報告列表（供訪客唯讀） '''
@@ -78,6 +113,8 @@ def site(site_uid):
         query1 = Site.get(session, uid=site_uid)
         if not query1:
             return abort(404)
+        if not _guest_has_access(site_uid):
+            return redirect(url_for('view_guest.region', region_index=query1.region, error='need_password', site_uid=site_uid))
         inverter = []
         module = []
         stmt = select(SitePhase).where(SitePhase.site_uid == site_uid)
@@ -227,6 +264,8 @@ def _build_full_report_data(session, site_uid, checklist_uid, check_type):
 @blueprint.route('/site/<int:site_uid>/report/<int:checklist_uid>/')
 def report(site_uid, checklist_uid):
     ''' 訪客：電廠檢測/維護報告（預設產出所有項目，唯讀） '''
+    if not _guest_has_access(site_uid):
+        return redirect(url_for('view_guest.site', site_uid=site_uid))
     with session_scope() as session:
         checklist_obj = Checklist.get(session, uid=checklist_uid)
         if not checklist_obj or checklist_obj.site_uid != site_uid:

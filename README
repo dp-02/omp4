@@ -1,4 +1,17 @@
+### 資料庫相關
+1. 初始化
+```Bash
+flask db init
+```
 
+2. 產生遷移檔
+```Bash
+flask db migrate -m "describe change"
+```
+3. 執行遷移
+```Bash
+flask db upgrade
+```
 ### docker rum
 
 ```Bash
