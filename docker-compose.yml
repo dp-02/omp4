@@ -16,4 +16,4 @@ services:
     environment:
       - TZ=Asia/Taipei
     volumes:
-      - ./omp-app/uploads:/app/uploads
+      - ./uploads:/app/uploads
