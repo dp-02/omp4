@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  omp-app:
+    # 這裡加入 build 設定
+    build:
+      context: .           # 代表在當前目錄尋找 Dockerfile
+      dockerfile: Dockerfile # 可選，預設就是 Dockerfile
+    image: omp-app:latest  # 建置後的 Image 名稱與標籤
+    container_name: omp-app
+    restart: always
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    environment:
+      - TZ=Asia/Taipei
+    volumes:
+      - ./uploads:/app/uploads
