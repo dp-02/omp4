@@ -82,11 +82,30 @@ def site_create():
     installation_mode = request.form.get('installation_mode') or None
     installation_env = request.form.get('installation_env') or None
     power_structure = request.form.get('power_structure') or None
+    guest_password = (request.form.get('guest_password') or '').strip() or None
 
     structured_phases = parse_site_form_data(request.form)
 
     with session_scope() as session:
-        query1 = Site.create(session, region = region, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, phase_number = phase_number, user_uid = user_uid, total_capacity = total_capacity, latitude = latitude, longitude = longitude, installation_mode = installation_mode, installation_env = installation_env, power_structure = power_structure)
+        create_kwargs = dict(
+            region=region,
+            name=name,
+            address=address,
+            company=company,
+            build_date=None if build_date == '' else build_date,
+            wait_cheack=wait_cheack,
+            phase_number=phase_number,
+            user_uid=user_uid,
+            total_capacity=total_capacity,
+            latitude=latitude,
+            longitude=longitude,
+            installation_mode=installation_mode,
+            installation_env=installation_env,
+            power_structure=power_structure,
+        )
+        if guest_password is not None:
+            create_kwargs['guest_password'] = guest_password
+        query1 = Site.create(session, **create_kwargs)
         for p_data in structured_phases:
             query2 = SitePhase.create(session, site_uid = query1.uid,  name = p_data['name'], sort = p_data['sort'], taipower_rate = p_data.get('taipower_rate'), greenpower_rate = p_data.get('greenpower_rate'))
             for i_data in p_data['inverters']:
@@ -169,10 +188,26 @@ def site_update():
     installation_mode = request.form.get('installation_mode') or None
     installation_env = request.form.get('installation_env') or None
     power_structure = request.form.get('power_structure') or None
+    guest_password = (request.form.get('guest_password') or '').strip() or None
 
     structured_phases = parse_site_form_data(request.form)
     with session_scope() as session:
-        Site.update(session, uid = site_uid, name = name, address = address, company = company, build_date = None if build_date == '' else build_date, wait_cheack = wait_cheack, total_capacity = total_capacity, latitude = latitude, longitude = longitude, installation_mode = installation_mode, installation_env = installation_env, power_structure = power_structure)
+        Site.update(
+            session,
+            uid=site_uid,
+            name=name,
+            address=address,
+            company=company,
+            build_date=None if build_date == '' else build_date,
+            wait_cheack=wait_cheack,
+            total_capacity=total_capacity,
+            latitude=latitude,
+            longitude=longitude,
+            installation_mode=installation_mode,
+            installation_env=installation_env,
+            power_structure=power_structure,
+            guest_password=guest_password,
+        )
         stmt = delete(SitePhase).where(SitePhase.site_uid == site_uid)
         result = session.execute(stmt)
         for p_data in structured_phases:
