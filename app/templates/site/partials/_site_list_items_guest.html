@@ -19,18 +19,9 @@
                 <td class="hidden md:table-cell">{{ data_s_s.address }}</td>
                 <td class="hidden md:table-cell">{% if data_s_s.build_date %}{{ data_s_s.build_date }}{% else %}待確認{% endif %}</td>
                 <td class="text-center">
-                    {% if unlocked_site_uids and (data_s_s.uid in unlocked_site_uids) %}
-                        <a href="{{ url_for('view_guest.site', site_uid=data_s_s.uid) }}" class="btn btn-sm btn-ghost text-success">
-                            <i class="bi bi-eye"></i> 查看
-                        </a>
-                    {% else %}
-                        <form class="flex flex-col md:flex-row gap-2 justify-center items-center" method="post" action="{{ url_for('view_guest.unlock_site', site_uid=data_s_s.uid) }}">
-                            <input type="text" name="guest_password" class="input input-bordered input-sm font-mono w-32" placeholder="訪客密碼" required>
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                進入
-                            </button>
-                        </form>
-                    {% endif %}
+                    <a href="{{ url_for('view_guest.site', site_uid=data_s_s.uid) }}" class="btn btn-sm btn-ghost text-success">
+                        <i class="bi bi-eye"></i> 查看
+                    </a>
                 </td>
             </tr>
             {% endfor %}

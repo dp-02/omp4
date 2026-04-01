@@ -1,0 +1,103 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+管理後臺 - 訪客管理
+{% endblock %}
+
+{% block content %}
+<div x-data="{ 
+    notyf: new Notyf({position: {x: 'right', y: 'top'}}),
+    confirmDelete(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: '確定要刪除這位訪客嗎？',
+            text: '此動作無法復原！',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '是的，刪除！',
+            cancelButtonText: '取消'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                htmx.trigger(event.target, 'confirmed-delete');
+            }
+        });
+    }
+}" 
+class="min-h-screen p-4 lg:p-10">
+  <div class="card w-full max-w-6xl mx-auto bg-base-100 shadow-xl border border-base-300">
+    <div class="card-body">
+      
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="card-title text-2xl font-bold">訪客管理</h2>
+        
+        <a href="/guestManager/create/" class="btn btn-primary gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          新增訪客
+        </a>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>登入帳號</th>
+              <th>登入密碼</th>
+              <th>關聯案場</th>
+              <th class="text-center">操作</th>
+            </tr>
+          </thead>
+          
+          <tbody id="guests-table-body"
+                 hx-get="/api/guestManager/partials/get_guest_rows" 
+                 hx-trigger="load" 
+                 hx-swap="innerHTML">
+            
+            <tr>
+              <td colspan="5" class="text-center py-10">
+                <span class="loading loading-spinner loading-lg text-primary"></span>
+                <p class="mt-2 text-gray-500">正在載入訪客資料...</p>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+  const notyf = new Notyf({
+      position: {x: 'right', y: 'top'},
+      duration: 3000,
+      dismissible: true
+  });
+
+  document.body.addEventListener('showToast', function(evt) {
+      const data = evt.detail;
+      if (data.type === 'success') {
+          notyf.success(data.message);
+      } else {
+          notyf.error(data.message);
+      }
+  });
+
+  document.body.addEventListener('htmx:responseError', function(evt) {
+      let errorMsg = "發生未知錯誤";
+      try {
+          const response = JSON.parse(evt.detail.xhr.responseText);
+          errorMsg = response.error || errorMsg;
+      } catch(e) {}
+      notyf.error(errorMsg);
+  });
+</script>
+{% endblock %}

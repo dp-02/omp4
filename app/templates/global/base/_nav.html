@@ -1,20 +1,46 @@
 <nav class="navbar bg-base-100 shadow-md sticky top-0 z-50">
-        <div class="navbar-start">
-            <div class="dropdown">
-                <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
-                </div>
-                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a href="{{ url_for('view_home.choose_region') }}">首頁</a></li>
-                </ul>
+    <div class="navbar-start">
+        <div class="dropdown">
+            <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+                </svg>
             </div>
-            <a href="{{ url_for('view_home.choose_region') }}" class="btn btn-ghost text-xl">吉陽能源工程管理系統</a>
-        </div>
-
-        <div class="navbar-center hidden lg:flex">
-            <ul class="menu menu-horizontal px-1">
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                {% if session.get('user_uid') %}
                 <li><a href="{{ url_for('view_home.choose_region') }}">首頁</a></li>
+                {% endif %}
             </ul>
         </div>
+        <a href="{% if session.get('guest_uid') %}/guest/site/{{ session.get('guest_site_uid') }}/{% elif session.get('user_uid') %}{{ url_for('view_home.choose_region') }}{% else %}/{% endif %}"
+            class="btn btn-ghost text-xl">吉陽能源工程管理系統</a>
+    </div>
 
-    </nav>
+    <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1 gap-2">
+            {% if session.get('user_uid') %}
+            <li><a href="{{ url_for('view_home.choose_region') }}">首頁</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="navbar-end">
+        {% if session.get('guest_uid') %}
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-secondary mr-2 hidden sm:inline-block">
+                <i class="bi bi-person-badge"></i> 訪客：{{ session.get('guest_account') }}
+            </span>
+            <a href="/guest/logout" class="btn btn-outline btn-error btn-sm">登出</a>
+        </div>
+        {% elif session.get('user_uid') %}
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-primary mr-2 hidden sm:inline-block">
+                <i class="bi bi-person-circle"></i> {{ session.get('user_name') }}
+            </span>
+            <a href="{{ url_for('view_home.logout') }}" class="btn btn-outline btn-error btn-sm">登出</a>
+        </div>
+        {% endif %}
+    </div>
+
+</nav>

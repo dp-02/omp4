@@ -1,0 +1,107 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+{% if act == 'create'%}新增{% else %}修改{% endif%}訪客帳號
+{% endblock %}
+
+{% block content %}
+<div class="grid min-h-[80vh] place-items-center bg-base-100 p-4"
+    x-data
+    @response-data.window="
+            Swal.fire({
+                title: $event.detail.title,
+                text: $event.detail.text,
+                icon: 'success',
+                confirmButtonText: 'OK',
+                timer: 2000
+            }).then(() => {
+                if ($event.detail.redirectUrl) {
+                    window.location.href = $event.detail.redirectUrl;
+                }
+            });
+        ">
+  <div class="card w-full max-w-lg bg-base-100 shadow-xl border border-base-200">
+    <div class="card-body">
+        <h2 class="card-title text-2xl mb-4 border-b border-base-200 pb-2">
+            {% if act == 'create'%}新增{% else %}修改{% endif%}訪客
+        </h2>
+        
+        <form x-data 
+            hx-post="{% if act == 'create'%}/api/guestManager/create{% else %}/api/guestManager/update{% endif %}" 
+            hx-swap="none">
+            
+            {% if act == 'update' %}
+            <input type="hidden" name="uid" value="{{ data.uid }}">
+            {% endif %}
+
+            <div class="form-control w-full mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">登入帳號</span>
+                </label>
+                <input 
+                    type="text" 
+                    name="account" 
+                    placeholder="輸入訪客帳號" 
+                    class="input input-bordered w-full font-mono" 
+                    value="{{ data.get('account', '') }}"
+                    required 
+                />
+            </div>
+
+            <div class="form-control w-full mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">登入密碼</span>
+                </label>
+                <input 
+                    type="text" 
+                    name="password" 
+                    placeholder="輸入密碼 (不隱藏)" 
+                    class="input input-bordered w-full font-mono" 
+                    value="{{ data.get('password', '') }}"
+                    required 
+                />
+            </div>
+
+            <div class="divider">綁定案場</div>
+
+            <div class="form-control w-full mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">篩選地區</span>
+                </label>
+                <select id="region_index" name="region_index" class="select select-bordered w-full"
+                        hx-get="/api/guestManager/partials/get_sites_by_region" 
+                        hx-target="#site_uid"
+                        hx-swap="innerHTML">
+                    <option value="">-- 先選擇地區 --</option>
+                    {% for idx, name in regions.items() %}
+                    <option value="{{ idx }}" {% if region_index == idx %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <label class="label">
+                    <span class="label-text-alt text-gray-500">切換區域可更新下方案場選單</span>
+                </label>
+            </div>
+
+            <div class="form-control w-full mb-6">
+                <label class="label">
+                    <span class="label-text font-semibold">指定案場</span>
+                </label>
+                <!-- 初始載入時，若是更新且有 sites，則預設渲染；若無則顯示空選項等待 HTMX -->
+                <select id="site_uid" name="site_uid" class="select select-bordered w-full">
+                    {% with selected_site_uid = data.get('site_uid') %}
+                        {% include 'guestManager/partials/_site_options.html' %}
+                    {% endwith %}
+                </select>
+            </div>
+
+            <div class="card-actions flex items-center justify-end gap-3 mt-6">
+                <a href="/guestManager/" class="btn btn-neutral btn-outline">取消返回</a>
+                <button type="submit" class="btn btn-primary px-8">
+                    {% if act == 'create'%}提交新增{% else %}儲存更新{% endif%}
+                </button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

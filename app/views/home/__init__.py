@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, make_response
+from flask import Blueprint, render_template, request, flash, make_response, redirect, url_for
 from flask import session as flask_session
 from app.database import session_scope
 from app.auth import login_required
@@ -46,3 +46,11 @@ def choose_region():
             print(f'使用者登入 uid：{uid} name:{query.name}')
 
     return render_template('home/chooseRegion.html')
+
+@blueprint.route('/logout/')
+def logout():
+    ''' 登出 '''
+    flask_session.pop('user_uid', None)
+    flask_session.pop('user_name', None)
+    flash('已登出。', 'success')
+    return redirect(url_for('view_home.index'))

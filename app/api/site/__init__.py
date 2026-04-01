@@ -82,7 +82,6 @@ def site_create():
     installation_mode = request.form.get('installation_mode') or None
     installation_env = request.form.get('installation_env') or None
     power_structure = request.form.get('power_structure') or None
-    guest_password = (request.form.get('guest_password') or '').strip() or None
 
     structured_phases = parse_site_form_data(request.form)
 
@@ -103,8 +102,6 @@ def site_create():
             installation_env=installation_env,
             power_structure=power_structure,
         )
-        if guest_password is not None:
-            create_kwargs['guest_password'] = guest_password
         query1 = Site.create(session, **create_kwargs)
         for p_data in structured_phases:
             query2 = SitePhase.create(session, site_uid = query1.uid,  name = p_data['name'], sort = p_data['sort'], taipower_rate = p_data.get('taipower_rate'), greenpower_rate = p_data.get('greenpower_rate'))
@@ -188,7 +185,6 @@ def site_update():
     installation_mode = request.form.get('installation_mode') or None
     installation_env = request.form.get('installation_env') or None
     power_structure = request.form.get('power_structure') or None
-    guest_password = (request.form.get('guest_password') or '').strip() or None
 
     structured_phases = parse_site_form_data(request.form)
     with session_scope() as session:
@@ -206,7 +202,6 @@ def site_update():
             installation_mode=installation_mode,
             installation_env=installation_env,
             power_structure=power_structure,
-            guest_password=guest_password,
         )
         stmt = delete(SitePhase).where(SitePhase.site_uid == site_uid)
         result = session.execute(stmt)
@@ -251,11 +246,9 @@ def get_by_region_guest(region_index):
         query = session.scalars(stmt).all()
         for item in query:
             data_s.append(Site.to_dict(item))
-    unlocked_site_uids = set(flask_session.get('guest_site_access', []))
     return render_template(
         'site/partials/_site_list_items_guest.html',
         data_s=data_s,
-        unlocked_site_uids=unlocked_site_uids,
     )
 
 

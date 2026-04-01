@@ -9,12 +9,9 @@
 
   <div class="card w-96 bg-base-100 shadow-xl border border-base-300">
     <div class="card-body">
-      
-      <form hx-post="/choose_user/" 
-            hx-target="body" 
-            hx-swap="outerHTML"
-            hx-indicator=".login-indicator"
-            hx-on::response-error="
+
+      <form hx-post="/choose_user/" hx-target="body" hx-swap="outerHTML" hx-indicator=".login-indicator"
+        hx-on::response-error="
               var xhr = event.detail.xhr;
               if (xhr && xhr.status === 422) {
                 try {
@@ -25,25 +22,21 @@
                 }
               }
             ">
-            
+
         <h2 class="card-title text-2xl font-bold mb-4">系統登入</h2>
-        
+
         <div class="form-control" x-data="{ showPass: false }">
           <label class="label">
             <span class="label-text">請輸入密碼</span>
           </label>
           <div class="relative">
-            <input :type="showPass ? 'text' : 'password'" 
-                   name="password" 
-                   placeholder="Password" 
-                   class="input input-bordered w-full pr-10" 
-                   required 
-                   autofocus />
-            
-            <button type="button" 
-                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                    @click="showPass = !showPass">
-               <span x-text="showPass ? '隱藏' : '顯示'" class="text-xs"></span>
+            <input :type="showPass ? 'text' : 'password'" name="password" placeholder="Password"
+              class="input input-bordered w-full pr-10" required autofocus />
+
+            <button type="button"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+              @click="showPass = !showPass">
+              <span x-text="showPass ? '隱藏' : '顯示'" class="text-xs"></span>
             </button>
           </div>
         </div>
@@ -52,11 +45,14 @@
           <button type="submit" class="btn btn-primary btn-block">
             登入 <span class="loading loading-spinner loading-sm login-indicator htmx-indicator"></span>
           </button>
-          <a href="{{ url_for('view_guest.choose_region') }}" class="btn btn-ghost btn-block btn-outline">
-            訪客登入
-          </a>
         </div>
       </form>
+
+      <div class="divider my-4">或</div>
+
+      <a href="/guest/login" class="btn btn-outline btn-secondary btn-block">
+        訪客點此登入
+      </a>
 
     </div>
   </div>

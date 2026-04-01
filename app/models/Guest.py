@@ -1,31 +1,18 @@
 from app.database import db
-from sqlalchemy import Column, String, Integer, Date, Boolean, Float
+from sqlalchemy import Column, String, Integer
 from sqlalchemy import select, delete, update
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy.orm import Session
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class Site(db.Model):
-    ''' 案場 '''
-    __tablename__ = 'site'
+class Guest(db.Model):
+    ''' 訪客 '''
+    __tablename__ = 'guest'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    region = Column(Integer)
-    name = Column(String(64))
-    address = Column(String(256))
-    company = Column(String(64))
-    build_date = Column(Date)
-    wait_cheack = Column(Boolean)
-    phase_number = Column(Integer)
-    user_uid = Column(Integer)
-    total_capacity = Column(Float)
-    latitude = Column(String(64))
-    longitude = Column(String(64))
-    installation_mode = Column(String(64))
-    installation_env = Column(String(64))
-    power_structure = Column(String(64))
-
-    phases = relationship("SitePhase", back_populates="site", cascade="all, delete-orphan", order_by="SitePhase.uid")
+    account = Column(String(128))
+    password = Column(String(128))
+    site_uid = Column(Integer)
     
     # region CRUD
 
@@ -72,4 +59,4 @@ class Site(db.Model):
         return result
     
     def __repr__(self):
-        return f'<site {self.uid}>'
+        return f'<guest {self.uid}>'

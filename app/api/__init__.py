@@ -5,6 +5,7 @@ from .construction import blueprint as construction
 from .design import blueprint as design
 from .optionAttachment import blueprint as optionAttachment
 from .site import blueprint as site
+from .guestManager import blueprint as guestManager
 
 def init(app:Flask):
     app.register_blueprint(adminDashboard, url_prefix= '/api/adminDashboard')
@@ -13,3 +14,4 @@ def init(app:Flask):
     app.register_blueprint(design, url_prefix= '/api/design')
     app.register_blueprint(optionAttachment, url_prefix= '/api/optionAttachment')
     app.register_blueprint(site, url_prefix= '/api/site')
+    app.register_blueprint(guestManager, url_prefix= '/api/guestManager')

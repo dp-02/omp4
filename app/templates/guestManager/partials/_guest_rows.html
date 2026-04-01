@@ -1,0 +1,42 @@
+{% if guest_data %}
+  {% for row in guest_data %}
+  <tr>
+    <td>{{ row.uid }}</td>
+    <td><span class="font-semibold">{{ row.account }}</span></td>
+    <td><span class="font-mono text-gray-500">{{ row.password }}</span></td>
+    <td>
+      {% if row.site_uid %}
+        <div class="badge badge-outline badge-primary">{{ row.site_name }}</div>
+      {% else %}
+        <div class="badge badge-ghost text-gray-400">尚未綁定</div>
+      {% endif %}
+    </td>
+    <td class="text-center">
+      <div class="flex flex-col md:flex-row gap-2 justify-center items-center">
+        <!-- 導向編輯頁 -->
+        <a href="/guestManager/edit/{{ row.uid }}/" class="btn btn-sm btn-info text-white">
+          <i class="bi bi-pencil-square"></i> 編輯
+        </a>
+
+        <!-- 刪除按鈕 (SweetAlert 後發送 HTMX 請求) -->
+        <button type="button" 
+                class="btn btn-sm btn-error text-white"
+                @click="confirmDelete(event)"
+                hx-delete="/api/guestManager/delete/{{ row.uid }}"
+                hx-trigger="confirmed-delete"
+                hx-target="closest tr"
+                hx-swap="outerHTML">
+          <i class="bi bi-trash"></i> 刪除
+        </button>
+      </div>
+    </td>
+  </tr>
+  {% endfor %}
+{% else %}
+  <tr>
+    <td colspan="5" class="text-center py-10 text-gray-500">
+      <i class="bi bi-inbox text-4xl mb-2 block"></i>
+      目前沒有建立任何訪客資料。
+    </td>
+  </tr>
+{% endif %}

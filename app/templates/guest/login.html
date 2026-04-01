@@ -1,0 +1,67 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+訪客登入
+{% endblock %}
+
+{% block content %}
+<div class="grid min-h-screen place-items-center bg-base-100" x-data>
+
+  <div class="card w-96 bg-base-100 shadow-xl border border-secondary">
+    <div class="card-body">
+
+      <form hx-post="/guest/login" hx-target="body" hx-swap="none" hx-indicator=".login-indicator"
+        hx-on::response-error="
+              var xhr = event.detail.xhr;
+              if (xhr && xhr.status === 422) {
+                try {
+                  var d = JSON.parse(xhr.response || xhr.responseText || '{}');
+                  (window.notyf || new Notyf()).error(d.message || '登入失敗！');
+                } catch (e) {
+                  (window.notyf || new Notyf()).error('登入失敗！');
+                }
+              }
+            ">
+
+        <h2 class="card-title text-2xl font-bold mb-4 text-secondary">訪客登入</h2>
+
+        <div class="form-control mb-2">
+          <label class="label">
+            <span class="label-text font-semibold">登入帳號</span>
+          </label>
+          <input type="text" name="account" placeholder="輸入帳號" class="input input-bordered input-secondary w-full"
+            required autofocus />
+        </div>
+
+        <div class="form-control" x-data="{ showPass: false }">
+          <label class="label">
+            <span class="label-text font-semibold">登入密碼</span>
+          </label>
+          <div class="relative">
+            <input :type="showPass ? 'text' : 'password'" name="password" placeholder="輸入密碼"
+              class="input input-bordered input-secondary w-full pr-10" required />
+
+            <button type="button"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+              @click="showPass = !showPass">
+              <span x-text="showPass ? '隱藏' : '顯示'" class="text-xs"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-actions flex flex-col gap-4 mt-6">
+          <button type="submit" class="btn btn-secondary btn-block text-white">
+            登入案場儀表板 <span class="loading loading-spinner loading-sm login-indicator htmx-indicator"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.notyf = window.notyf || new Notyf();
+</script>
+{% endblock %}

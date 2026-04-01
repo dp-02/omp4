@@ -3,6 +3,7 @@ from app.database import session_scope
 from sqlalchemy import select
 from collections import defaultdict
 from app.models import (
+    Guest,
     Site,
     SitePhase,
     SitePhaseInverter,
@@ -18,66 +19,52 @@ from app.models import (
 
 blueprint = Blueprint('view_guest', __name__)
 
-REGION_MAP = {
-    1: "北部",
-    2: "中彰投",
-    3: "雲嘉南",
-    4: "高屏",
-    5: "東部",
-}
+import json
+from flask import make_response
 
+def _check_guest_access(site_uid):
+    if 'user_uid' in session:
+        return True
+    if 'guest_site_uid' in session and session['guest_site_uid'] == site_uid:
+        return True
+    return False
 
-@blueprint.route('/choose_region/')
-def choose_region():
-    ''' 訪客：選擇地區（免登入） '''
-    return render_template('guest/chooseRegion.html')
+@blueprint.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('guest/login.html')
+    else:
+        account = request.form.get('account')
+        password = request.form.get('password')
+        with session_scope() as session_db:
+            stmt = select(Guest).where(Guest.account == account, Guest.password == password)
+            guest = session_db.scalars(stmt).first()
+            if guest:
+                if not guest.site_uid:
+                    msg = "您的帳號尚未綁定任何案場！"
+                    resp = make_response(json.dumps({"message": msg}), 422)
+                    resp.headers['Content-Type'] = 'application/json'
+                    return resp
+                
+                session['guest_uid'] = guest.uid
+                session['guest_site_uid'] = guest.site_uid
+                session['guest_account'] = guest.account
+                
+                response = make_response()
+                response.headers['HX-Redirect'] = url_for('view_guest.site', site_uid=guest.site_uid)
+                return response
+            else:
+                msg = "帳號或密碼錯誤，請重新輸入！"
+                resp = make_response(json.dumps({"message": msg}), 422)
+                resp.headers['Content-Type'] = 'application/json'
+                return resp
 
-
-@blueprint.route('/region/<int:region_index>/')
-def region(region_index):
-    ''' 訪客：地區案場列表（唯讀） '''
-    if region_index not in REGION_MAP:
-        return abort(404)
-    return render_template(
-        'guest/region.html',
-        region_name=REGION_MAP[region_index],
-        region_index=region_index,
-    )
-
-def _guest_has_access(site_uid: int) -> bool:
-    access_list = session.get('guest_site_access', [])
-    try:
-        return int(site_uid) in set(int(x) for x in access_list)
-    except Exception:
-        return False
-
-
-def _guest_grant_access(site_uid: int) -> None:
-    access_list = session.get('guest_site_access', [])
-    try:
-        access_set = set(int(x) for x in access_list)
-    except Exception:
-        access_set = set()
-    access_set.add(int(site_uid))
-    session['guest_site_access'] = sorted(access_set)
-
-
-@blueprint.route('/site/<int:site_uid>/unlock/', methods=['POST'])
-def unlock_site(site_uid):
-    ''' 訪客：輸入案場訪客密碼後解鎖檢視 '''
-    guest_password = (request.form.get('guest_password') or '').strip()
-    with session_scope() as db_session:
-        site_obj = Site.get(db_session, uid=site_uid)
-        if not site_obj:
-            return abort(404)
-        expected = (site_obj.guest_password or '').strip()
-        region_index = site_obj.region
-
-    if expected and guest_password == expected:
-        _guest_grant_access(site_uid)
-        return redirect(url_for('view_guest.site', site_uid=site_uid))
-
-    return redirect(url_for('view_guest.region', region_index=region_index, error='bad_password', site_uid=site_uid))
+@blueprint.route('/logout')
+def logout():
+    session.pop('guest_uid', None)
+    session.pop('guest_site_uid', None)
+    session.pop('guest_account', None)
+    return redirect(url_for('view_guest.login'))
 
 
 def _reports_by_year(session, site_uid):
@@ -109,27 +96,28 @@ def _reports_by_year(session, site_uid):
 @blueprint.route('/site/<int:site_uid>/')
 def site(site_uid):
     ''' 訪客：案場詳情（唯讀） '''
-    with session_scope() as session:
-        query1 = Site.get(session, uid=site_uid)
+    if not _check_guest_access(site_uid):
+        return abort(403)
+        
+    with session_scope() as session_db:
+        query1 = Site.get(session_db, uid=site_uid)
         if not query1:
             return abort(404)
-        if not _guest_has_access(site_uid):
-            return redirect(url_for('view_guest.region', region_index=query1.region, error='need_password', site_uid=site_uid))
         inverter = []
         module = []
         stmt = select(SitePhase).where(SitePhase.site_uid == site_uid)
-        query2 = session.scalars(stmt).all()
+        query2 = session_db.scalars(stmt).all()
         for sp_data in query2:
             stmt = select(SitePhaseInverter).where(SitePhaseInverter.phase_uid == sp_data.uid)
-            query3 = session.scalars(stmt).all()
+            query3 = session_db.scalars(stmt).all()
             for spi_data in query3:
                 inverter.append(SitePhaseInverter.to_dict(spi_data))
             stmt = select(SitePhaseModule).where(SitePhaseModule.phase_uid == sp_data.uid)
-            query4 = session.scalars(stmt).all()
+            query4 = session_db.scalars(stmt).all()
             for spm_data in query4:
                 module.append(SitePhaseModule.to_dict(spm_data))
         site_dict = Site.to_dict(query1)
-        reports_by_year = _reports_by_year(session, site_uid)
+        reports_by_year = _reports_by_year(session_db, site_uid)
     data = {
         "site": site_dict,
         "inverter": inverter,
@@ -264,12 +252,13 @@ def _build_full_report_data(session, site_uid, checklist_uid, check_type):
 @blueprint.route('/site/<int:site_uid>/report/<int:checklist_uid>/')
 def report(site_uid, checklist_uid):
     ''' 訪客：電廠檢測/維護報告（預設產出所有項目，唯讀） '''
-    if not _guest_has_access(site_uid):
-        return redirect(url_for('view_guest.site', site_uid=site_uid))
-    with session_scope() as session:
-        checklist_obj = Checklist.get(session, uid=checklist_uid)
+    if not _check_guest_access(site_uid):
+        return abort(403)
+        
+    with session_scope() as session_db:
+        checklist_obj = Checklist.get(session_db, uid=checklist_uid)
         if not checklist_obj or checklist_obj.site_uid != site_uid:
             return abort(404)
         check_type = checklist_obj.check_type
-        data = _build_full_report_data(session, site_uid, checklist_uid, check_type)
+        data = _build_full_report_data(session_db, site_uid, checklist_uid, check_type)
     return render_template('checklist/createReport.html', data=data)

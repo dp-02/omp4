@@ -1,0 +1,8 @@
+<option value="">-- 請選擇案場 --</option>
+{% if sites %}
+    {% for site in sites %}
+    <option value="{{ site.uid }}" {% if selected_site_uid and selected_site_uid == site.uid %}selected{% endif %}>{{ site.name }}</option>
+    {% endfor %}
+{% else %}
+    <option value="" disabled>此區域目前無案場</option>
+{% endif %}
