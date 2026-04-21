@@ -25,7 +25,7 @@ from flask import make_response
 def _check_guest_access(site_uid):
     if 'user_uid' in session:
         return True
-    if 'guest_site_uid' in session and session['guest_site_uid'] == site_uid:
+    if 'guest_site_uids' in session and site_uid in session['guest_site_uids']:
         return True
     return False
 
@@ -40,18 +40,23 @@ def login():
             stmt = select(Guest).where(Guest.account == account, Guest.password == password)
             guest = session_db.scalars(stmt).first()
             if guest:
-                if not guest.site_uid:
+                from app.models import GuestSite
+                guest_sites = session_db.scalars(select(GuestSite.site_uid).where(GuestSite.guest_uid == guest.uid)).all()
+                if not guest_sites:
                     msg = "您的帳號尚未綁定任何案場！"
                     resp = make_response(json.dumps({"message": msg}), 422)
                     resp.headers['Content-Type'] = 'application/json'
                     return resp
                 
+                session.pop('user_uid', None)
+                session.pop('user_name', None)
+                
                 session['guest_uid'] = guest.uid
-                session['guest_site_uid'] = guest.site_uid
+                session['guest_site_uids'] = guest_sites
                 session['guest_account'] = guest.account
                 
                 response = make_response()
-                response.headers['HX-Redirect'] = url_for('view_guest.site', site_uid=guest.site_uid)
+                response.headers['HX-Redirect'] = url_for('view_guest.select_site')
                 return response
             else:
                 msg = "帳號或密碼錯誤，請重新輸入！"
@@ -59,10 +64,22 @@ def login():
                 resp.headers['Content-Type'] = 'application/json'
                 return resp
 
+@blueprint.route('/select_site', methods=['GET'])
+def select_site():
+    ''' 訪客登入後選擇案場 '''
+    if 'guest_uid' not in session or 'guest_site_uids' not in session:
+        return redirect(url_for('view_guest.login'))
+        
+    with session_scope() as session_db:
+        site_uids = session['guest_site_uids']
+        sites = session_db.scalars(select(Site).where(Site.uid.in_(site_uids))).all()
+        
+    return render_template('guest/select_site.html', sites=sites)
+
 @blueprint.route('/logout')
 def logout():
     session.pop('guest_uid', None)
-    session.pop('guest_site_uid', None)
+    session.pop('guest_site_uids', None)
     session.pop('guest_account', None)
     return redirect(url_for('view_guest.login'))
 

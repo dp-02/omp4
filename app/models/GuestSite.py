@@ -1,17 +1,17 @@
 from app.database import db
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, Integer
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 
-class Guest(db.Model):
-    ''' 訪客 '''
-    __tablename__ = 'guest'
+class GuestSite(db.Model):
+    ''' 訪客與案場的關聯 '''
+    __tablename__ = 'guest_site'
 
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    account = Column(String(128))
-    password = Column(String(128))
+    guest_uid = Column(Integer)
+    site_uid = Column(Integer)
     
     # region CRUD
 
@@ -58,4 +58,4 @@ class Guest(db.Model):
         return result
     
     def __repr__(self):
-        return f'<guest {self.uid}>'
+        return f'<guest_site {self.uid}>'

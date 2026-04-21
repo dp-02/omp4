@@ -5,7 +5,7 @@
     <td><span class="font-semibold">{{ row.account }}</span></td>
     <td><span class="font-mono text-gray-500">{{ row.password }}</span></td>
     <td>
-      {% if row.site_uid %}
+      {% if row.site_name != "尚未綁定" %}
         <div class="badge badge-outline badge-primary">{{ row.site_name }}</div>
       {% else %}
         <div class="badge badge-ghost text-gray-400">尚未綁定</div>

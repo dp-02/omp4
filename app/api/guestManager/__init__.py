@@ -13,11 +13,16 @@ def get_guest_rows():
     ''' 取得訪客列表 HTML 行 '''
     guest_data = []
     with session_scope() as session:
-        stmt = select(Guest, Site).outerjoin(Site, Guest.site_uid == Site.uid).order_by(Guest.uid.desc())
-        results = session.execute(stmt).all()
-        for g, s in results:
+        from app.models import GuestSite
+        stmt = select(Guest).order_by(Guest.uid.desc())
+        results = session.execute(stmt).scalars().all()
+        for g in results:
             item = Guest.to_dict(g)
-            item['site_name'] = s.name if s else "尚未綁定"
+            guest_sites = session.execute(select(Site.name).join(GuestSite, GuestSite.site_uid == Site.uid).where(GuestSite.guest_uid == g.uid)).scalars().all()
+            if guest_sites:
+                item['site_name'] = "、".join(guest_sites)
+            else:
+                item['site_name'] = "尚未綁定"
             guest_data.append(item)
     return render_template('guestManager/partials/_guest_rows.html', guest_data=guest_data)
 
@@ -42,15 +47,18 @@ def guest_create():
     ''' 建立訪客 '''
     account = request.form.get('account')
     password = request.form.get('password')
-    site_uid = request.form.get('site_uid')
+    site_uids = request.form.getlist('site_uids')
     
     with session_scope() as session:
-        Guest.create(
+        new_guest = Guest.create(
             session,
             account=account,
-            password=password,
-            site_uid=site_uid if site_uid else None
+            password=password
         )
+        if site_uids:
+            from app.models import GuestSite
+            for s_uid in site_uids:
+                GuestSite.create(session, guest_uid=new_guest.uid, site_uid=s_uid)
         
     response = make_response()
     trigger_data = {
@@ -70,16 +78,20 @@ def guest_update():
     uid = request.form.get('uid')
     account = request.form.get('account')
     password = request.form.get('password')
-    site_uid = request.form.get('site_uid')
+    site_uids = request.form.getlist('site_uids')
     
     with session_scope() as session:
         Guest.update(
             session,
             uid=uid,
             account=account,
-            password=password,
-            site_uid=site_uid if site_uid else None
+            password=password
         )
+        from app.models import GuestSite
+        session.execute(delete(GuestSite).where(GuestSite.guest_uid == uid))
+        if site_uids:
+            for s_uid in site_uids:
+                GuestSite.create(session, guest_uid=uid, site_uid=s_uid)
         
     response = make_response()
     trigger_data = {
@@ -98,6 +110,8 @@ def guest_delete(uid):
     ''' 刪除訪客 '''
     with session_scope() as session:
         Guest.delete(session, uid=uid)
+        from app.models import GuestSite
+        session.execute(delete(GuestSite).where(GuestSite.guest_uid == uid))
     
     response = make_response()
     trigger_data = {

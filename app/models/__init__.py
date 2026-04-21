@@ -32,3 +32,4 @@ from .SitePhaseInverter import SitePhaseInverter
 from .SitePhaseModule import SitePhaseModule
 from .SitePhaseInverterSld import SitePhaseInverterSld
 from .Guest import Guest
+from .GuestSite import GuestSite

@@ -62,36 +62,31 @@
                 />
             </div>
 
-            <div class="divider">綁定案場</div>
-
-            <div class="form-control w-full mb-4">
-                <label class="label">
-                    <span class="label-text font-semibold">篩選地區</span>
-                </label>
-                <select id="region_index" name="region_index" class="select select-bordered w-full"
-                        hx-get="/api/guestManager/partials/get_sites_by_region" 
-                        hx-target="#site_uid"
-                        hx-swap="innerHTML">
-                    <option value="">-- 先選擇地區 --</option>
-                    {% for idx, name in regions.items() %}
-                    <option value="{{ idx }}" {% if region_index == idx %}selected{% endif %}>{{ name }}</option>
-                    {% endfor %}
-                </select>
-                <label class="label">
-                    <span class="label-text-alt text-gray-500">切換區域可更新下方案場選單</span>
-                </label>
-            </div>
+            <div class="divider">綁定案場 (可複選)</div>
 
             <div class="form-control w-full mb-6">
-                <label class="label">
-                    <span class="label-text font-semibold">指定案場</span>
-                </label>
-                <!-- 初始載入時，若是更新且有 sites，則預設渲染；若無則顯示空選項等待 HTMX -->
-                <select id="site_uid" name="site_uid" class="select select-bordered w-full">
-                    {% with selected_site_uid = data.get('site_uid') %}
-                        {% include 'guestManager/partials/_site_options.html' %}
-                    {% endwith %}
-                </select>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for region_idx, region_name in regions.items() %}
+                    <div class="card bg-base-200 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg mb-2 border-b border-gray-300 pb-1">{{ region_name }}</h3>
+                        <div class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-2">
+                            {% set region_sites = sites|selectattr('region', 'equalto', region_idx)|list %}
+                            {% if region_sites %}
+                                {% for s in region_sites %}
+                                <label class="cursor-pointer label justify-start gap-3">
+                                    <input type="checkbox" name="site_uids" value="{{ s.uid }}" 
+                                           class="checkbox checkbox-primary" 
+                                           {% if s.uid in data.get('site_uids', []) %}checked{% endif %} />
+                                    <span class="label-text">{{ s.name }}</span>
+                                </label>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-gray-500 text-sm">無案場</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
 
             <div class="card-actions flex items-center justify-end gap-3 mt-6">

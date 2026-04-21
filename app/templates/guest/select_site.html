@@ -1,0 +1,44 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+選擇案場
+{% endblock %}
+
+{% block content %}
+<div class="grid min-h-screen place-items-center bg-base-100 p-4">
+
+  <div class="card w-full max-w-2xl bg-base-100 shadow-xl border border-secondary">
+    <div class="card-body">
+      <h2 class="card-title text-2xl font-bold mb-6 text-secondary">請選擇要進入的案場</h2>
+      
+      {% if sites %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for site in sites %}
+        <a href="/guest/site/{{ site.uid }}/" class="card bg-base-200 hover:bg-secondary hover:text-white transition-colors cursor-pointer border border-base-300">
+          <div class="card-body p-4">
+            <h3 class="card-title text-lg">{{ site.name }}</h3>
+            {% if site.address %}
+            <p class="text-sm opacity-80">{{ site.address }}</p>
+            {% else %}
+            <p class="text-sm opacity-80">無地址資訊</p>
+            {% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="alert alert-warning shadow-lg">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          <span>您的帳號目前尚未綁定任何案場。</span>
+        </div>
+      </div>
+      {% endif %}
+      
+      <div class="card-actions justify-end mt-6 border-t pt-4 border-base-200">
+        <a href="/guest/logout" class="btn btn-outline">登出</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

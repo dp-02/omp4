@@ -24,7 +24,9 @@ def index():
 @login_required
 def create():
     ''' 新增訪客頁面 '''
-    return render_template('guestManager/form.html', act='create', regions=region_map, data={})
+    with session_scope() as session:
+        sites = session.scalars(select(Site).order_by(Site.region, Site.name)).all()
+    return render_template('guestManager/form.html', act='create', regions=region_map, data={}, sites=sites)
 
 @blueprint.route('/edit/<int:uid>/')
 @login_required
@@ -36,22 +38,16 @@ def edit(uid):
             return abort(404)
         form_data = Guest.to_dict(guest)
         
-        # 查詢此訪客對應的案場所屬地區
-        region_index = None
-        if guest.site_uid:
-            site = Site.get(session, uid=guest.site_uid)
-            if site:
-                region_index = site.region
-                
-        # 取得該地區的所有案場
-        sites = []
-        if region_index:
-            stmt = select(Site).where(Site.region == region_index).order_by(Site.name)
-            sites = session.scalars(stmt).all()
+        # 取得此訪客關聯的案場 UIDs
+        from app.models import GuestSite
+        guest_sites = session.scalars(select(GuestSite.site_uid).where(GuestSite.guest_uid == uid)).all()
+        form_data['site_uids'] = guest_sites
+        
+        # 取得所有案場
+        sites = session.scalars(select(Site).order_by(Site.region, Site.name)).all()
             
     return render_template('guestManager/form.html', 
                            act='update', 
                            regions=region_map, 
                            data=form_data, 
-                           region_index=region_index,
                            sites=sites)
