@@ -4,9 +4,13 @@
     <td>{{ row.uid }}</td>
     <td><span class="font-semibold">{{ row.account }}</span></td>
     <td><span class="font-mono text-gray-500">{{ row.password }}</span></td>
-    <td>
+    <td class="max-w-xs">
       {% if row.site_name != "尚未綁定" %}
-        <div class="badge badge-outline badge-primary">{{ row.site_name }}</div>
+        <div class="flex flex-wrap gap-1">
+          {% for name in row.site_name.split('、') %}
+            <div class="badge badge-outline badge-primary whitespace-nowrap">{{ name }}</div>
+          {% endfor %}
+        </div>
       {% else %}
         <div class="badge badge-ghost text-gray-400">尚未綁定</div>
       {% endif %}
