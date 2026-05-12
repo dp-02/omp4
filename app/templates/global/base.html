@@ -1,43 +1,46 @@
 <!DOCTYPE html>
 <html lang="zh-TW" data-theme="cupcake">
-    <head>
-        <title>{% block title %}吉陽工程管理{% endblock %}</title>
-        <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 
-        <!-- favicon.ico -->
-        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<head>
+    <title>{% block title %}寬福系統工程管理{% endblock %}</title>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 
-        <!-- HTMX -->
-        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-        <!-- Bootstrap icon -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-        <!-- Alpine.js -->
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-        <!-- Tailwind css -->
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <!-- Notyf -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
-        <!-- SweetAlert2  -->
-        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-        <!-- flatpickr -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- favicon.ico -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
-        {% block style %}{% endblock %}
-        {% block head_scripts %}{% endblock %}
-    </head>
-    <body class="min-h-screen flex flex-col">        
-        {% include 'global/base/_nav.html' %}
-        <main class="flex-grow container mx-auto p-4">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Bootstrap icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Tailwind css -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Notyf -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <!-- SweetAlert2  -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <!-- flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    {% block style %}{% endblock %}
+    {% block head_scripts %}{% endblock %}
+</head>
+
+<body class="min-h-screen flex flex-col">
+    {% include 'global/base/_nav.html' %}
+    <main class="flex-grow container mx-auto p-4">
         {% block content %}{% endblock %}
-        </main>
-        {% include 'global/base/_footer.html' %}
-                
-        <!-- SweetAlert2 -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-        
-        {% block scripts %}{% endblock %}
-    </body>
+    </main>
+    {% include 'global/base/_footer.html' %}
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+
 </html>

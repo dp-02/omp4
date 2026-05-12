@@ -14,7 +14,7 @@
             </ul>
         </div>
         <a href="{% if session.get('guest_uid') %}/guest/select_site{% elif session.get('user_uid') %}{{ url_for('view_home.choose_region') }}{% elif request.path and request.path.startswith('/guest') %}/guest/login{% else %}/{% endif %}"
-            class="btn btn-ghost text-xl">吉陽能源工程管理系統</a>
+            class="btn btn-ghost text-xl">寬福系統工程管理系統</a>
     </div>
 
     <div class="navbar-center hidden lg:flex">
