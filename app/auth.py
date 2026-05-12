@@ -9,3 +9,12 @@ def login_required(f):
             return redirect(url_for('view_home.index'))
         return f(*args, **kwargs)
     return decorated_function
+
+def user_or_guest_required(f):
+    ''' 使用者或訪客登入驗證 '''
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_uid' not in session and 'guest_uid' not in session:
+            return redirect(url_for('view_home.index'))
+        return f(*args, **kwargs)
+    return decorated_function

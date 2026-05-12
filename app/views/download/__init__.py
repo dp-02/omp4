@@ -1,12 +1,12 @@
 from flask import Blueprint, send_from_directory
-from app.auth import login_required
+from app.auth import user_or_guest_required
 import os
 from dotenv import load_dotenv
 load_dotenv()
 blueprint = Blueprint('view_download', __name__)
 
 @blueprint.route('/<path:filename>')
-@login_required
+@user_or_guest_required
 def download(filename):
     '''
     ### 下載
@@ -20,7 +20,7 @@ def download(filename):
     )
 
 @blueprint.route('/attachment/<path:filename>')
-@login_required
+@user_or_guest_required
 def attachment(filename):
     '''
     ### 下載
