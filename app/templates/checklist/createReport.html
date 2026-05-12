@@ -8,7 +8,8 @@
 <div class="container mx-auto px-4 py-8">
     <div class="card bg-base-100 shadow-xl border border-base-200 max-w-4xl mx-auto">
         <div class="card-body p-6 md:p-10">
-            <h1 class="card-title text-2xl md:text-3xl font-bold mb-6 pb-4 border-b border-base-200 flex items-center gap-3">
+            <h1
+                class="card-title text-2xl md:text-3xl font-bold mb-6 pb-4 border-b border-base-200 flex items-center gap-3">
                 <div class="p-3 bg-primary/10 rounded-lg text-primary">
                     <i class="bi bi-file-earmark-text text-2xl"></i>
                 </div>
@@ -25,13 +26,17 @@
             {% endif %}
 
             {% if data.site or data.checklist %}
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-base-200 pb-6">
+            <div
+                class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-base-200 pb-6">
                 <div>
                     {% if data.site %}
                     <h2 class="text-xl font-bold mb-2">{{ data.site.company }}</h2>
                     <p class="text-base-content/70 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                clip-rule="evenodd" />
                         </svg>
                         {{ data.site.address | default('-', true) }}
                     </p>
@@ -56,32 +61,33 @@
                     <div class="space-y-2">
                         {% set ns_inv = namespace(processed=[], groups=[]) %}
                         {% for item in data.inverter %}
-                            {% set key_inv = item.brand ~ '|' ~ item.model %}
-                            {% if key_inv not in ns_inv.processed %}
-                                {% set matching_list = [] %}
-                                {% for check_item in data.inverter %}
-                                    {% if check_item.brand == item.brand and check_item.model == item.model %}
-                                        {% set _ = matching_list.append(check_item) %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% set count_inv = matching_list | length %}
-                                {% set _ = ns_inv.processed.append(key_inv) %}
-                                {% set group_dict = {'brand': item.brand, 'model': item.model, 'count': count_inv} %}
-                                {% set _ = ns_inv.groups.append(group_dict) %}
-                            {% endif %}
+                        {% set key_inv = item.brand ~ '|' ~ item.model %}
+                        {% if key_inv not in ns_inv.processed %}
+                        {% set matching_list = [] %}
+                        {% for check_item in data.inverter %}
+                        {% if check_item.brand == item.brand and check_item.model == item.model %}
+                        {% set _ = matching_list.append(check_item) %}
+                        {% endif %}
+                        {% endfor %}
+                        {% set count_inv = matching_list | length %}
+                        {% set _ = ns_inv.processed.append(key_inv) %}
+                        {% set group_dict = {'brand': item.brand, 'model': item.model, 'count': count_inv} %}
+                        {% set _ = ns_inv.groups.append(group_dict) %}
+                        {% endif %}
                         {% endfor %}
                         {% for group in ns_inv.groups %}
-                            <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
-                                <div class="badge badge-outline">型號</div>
-                                <span class="font-mono">{{ group.model }}</span>
-                                {% if group.count > 1 %}
-                                    <div class="divider divider-horizontal m-0 py-1"></div>
-                                    <span class="font-semibold">{{ group.count }} 台</span>
-                                {% endif %}
-                            </div>
+                        <div
+                            class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
+                            <div class="badge badge-outline">型號</div>
+                            <span class="font-mono">{{ group.model }}</span>
+                            {% if group.count > 1 %}
+                            <div class="divider divider-horizontal m-0 py-1"></div>
+                            <span class="font-semibold">{{ group.count }} 台</span>
+                            {% endif %}
+                        </div>
                         {% endfor %}
                         {% if not ns_inv.groups %}
-                            <p class="text-base-content/50 text-sm">尚無逆變器資料</p>
+                        <p class="text-base-content/50 text-sm">尚無逆變器資料</p>
                         {% endif %}
                     </div>
                 </div>
@@ -93,7 +99,8 @@
                     </h3>
                     <div class="space-y-2">
                         {% for item in data.module %}
-                        <div class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
+                        <div
+                            class="bg-base-100 p-3 rounded-lg shadow-sm border border-base-300 flex flex-wrap gap-3 items-center text-sm">
                             <div class="badge badge-outline">型號</div>
                             <span class="font-mono">{{ item.model }}</span>
                             <div class="divider divider-horizontal m-0 py-1"></div>
@@ -102,7 +109,7 @@
                         </div>
                         {% endfor %}
                         {% if not data.module %}
-                            <p class="text-base-content/50 text-sm">尚無模組資料</p>
+                        <p class="text-base-content/50 text-sm">尚無模組資料</p>
                         {% endif %}
                     </div>
                 </div>
@@ -121,7 +128,8 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
                         {% for key_o, value_o in value.options.items() %}
-                        <div class="flex flex-col p-4 rounded-lg border border-base-200 bg-base-200/30 hover:bg-base-200/50 transition-colors">
+                        <div
+                            class="flex flex-col p-4 rounded-lg border border-base-200 bg-base-200/30 hover:bg-base-200/50 transition-colors">
                             <div class="flex justify-between items-start mb-2">
                                 <span class="text-sm font-semibold uppercase text-base-content/70 tracking-wider">
                                     {{ value_o.name }}
@@ -130,8 +138,9 @@
                                     #{{ value_o.sort }}
                                 </span>
                             </div>
-                            
-                            <div class="text-base md:text-lg font-medium text-base-content break-words mt-1 mb-3 pl-1">
+
+                            <div
+                                class="text-base md:text-lg font-medium {% if value_o.value == '異常' %}text-error{% else %}text-base-content{% endif %} break-words mt-1 mb-3 pl-1">
                                 <b>{{ value_o.value | default('-', true) }}</b>
                             </div>
 
@@ -140,10 +149,9 @@
                             <div class="divider my-0"></div>
                             <div class="flex flex-col gap-4 mt-3 w-full">
                                 {% for attachment_uid in value_o.attachment %}
-                                <div hx-get="/api/optionAttachment/report/get/{{ attachment_uid }}" 
-                                     hx-trigger="load"
-                                     hx-swap="outerHTML"
-                                     class="w-full p-4 rounded-lg border border-base-200 bg-base-100 animate-pulse">
+                                <div hx-get="/api/optionAttachment/report/get/{{ attachment_uid }}" hx-trigger="load"
+                                    hx-swap="outerHTML"
+                                    class="w-full p-4 rounded-lg border border-base-200 bg-base-100 animate-pulse">
                                     <div class="flex flex-col gap-3">
                                         <div class="h-4 bg-base-300 rounded w-1/4"></div>
                                         <div class="h-20 bg-base-300 rounded w-full"></div>
@@ -153,7 +161,7 @@
                                         </div>
                                     </div>
                                     <div class="flex justify-center mt-2">
-                                         <span class="text-xs text-base-content/40">正在載入附件資料...</span>
+                                        <span class="text-xs text-base-content/40">正在載入附件資料...</span>
                                     </div>
                                 </div>
                                 {% endfor %}
