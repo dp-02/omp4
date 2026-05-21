@@ -1,0 +1,104 @@
+<div class="w-full bg-base-100 rounded-xl border border-base-300 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+    
+    <!-- 標題欄 -->
+    <div class="bg-base-200/60 px-5 py-3 border-b border-base-300 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="badge badge-success text-white gap-2 font-medium">
+                <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                檔案紀錄
+            </div>
+            <span class="text-sm font-mono opacity-50">#{{ uid }}</span>
+        </div>
+        <span class="text-xs text-base-content/50 font-medium">
+            共 {{ files|length }} 個檔案
+        </span>
+    </div>
+
+    <div class="p-5 space-y-4">
+        
+        <!-- 備註說明 -->
+        {% if note %}
+        <div class="alert bg-base-100 border border-base-200 text-sm shadow-sm flex-col items-start gap-1 p-3">
+            <span class="text-xs font-bold opacity-50 uppercase flex items-center gap-2">
+                <i class="bi bi-journal-text"></i> 備註 Note
+            </span>
+            <div class="opacity-80 whitespace-pre-wrap pl-1">{{ note }}</div>
+        </div>
+        {% endif %}
+
+        <!-- 檔案列表 -->
+        {% if files %}
+        <div class="flex flex-col gap-2">
+            {% for f in files %}
+                {% set ext = f.name.split('.')[-1]|lower %}
+                {% if ext == 'pdf' %}
+                    {% set icon_class = 'bi-file-pdf-fill text-red-500' %}
+                {% elif ext in ['xls', 'xlsx'] %}
+                    {% set icon_class = 'bi-file-excel-fill text-green-600' %}
+                {% elif ext in ['doc', 'docx'] %}
+                    {% set icon_class = 'bi-file-word-fill text-blue-600' %}
+                {% elif ext in ['ppt', 'pptx'] %}
+                    {% set icon_class = 'bi-file-ppt-fill text-orange-500' %}
+                {% elif ext in ['zip', 'rar', '7z', 'tar', 'gz'] %}
+                    {% set icon_class = 'bi-file-zip-fill text-yellow-600' %}
+                {% elif ext in ['jpg', 'jpeg', 'png', 'gif', 'svg'] %}
+                    {% set icon_class = 'bi-file-image-fill text-sky-500' %}
+                {% elif ext in ['txt', 'csv', 'md'] %}
+                    {% set icon_class = 'bi-file-text-fill text-slate-500' %}
+                {% else %}
+                    {% set icon_class = 'bi-file-earmark-fill text-base-content/40' %}
+                {% endif %}
+                
+                <div class="flex items-center justify-between p-3 rounded-lg border border-base-200 bg-base-50/50 hover:bg-base-50 transition-all">
+                    
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <!-- 檔案 icon -->
+                        <div class="flex items-center justify-center text-2xl shrink-0">
+                            <i class="bi {{ icon_class }}"></i>
+                        </div>
+                        
+                        <!-- 檔案名稱與資訊 -->
+                        <div class="flex flex-col min-w-0">
+                            <a href="{{ f.url }}" 
+                               target="_blank" 
+                               class="text-xs font-bold text-primary hover:underline truncate"
+                               title="{{ f.name }}">
+                               {{ f.name }}
+                            </a>
+                            
+                            <!-- 上傳資訊 -->
+                            <div class="flex flex-wrap items-center gap-x-2 text-[10px] opacity-60 mt-0.5">
+                                <div class="flex items-center gap-1">
+                                    <i class="bi bi-person-fill"></i>
+                                    <span>{{ f.userName or '未知' }}</span>
+                                    <span class="mx-1 font-normal opacity-40">|</span>
+                                    <i class="bi bi-clock"></i>
+                                    <span>{{ f.atCreatedtime }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 下載按鈕 -->
+                    <div class="flex items-center gap-1 shrink-0 ml-2">
+                        <a href="{{ f.url }}" 
+                           target="_blank" 
+                           download
+                           class="btn btn-ghost btn-circle btn-xs text-primary hover:bg-primary/10 tooltip tooltip-left"
+                           data-tip="下載檔案">
+                            <i class="bi bi-download text-sm"></i>
+                        </a>
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="flex flex-col items-center justify-center py-8 text-base-content/30 gap-2 border-2 border-dashed border-base-200 rounded-lg">
+            <i class="bi bi-file-earmark text-3xl"></i>
+            <span class="text-sm">此項目未上傳任何檔案</span>
+        </div>
+        {% endif %}
+
+    </div>
+</div>

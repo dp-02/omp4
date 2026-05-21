@@ -1,0 +1,176 @@
+<div class="card bg-base-100 border shadow-sm relative group transition-all"
+     :class="record.isSaved ? 'border-success/30 bg-success/5' : 'border-info/30'"
+     x-data="{ 
+        currentRecord: null,
+        init() {
+            this.currentRecord = record; 
+        },
+        get displayPreviews() {
+            if (!this.currentRecord) return [];
+            return this.currentRecord.files_previews || [];
+        },
+        syncInputFiles() {
+            const inputEl = this.$refs.fileInput;
+            const dataTransfer = new DataTransfer();
+            this.currentRecord.files_previews.forEach(preview => {
+                if (!preview.isSaved && preview.fileObj) {
+                    dataTransfer.items.add(preview.fileObj);
+                }
+            });
+            inputEl.files = dataTransfer.files;
+        },
+        handleFileChange(event) {
+            const newFiles = Array.from(event.target.files);
+            if (newFiles.length > 0) {
+                newFiles.forEach(file => {
+                    if (this.currentRecord) {
+                        this.currentRecord.files_previews.push({
+                            url: URL.createObjectURL(file),
+                            name: file.name,
+                            isDoc: true,
+                            isSaved: false,
+                            fileObj: file // 重要：必須保存原始 File 物件
+                        });
+                    }
+                });
+                this.syncInputFiles();
+            }
+        },
+        async removeFile(fileIndex, fileItem) {
+            if (!this.currentRecord) return;
+            if (fileItem.isSaved) {
+                if(!confirm('確定要刪除這個已存檔的檔案嗎？')) return;
+                const resp = await fetch(`/api/optionAttachment/file/delete/${fileItem.uid}`, { method: 'DELETE' });
+                if(resp.ok) {
+                    this.currentRecord.files_previews.splice(fileIndex, 1);
+                    if (typeof notyf !== 'undefined') notyf.success('檔案已刪除');
+                } else {
+                    if (typeof notyf !== 'undefined') notyf.error('刪除失敗');
+                }
+            } 
+            else {
+                this.currentRecord.files_previews.splice(fileIndex, 1);
+                this.syncInputFiles();
+            }
+        },
+        getFileIcon(filename) {
+            if (!filename) return 'bi-file-earmark-fill text-base-content/40';
+            const ext = filename.split('.').pop().toLowerCase();
+            if (ext === 'pdf') return 'bi-file-pdf-fill text-red-500';
+            if (['xls', 'xlsx'].includes(ext)) return 'bi-file-excel-fill text-green-600';
+            if (['doc', 'docx'].includes(ext)) return 'bi-file-word-fill text-blue-600';
+            if (['ppt', 'pptx'].includes(ext)) return 'bi-file-ppt-fill text-orange-500';
+            if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return 'bi-file-zip-fill text-yellow-600';
+            if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(ext)) return 'bi-file-image-fill text-sky-500';
+            if (['txt', 'csv', 'md'].includes(ext)) return 'bi-file-text-fill text-slate-500';
+            return 'bi-file-earmark-fill text-base-content/40';
+        }
+     }">
+     
+     <button type="button" 
+            @click="removeRecord(record)"
+            class="btn btn-circle btn-ghost btn-xs absolute top-2 right-2 z-10"
+            :class="record.isSaved ? 'text-error hover:bg-error/10' : 'text-base-content/40 hover:text-error'">
+        <i class="bi bi-trash"></i>
+    </button>
+
+    <div class="card-body p-4 gap-4">
+        <!-- 標題與類型 -->
+        <div class="flex items-center gap-2 text-sm font-bold border-b border-base-200 pb-2"
+             :class="record.isSaved ? 'text-success' : 'text-info'">
+            <i class="bi" :class="record.isSaved ? 'bi-check-circle-fill' : 'bi-file-earmark-arrow-up-fill'"></i>
+            <span x-text="record.isSaved ? '已存檔檔案紀錄' : '新檔案紀錄'"></span>
+        </div>
+
+        <!-- 說明輸入框 -->
+        <div class="form-control">
+            <div class="label pb-1"><span class="label-text font-bold text-xs opacity-70">說明</span></div>
+            <textarea class="textarea textarea-bordered textarea-sm w-full transition-all" 
+                        :class="record.isSaved ? 'focus:textarea-success' : 'focus:textarea-info'"
+                        placeholder="請輸入說明..."
+                        rows="2"
+                        x-model="record.note"
+                        :name="record.isSaved ? 'file_update_note_' + record.id : 'file_create_note_' + '{{ uid }}_' + record.id"></textarea>
+        </div>
+
+        <!-- 檔案上傳 input -->
+        <div class="form-control">
+            <input type="file" 
+                   x-ref="fileInput"
+                   class="file-input file-input-bordered file-input-sm w-full" 
+                   :class="record.isSaved ? 'file-input-success' : 'file-input-info'"
+                   multiple
+                   @change="handleFileChange($event)"
+                   :name="record.isSaved ? 'file_append_files_' + record.id + '_[]' : 'file_create_files_' + '{{ uid }}_' + record.id + '_[]'" />
+        </div>
+
+        <!-- 檔案列表展示 -->
+        <div class="flex flex-col gap-2 mt-2" x-show="displayPreviews && displayPreviews.length > 0">
+            <div class="text-xs font-bold opacity-60">檔案清單</div>
+            
+            <template x-for="(fileItem, fileIdx) in displayPreviews" :key="fileIdx">
+                <div class="flex items-center justify-between p-3 rounded-lg border bg-base-50/50 hover:bg-base-50 transition-all"
+                     :class="fileItem.isSaved ? 'border-success/20' : 'border-info/20'">
+                    
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <!-- 檔案 icon -->
+                        <div class="flex items-center justify-center text-2xl shrink-0">
+                            <i class="bi" :class="getFileIcon(fileItem.name)"></i>
+                        </div>
+                        
+                        <!-- 檔案名稱與資訊 -->
+                        <div class="flex flex-col min-w-0">
+                            <template x-if="fileItem.isSaved">
+                                <a :href="fileItem.url" 
+                                   target="_blank" 
+                                   class="text-xs font-bold text-primary hover:underline truncate"
+                                   x-text="fileItem.name"></a>
+                            </template>
+                            <template x-if="!fileItem.isSaved">
+                                <span class="text-xs font-bold truncate text-base-content/80" x-text="fileItem.name"></span>
+                            </template>
+
+                            <!-- 上傳資訊 -->
+                            <div class="flex flex-wrap items-center gap-x-2 text-[10px] opacity-60 mt-0.5">
+                                <template x-if="fileItem.isSaved">
+                                    <div class="flex items-center gap-1">
+                                        <i class="bi bi-person-fill"></i>
+                                        <span x-text="fileItem.userName || '未知'"></span>
+                                        <span class="mx-1 font-normal opacity-40">|</span>
+                                        <i class="bi bi-clock"></i>
+                                        <span x-text="fileItem.atCreatedtime"></span>
+                                        <span class="badge badge-xs badge-success/10 text-success border-0 px-1 ml-1 scale-90">已存</span>
+                                    </div>
+                                </template>
+                                <template x-if="!fileItem.isSaved">
+                                    <div class="flex items-center gap-1 text-info font-medium">
+                                        <i class="bi bi-cloud-arrow-up"></i>
+                                        <span>準備上傳 (點擊儲存以寫入)</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 動作按鈕 -->
+                    <div class="flex items-center gap-1 shrink-0 ml-2">
+                        <template x-if="fileItem.isSaved">
+                            <a :href="fileItem.url" 
+                               target="_blank" 
+                               download
+                               class="btn btn-ghost btn-circle btn-xs text-success hover:bg-success/10">
+                                <i class="bi bi-download text-sm"></i>
+                            </a>
+                        </template>
+                        <button type="button" 
+                                @click="removeFile(fileIdx, fileItem)"
+                                class="btn btn-ghost btn-circle btn-xs text-error hover:bg-error/10">
+                            <i class="bi bi-x text-base"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </template>
+        </div>
+    </div>
+</div>

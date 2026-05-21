@@ -32,6 +32,7 @@ class OptionAttachment(db.Model):
     )
     
     images = relationship("OptionAttachmentImage", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentImage.uid")
+    files = relationship("OptionAttachmentFile", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentFile.uid")
     notes = relationship("OptionAttachmentNote", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentNote.uid")
     anomaly_breakers = relationship("OptionAttachmentAnomalyBreaker", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyBreaker.uid")
     anomaly_damageds = relationship("OptionAttachmentAnomalyDamaged", back_populates="attachment", cascade="all, delete-orphan", order_by="OptionAttachmentAnomalyDamaged.uid")

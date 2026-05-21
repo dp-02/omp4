@@ -52,6 +52,15 @@
                             isDoc: false,       
                             isSaved: true
                         })),
+                        files_previews: (item.files || []).map(f => ({
+                            uid: f.uid,       
+                            url: f.url,       
+                            name: f.name,   
+                            userName: f.userName,   
+                            atCreatedtime: f.atCreatedtime,
+                            isDoc: true,       
+                            isSaved: true
+                        })),
                         anomaly_previews: (item.anomaly_images || []).map(img => ({
                             uid: img.uid,       
                             url: img.url,       
@@ -76,6 +85,7 @@
                 type: type,
                 note: '',
                 images_previews: [],
+                files_previews: [],
                 isSaved: false,
                 state: '0'
             };
@@ -135,6 +145,10 @@
                     {% include 'global/optionAttachment/partials/_uploadImage.html' %}
                 </template>
 
+                <template x-if="record.type === 'file'">
+                    {% include 'global/optionAttachment/partials/_uploadFile.html' %}
+                </template>
+
                 <template x-if="record.type === 'anomaly'">
                     {% include 'global/optionAttachment/partials/_anomaly.html' %}
                 </template>
@@ -152,14 +166,24 @@
         </div>
         
         <div class="collapse-content">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 pb-2">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 pb-2">
                 <button type="button"
                         @click="addRecord('image')"
                         class="btn btn-outline btn-info border-dashed border-2 hover:bg-info hover:text-white gap-2 h-auto py-2">
                     <i class="bi bi-camera-fill text-xl"></i>
-                    <div class="flex flex-col items-start">
+                    <div class="flex flex-col items-start text-left">
                         <span class="font-bold">新增照片說明</span>
                         <span class="text-[10px] opacity-70 font-normal">一張說明 + 多張照片</span>
+                    </div>
+                </button>
+
+                <button type="button"
+                        @click="addRecord('file')"
+                        class="btn btn-outline btn-success border-dashed border-2 hover:bg-success hover:text-white gap-2 h-auto py-2">
+                    <i class="bi bi-file-earmark-arrow-up-fill text-xl"></i>
+                    <div class="flex flex-col items-start text-left">
+                        <span class="font-bold">新增檔案說明</span>
+                        <span class="text-[10px] opacity-70 font-normal">一張說明 + 多個任意檔案</span>
                     </div>
                 </button>
 
@@ -167,7 +191,7 @@
                         @click="addRecord('anomaly')"
                         class="btn btn-outline btn-warning border-dashed border-2 hover:bg-warning hover:text-white gap-2 h-auto py-2">
                     <i class="bi bi-exclamation-triangle-fill text-xl"></i>
-                    <div class="flex flex-col items-start">
+                    <div class="flex flex-col items-start text-left">
                         <span class="font-bold">新增異常紀錄</span>
                         <span class="text-[10px] opacity-70 font-normal">紀錄異常狀況與對策</span>
                     </div>

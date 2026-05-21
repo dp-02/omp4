@@ -8,6 +8,7 @@ from .ConstructionTableOptionData import ConstructionTableOptionData
 from .ConstructionHazardNotice import ConstructionHazardNotice
 from .OptionAttachment import OptionAttachment
 from .OptionAttachmentImage import OptionAttachmentImage
+from .OptionAttachmentFile import OptionAttachmentFile
 from .OptionAttachmentNote import OptionAttachmentNote
 from .OptionAttachmentAnomalyBreaker import OptionAttachmentAnomalyBreaker
 from .OptionAttachmentAnomalyDamaged import OptionAttachmentAnomalyDamaged

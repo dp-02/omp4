@@ -1,0 +1,183 @@
+{% extends 'global/base.html' %}
+
+{% block title %}
+資料統整與統計 - 寬福系統工程管理
+{% endblock %}
+
+{% block style %}
+<style>
+    /* 微動畫效果 */
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    .floating-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-5xl" x-data="{ loading: false, hasSearched: false }">
+    
+    <!-- 麵包屑導覽 -->
+    <div class="text-sm breadcrumbs mb-6 text-base-content/60">
+        <ul>
+            <li><a href="/choose_region/"><i class="bi bi-house-door-fill mr-2"></i>首頁</a></li>
+            <li>系統管理</li>
+            <li class="text-primary font-semibold">數據統整</li>
+        </ul>
+    </div>
+
+    <!-- 主標題區 -->
+    <div class="mb-8 text-center md:text-left">
+        <h1 class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            年度資料數據統整
+        </h1>
+        <p class="mt-2 text-base-content/75 text-lg">
+            提供 2010 年至明年度的保養維護、異常狀況及工單統計分析。
+        </p>
+    </div>
+
+    <!-- 查詢卡片 -->
+    <div class="card bg-base-100 shadow-xl border border-base-200 mb-8 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+        <div class="p-6 md:p-8">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-base-content">
+                <i class="bi bi-search text-primary"></i> 統計區間查詢
+            </h2>
+            
+            <form @submit.prevent="loading = true; setTimeout(() => { loading = false; hasSearched = true; }, 1200)" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <!-- 開始年份 -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-semibold flex items-center gap-2">
+                            <i class="bi bi-calendar-event text-secondary"></i> 開始年份
+                        </span>
+                    </label>
+                    <select class="select select-bordered select-primary w-full focus:ring-2 focus:ring-primary" id="start-year" name="start_year">
+                        {% for year in range(2010, 2028) %}
+                        <option value="{{ year }}" {% if year == 2010 %}selected{% endif %}>{{ year }} 年</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 結束年份 -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-semibold flex items-center gap-2">
+                            <i class="bi bi-calendar-check text-secondary"></i> 結束年份
+                        </span>
+                    </label>
+                    <select class="select select-bordered select-primary w-full focus:ring-2 focus:ring-primary" id="end-year" name="end_year">
+                        {% for year in range(2010, 2028) %}
+                        <option value="{{ year }}" {% if year == 2027 %}selected{% endif %}>{{ year }} 年</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 查詢按鈕 -->
+                <div>
+                    <button type="submit" 
+                            class="btn btn-primary w-full text-lg shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                            :disabled="loading">
+                        <span x-show="!loading" class="flex items-center gap-2">
+                            <i class="bi bi-funnel-fill"></i> 開始統整分析
+                        </span>
+                        <span x-show="loading" class="flex items-center gap-2">
+                            <span class="loading loading-spinner loading-md"></span> 計算數據中...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 結果展示區 -->
+    <div class="card bg-base-100 shadow-lg border border-base-200 min-h-[350px] flex items-center justify-center p-8">
+        
+        <!-- 初始空狀態 (未查詢) -->
+        <div x-show="!hasSearched && !loading" class="text-center max-w-md mx-auto py-10" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+            <div class="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 floating-icon">
+                <i class="bi bi-clipboard2-data text-primary text-5xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-base-content mb-2">準備進行數據統整</h3>
+            <p class="text-base-content/60">
+                請選擇您欲查詢的年度區間，點擊上方的「開始統整分析」按鈕，系統將彙整並生成對應年份的維護報表與統計資料。
+            </p>
+        </div>
+
+        <!-- 載入中骨架屏 (Skeleton) -->
+        <div x-show="loading" class="w-full space-y-6" x-transition>
+            <div class="flex flex-col gap-4 w-full">
+                <div class="flex justify-between items-center">
+                    <div class="skeleton h-8 w-40"></div>
+                    <div class="skeleton h-8 w-24"></div>
+                </div>
+                <div class="skeleton h-32 w-full"></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                    <div class="skeleton h-24 w-full"></div>
+                    <div class="skeleton h-24 w-full"></div>
+                    <div class="skeleton h-24 w-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 查詢結果預留區 (Mockup Data) -->
+        <div x-show="hasSearched && !loading" class="w-full" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+            <div class="flex justify-between items-center border-b border-base-200 pb-4 mb-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-base-content flex items-center gap-2">
+                        <i class="bi bi-bar-chart-steps text-secondary"></i> 統整分析結果
+                    </h3>
+                    <p class="text-sm text-base-content/60 mt-1">
+                        統計資料範圍：2010 年 至 2027 年
+                    </p>
+                </div>
+                <button class="btn btn-outline btn-sm btn-secondary" @click="hasSearched = false">
+                    <i class="bi bi-arrow-counterclockwise"></i> 重設查詢
+                </button>
+            </div>
+
+            <!-- 其他內容待後續補充的提示框 -->
+            <div class="alert alert-info shadow-sm mb-6">
+                <i class="bi bi-info-circle-fill text-info-content text-xl"></i>
+                <div>
+                    <h4 class="font-bold">統計欄位與報表載入成功！</h4>
+                    <div class="text-xs">各項目的詳細統計表格、趨勢圖表與匯出功能，正等待您後續補充具體設計規範，我們將依此進行資料串接。</div>
+                </div>
+            </div>
+
+            <!-- 精美預覽卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="stat bg-base-200/50 rounded-box border border-base-300 hover:scale-[1.02] transition-transform">
+                    <div class="stat-figure text-primary">
+                        <i class="bi bi-wrench-adjustable text-3xl"></i>
+                    </div>
+                    <div class="stat-title text-base-content/70">保養次數 (預估)</div>
+                    <div class="stat-value text-primary">--</div>
+                    <div class="stat-desc">2010 - 2027 年累計</div>
+                </div>
+                
+                <div class="stat bg-base-200/50 rounded-box border border-base-300 hover:scale-[1.02] transition-transform">
+                    <div class="stat-figure text-error">
+                        <i class="bi bi-exclamation-triangle text-3xl"></i>
+                    </div>
+                    <div class="stat-title text-base-content/70">異常申報 (預估)</div>
+                    <div class="stat-value text-error">--</div>
+                    <div class="stat-desc">待修復項目統計</div>
+                </div>
+                
+                <div class="stat bg-base-200/50 rounded-box border border-base-300 hover:scale-[1.02] transition-transform">
+                    <div class="stat-figure text-success">
+                        <i class="bi bi-check-circle text-3xl"></i>
+                    </div>
+                    <div class="stat-title text-base-content/70">完工結案率</div>
+                    <div class="stat-value text-success">-- %</div>
+                    <div class="stat-desc font-semibold text-success">維護品質優良</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

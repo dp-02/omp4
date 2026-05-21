@@ -11,6 +11,7 @@ from app.models import (
     OptionAttachment, 
     OptionAttachmentForChecklist, 
     OptionAttachmentImage, 
+    OptionAttachmentFile,
     OptionAttachmentNote,
     OptionAttachmentAnomalyBreaker,
     OptionAttachmentAnomalyDamaged,
@@ -46,6 +47,37 @@ def save_attachment_image(site_uid, table_type):
 
             # 處裡 image
             if requset_data.attachment_type == 'image':
+                if requset_data.act == 'create':
+                    requset_data.option_uid = parts[3]
+                    requset_data.temp_id = parts[4]
+
+                    if not option_attachment_map.get(requset_data.temp_id):
+                        option_attachment = OptionAttachment.create(
+                            session, 
+                            site_uid = site_uid,
+                            option_uid = requset_data.option_uid, 
+                            table_type= table_type, 
+                            type = requset_data.attachment_type
+                            )
+                        option_attachment_map.setdefault(requset_data.temp_id, option_attachment)
+                        if table_type == "checklist":
+                            checklist_uid = request.form.get('checklist_uid')
+                            OptionAttachmentForChecklist.create(
+                                session,
+                                option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid,
+                                checklist_uid = checklist_uid
+                            )
+                    if requset_data.name == "note":
+                        OptionAttachmentNote.create(session, option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, value = value)
+
+                elif requset_data.act == 'update':
+                    requset_data.attachment_uid = parts[3]
+                    if requset_data.name == "note":
+                        stmt = select(OptionAttachmentNote).where(OptionAttachmentNote.option_attachment_uid == requset_data.attachment_uid)
+                        existing = session.execute(stmt).scalar()
+                        if existing: existing.value = value
+            # 處裡 file
+            elif requset_data.attachment_type == 'file':
                 if requset_data.act == 'create':
                     requset_data.option_uid = parts[3]
                     requset_data.temp_id = parts[4]
@@ -193,6 +225,42 @@ def save_attachment_image(site_uid, table_type):
                             if f.filename:
                                 file_path = save(f,"optionAttachment")
                                 OptionAttachmentImage.create(session, option_attachment_uid = requset_data.attachment_uid, file_path = file_path, user_name = flask_session['user_name'])
+            elif requset_data.attachment_type == 'file':
+                if requset_data.name == "files":
+                    if requset_data.act == 'create':
+                        requset_data.option_uid = parts[3]
+                        requset_data.temp_id = parts[4]
+                        if not option_attachment_map.get(requset_data.temp_id):
+                            option_attachment = OptionAttachment.create(
+                                session, 
+                                site_uid = site_uid,
+                                option_uid = requset_data.option_uid, 
+                                table_type= table_type, 
+                                type = requset_data.attachment_type
+                            )
+                            option_attachment_map.setdefault(requset_data.temp_id, option_attachment)
+                        for f in requset_data.file_list:
+                            if f.filename:
+                                file_path = save(f, "optionAttachment")
+                                OptionAttachmentFile.create(
+                                    session, 
+                                    option_attachment_uid = option_attachment_map.get(requset_data.temp_id).uid, 
+                                    file_path = file_path, 
+                                    file_name = f.filename,
+                                    user_name = flask_session['user_name']
+                                )
+                    elif requset_data.act == 'append':
+                        requset_data.attachment_uid = parts[3]
+                        for f in requset_data.file_list:
+                            if f.filename:
+                                file_path = save(f, "optionAttachment")
+                                OptionAttachmentFile.create(
+                                    session, 
+                                    option_attachment_uid = requset_data.attachment_uid, 
+                                    file_path = file_path, 
+                                    file_name = f.filename,
+                                    user_name = flask_session['user_name']
+                                )
             elif requset_data.attachment_type == 'anomaly':
                 if requset_data.act == 'create':
                     requset_data.temp_id = parts[5]
@@ -291,6 +359,7 @@ def get_saved(table_type, option_uid):
                 ).options(
                     selectinload(OptionAttachment.notes),
                     selectinload(OptionAttachment.images),
+                    selectinload(OptionAttachment.files),
                     selectinload(OptionAttachment.anomaly_states),
                     selectinload(OptionAttachment.anomaly_images),
                     selectinload(OptionAttachment.anomaly_positions),
@@ -313,6 +382,7 @@ def get_saved(table_type, option_uid):
                 .options(
                     selectinload(OptionAttachment.notes),
                     selectinload(OptionAttachment.images),
+                    selectinload(OptionAttachment.files),
                     selectinload(OptionAttachment.anomaly_states),
                     selectinload(OptionAttachment.anomaly_images),
                     selectinload(OptionAttachment.anomaly_positions),
@@ -344,6 +414,7 @@ def get_saved(table_type, option_uid):
             if record.notes and len(record.notes) > 0: 
                 description = record.notes[0].value
             image_list = []
+            file_list = []
             state_value = None # 預設狀態
             if record.type == 'anomaly':
                 # 1. 狀態 (State)
@@ -398,6 +469,17 @@ def get_saved(table_type, option_uid):
                         "category": img.type, # before / after
                         "isDoc": False
                     })
+            elif record.type == 'file':
+                for f in record.files:
+                    file_url = f"/download/{f.file_path}"
+                    file_list.append({
+                        "uid": f.uid,
+                        "url": file_url,
+                        "name": f.file_name,
+                        "isDoc": True,
+                        "userName": f.user_name,
+                        "atCreatedtime": f.at_createdtime.strftime('%Y-%m-%d %H:%M') if f.at_createdtime else ""
+                    })
             else:
                 for img in record.images:
                     file_url = f"/download/{img.file_path}"
@@ -419,7 +501,8 @@ def get_saved(table_type, option_uid):
                 "breaker": breaker_list,
                 "damaged_images": damaged_images,
                 "anomaly_images": generic_images,
-                "images": image_list
+                "images": image_list,
+                "files": file_list
             })
     return jsonify(output_data)
 
@@ -434,6 +517,7 @@ def report_get(attachment_uid):
             .options(
                 selectinload(OptionAttachment.notes),
                 selectinload(OptionAttachment.images),
+                selectinload(OptionAttachment.files),
                 selectinload(OptionAttachment.anomaly_states),
                 selectinload(OptionAttachment.anomaly_images),
                 selectinload(OptionAttachment.anomaly_positions),
@@ -539,6 +623,21 @@ def report_get(attachment_uid):
             
             return render_template('global/optionAttachment/partials/_report_image.html', **context)
 
+        elif attachment.type == "file":
+            # 一般檔案
+            file_list = []
+            for f in attachment.files:
+                file_list.append({
+                    "uid": f.uid,
+                    "url": f"/download/{f.file_path}",
+                    "name": f.file_name,
+                    "userName": f.user_name,
+                    "atCreatedtime": f.at_createdtime.strftime('%Y-%m-%d %H:%M') if f.at_createdtime else ""
+                })
+            context['files'] = file_list
+            
+            return render_template('global/optionAttachment/partials/_report_file.html', **context)
+
     return '<div class="alert alert-warning">未知的附件類型</div>', 400
 
 @blueprint.route('/reason/<option_uid>', methods=['GET'])
@@ -565,6 +664,9 @@ def delete_option_attachment(uid):
         if attachment.images:
             for img in attachment.images:
                 delete_file(img.file_path)
+        if attachment.files:
+            for f in attachment.files:
+                delete_file(f.file_path)
         OptionAttachment.delete(session, uid = uid)            
     return jsonify({'message': 'Record deleted successfully'}), 200
 
@@ -578,6 +680,17 @@ def delete_attachment_single_image(image_uid):
         delete_file(image_record.file_path)
         OptionAttachmentImage.delete(session, uid = image_uid)
     return jsonify({'message': 'Image deleted successfully'}), 200
+
+@blueprint.route('/file/delete/<int:file_uid>', methods=['DELETE'])
+def delete_attachment_single_file(file_uid):
+    with session_scope() as session:
+        stmt = select(OptionAttachmentFile).where(OptionAttachmentFile.uid == file_uid)
+        file_record = session.execute(stmt).scalar_one_or_none()
+        if not file_record:
+            return jsonify({'error': 'File not found'}), 404
+        delete_file(file_record.file_path)
+        OptionAttachmentFile.delete(session, uid = file_uid)
+    return jsonify({'message': 'File deleted successfully'}), 200
 
 @blueprint.route('/anomaly_image/delete/<int:image_uid>', methods=['DELETE'])
 def delete_attachment_anomaly_image(image_uid):
