@@ -65,6 +65,7 @@ def query():
                 .where(
                     and_(
                         ChecklistTableOptionData.option_uid.in_(uids),
+                        ChecklistTableOptionData.value == '異常',
                         Checklist.check_date.between(start_date, end_date)
                     )
                 )
