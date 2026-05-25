@@ -18,7 +18,45 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 max-w-5xl" x-data="{ loading: false, hasSearched: false }">
+<div class="container mx-auto px-4 py-8 max-w-5xl" x-data="{ 
+    loading: false, 
+    hasSearched: false, 
+    selectedYear: '2026', 
+    displayYear: '2026',
+    data: {
+        module: { count: 0, percentage: 0 },
+        support: { count: 0, percentage: 0 },
+        inverter: { count: 0, percentage: 0 },
+        dc_box: { count: 0, percentage: 0 },
+        ac_box: { count: 0, percentage: 0 },
+        meter_box: { count: 0, percentage: 0 },
+        dc_line: { count: 0, percentage: 0 },
+        ac_line: { count: 0, percentage: 0 },
+        transformer: { count: 0, percentage: 0 },
+        booster: { count: 0, percentage: 0 },
+        monitor: { count: 0, percentage: 0 },
+        other: { count: 0, percentage: 0 },
+        building: { count: 0, percentage: 0 }
+    },
+    async doQuery() {
+        this.loading = true;
+        try {
+            const res = await fetch(`/summary/query?year=${this.selectedYear}`);
+            if (res.ok) {
+                const result = await res.json();
+                this.data = result;
+                this.displayYear = this.selectedYear;
+                this.hasSearched = true;
+            } else {
+                console.error('查詢失敗');
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            this.loading = false;
+        }
+    }
+}">
     
     <!-- 麵包屑導覽 -->
     <div class="text-sm breadcrumbs mb-6 text-base-content/60">
@@ -43,34 +81,20 @@
     <div class="card bg-base-100 shadow-xl border border-base-200 mb-8 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
         <div class="p-6 md:p-8">
             <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-base-content">
-                <i class="bi bi-search text-primary"></i> 統計區間查詢
+                <i class="bi bi-search text-primary"></i> 統計年度查詢
             </h2>
             
-            <form @submit.prevent="loading = true; setTimeout(() => { loading = false; hasSearched = true; }, 1200)" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                <!-- 開始年份 -->
-                <div class="form-control w-full">
+            <form @submit.prevent="doQuery()" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <!-- 查詢年份 -->
+                <div class="form-control w-full md:col-span-2">
                     <label class="label">
                         <span class="label-text font-semibold flex items-center gap-2">
-                            <i class="bi bi-calendar-event text-secondary"></i> 開始年份
+                            <i class="bi bi-calendar-event text-secondary"></i> 查詢年份
                         </span>
                     </label>
-                    <select class="select select-bordered select-primary w-full focus:ring-2 focus:ring-primary" id="start-year" name="start_year">
+                    <select class="select select-bordered select-primary w-full focus:ring-2 focus:ring-primary" id="year" name="year" x-model="selectedYear">
                         {% for year in range(2010, 2028) %}
-                        <option value="{{ year }}" {% if year == 2010 %}selected{% endif %}>{{ year }} 年</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- 結束年份 -->
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-semibold flex items-center gap-2">
-                            <i class="bi bi-calendar-check text-secondary"></i> 結束年份
-                        </span>
-                    </label>
-                    <select class="select select-bordered select-primary w-full focus:ring-2 focus:ring-primary" id="end-year" name="end_year">
-                        {% for year in range(2010, 2028) %}
-                        <option value="{{ year }}" {% if year == 2027 %}selected{% endif %}>{{ year }} 年</option>
+                        <option value="{{ year }}" {% if year == 2026 %}selected{% endif %}>{{ year }} 年</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -102,7 +126,7 @@
             </div>
             <h3 class="text-2xl font-bold text-base-content mb-2">準備進行數據統整</h3>
             <p class="text-base-content/60">
-                請選擇您欲查詢的年度區間，點擊上方的「開始統整分析」按鈕，系統將彙整並生成對應年份的維護報表與統計資料。
+                請選擇您欲查詢的年份，點擊上方的「開始統整分析」按鈕，系統將彙整並生成對應年份的維護報表與統計資料。
             </p>
         </div>
 
@@ -130,7 +154,7 @@
                         <i class="bi bi-bar-chart-steps text-secondary"></i> 統整分析結果
                     </h3>
                     <p class="text-sm text-base-content/60 mt-1">
-                        統計資料範圍：2010 年 至 2027 年
+                        統計年份：<span class="font-semibold text-primary" x-text="displayYear"></span> 年
                     </p>
                 </div>
                 <button class="btn btn-outline btn-sm btn-secondary" @click="hasSearched = false">
@@ -138,42 +162,351 @@
                 </button>
             </div>
 
-            <!-- 其他內容待後續補充的提示框 -->
-            <div class="alert alert-info shadow-sm mb-6">
-                <i class="bi bi-info-circle-fill text-info-content text-xl"></i>
-                <div>
-                    <h4 class="font-bold">統計欄位與報表載入成功！</h4>
-                    <div class="text-xs">各項目的詳細統計表格、趨勢圖表與匯出功能，正等待您後續補充具體設計規範，我們將依此進行資料串接。</div>
-                </div>
-            </div>
 
-            <!-- 精美預覽卡片 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="stat bg-base-200/50 rounded-box border border-base-300 hover:scale-[1.02] transition-transform">
-                    <div class="stat-figure text-primary">
-                        <i class="bi bi-wrench-adjustable text-3xl"></i>
+
+            <!-- 細項設備統計區塊 -->
+            <div class="mt-8">
+                <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-base-content">
+                    <i class="bi bi-list-stars text-primary"></i> 設備細項統計
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- 1. 模組 -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-sun-fill text-yellow-500"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">模組</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.module.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.module.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.module.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-title text-base-content/70">保養次數 (預估)</div>
-                    <div class="stat-value text-primary">--</div>
-                    <div class="stat-desc">2010 - 2027 年累計</div>
-                </div>
-                
-                <div class="stat bg-base-200/50 rounded-box border border-base-300 hover:scale-[1.02] transition-transform">
-                    <div class="stat-figure text-error">
-                        <i class="bi bi-exclamation-triangle text-3xl"></i>
+                    
+                    <!-- 2. 支架(C鋼、H鋼) -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-bricks text-neutral-500"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">支架 (C鋼、H鋼)</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.support.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.support.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.support.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-title text-base-content/70">異常申報 (預估)</div>
-                    <div class="stat-value text-error">--</div>
-                    <div class="stat-desc">待修復項目統計</div>
-                </div>
-                
-                <div class="stat bg-base-200/50 rounded-box border border-base-300 hover:scale-[1.02] transition-transform">
-                    <div class="stat-figure text-success">
-                        <i class="bi bi-check-circle text-3xl"></i>
+                    
+                    <!-- 3. 逆變器(優化器) -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-cpu text-primary"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">逆變器 (優化器)</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.inverter.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.inverter.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.inverter.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-title text-base-content/70">完工結案率</div>
-                    <div class="stat-value text-success">-- %</div>
-                    <div class="stat-desc font-semibold text-success">維護品質優良</div>
+                    
+                    <!-- 4. DC箱 -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-box-fill text-warning"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">DC 箱</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.dc_box.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.dc_box.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.dc_box.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 5. AC箱 -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-box-fill text-info"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">AC 箱</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.ac_box.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.ac_box.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.ac_box.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 6. 電表箱 -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-speedometer2 text-success"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">電表箱</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.meter_box.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.meter_box.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.meter_box.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 7. 直流線 -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-bezier2 text-orange-500"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">直流線</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.dc_line.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.dc_line.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.dc_line.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 8. 交流線 -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-activity text-error"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">交流線</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.ac_line.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.ac_line.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.ac_line.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 9. 變壓器 -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-lightning-charge-fill text-amber-500"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">變壓器</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.transformer.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.transformer.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.transformer.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 10. 升壓設備 -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-graph-up-arrow text-secondary"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">升壓設備</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.booster.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.booster.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.booster.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 11. 監控 -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-camera-video-fill text-indigo-500"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">監控</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.monitor.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.monitor.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.monitor.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 12. 其他(走道爬梯) -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-tools text-violet-500"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">其他 (走道爬梯)</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.other.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.other.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.other.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 13. 建物(漏水) -->
+                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-2xl"><i class="bi bi-droplet-half text-blue-500"></i></span>
+                                <h4 class="text-sm font-bold text-base-content">建物 (漏水)</h4>
+                            </div>
+                            <div class="my-2">
+                                <template x-if="hasSearched">
+                                    <div class="radial-progress text-primary" :style="'--value:' + data.building.percentage + '; --size:4.5rem; --thickness: 6px;'" role="progressbar">
+                                        <span class="text-xs font-extrabold" x-text="data.building.percentage.toFixed(1) + '%'"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!hasSearched">
+                                    <div class="radial-progress text-base-content/10" style="--value:0; --size:4.5rem; --thickness: 6px;" role="progressbar">
+                                        <span class="text-xs font-bold text-base-content/30">-- %</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="text-xs text-base-content/60">
+                                <span x-show="hasSearched">統計次數：<span class="font-bold text-secondary" x-text="data.building.count"></span> 次</span>
+                                <span x-show="!hasSearched">統計次數：-- 次</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
