@@ -589,9 +589,9 @@
                             <thead>
                                 <tr class="border-b border-base-200 text-sm">
                                     <th class="w-1/4">案場名稱</th>
-                                    <th class="w-1/3">小項原因</th>
-                                    <th>備註說明</th>
-                                    <th class="w-1/4">異常附件</th>
+                                    <th class="w-1/4">小項原因</th>
+                                    <th class="w-1/4">原因</th>
+                                    <th class="w-1/4">位置</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -599,23 +599,8 @@
                                     <tr class="hover border-b border-base-100">
                                         <td class="font-semibold text-primary" x-text="item.site_name"></td>
                                         <td class="text-base-content/85 font-medium" x-text="item.option_name"></td>
-                                        <td class="text-xs text-base-content/75 max-w-[200px] break-words" x-text="item.note || '無備註'"></td>
-                                        <td>
-                                            <div class="flex flex-wrap gap-2">
-                                                <template x-for="imgUrl in item.images">
-                                                    <div class="avatar">
-                                                        <div class="w-12 h-12 rounded-lg ring ring-primary ring-offset-base-100 ring-offset-1 cursor-pointer hover:scale-110 transition-transform duration-150">
-                                                            <a :href="imgUrl" target="_blank" title="點擊在新分頁開啟原圖">
-                                                                <img :src="imgUrl" alt="異常圖片" class="object-cover w-full h-full" onerror="this.src='/static/images/no-image.png'" />
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                                <template x-if="item.images.length === 0">
-                                                    <span class="text-xs text-base-content/40">無照片附件</span>
-                                                </template>
-                                            </div>
-                                        </td>
+                                        <td class="text-xs text-base-content/80 break-words" x-text="item.reason || '-'"></td>
+                                        <td class="text-xs text-base-content/80 break-words" x-text="item.position || '-'"></td>
                                     </tr>
                                 </template>
                             </tbody>

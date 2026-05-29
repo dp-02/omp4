@@ -10,6 +10,7 @@ from app.models import (
     OptionAttachmentForChecklist
 )
 from sqlalchemy import select, func, and_
+from sqlalchemy.orm import selectinload
 from datetime import date
 
 blueprint = Blueprint('view_summary', __name__)
@@ -151,7 +152,10 @@ def detail():
         output = []
         for r in rows:
             # 2. 針對每筆異常資料，查詢對應的 OptionAttachment 記錄
-            stmt_attachment = select(OptionAttachment).join(
+            stmt_attachment = select(OptionAttachment).options(
+                selectinload(OptionAttachment.anomaly_reasons),
+                selectinload(OptionAttachment.anomaly_positions)
+            ).join(
                 OptionAttachmentForChecklist, OptionAttachmentForChecklist.option_attachment_uid == OptionAttachment.uid
             ).where(
                 and_(
@@ -162,32 +166,33 @@ def detail():
             )
             attachments = session.scalars(stmt_attachment).all()
 
-            note = ""
-            images = []
+            reason = ""
+            position = ""
             
             for att in attachments:
-                if att.notes:
-                    note = att.notes[0].value
-                if att.images:
-                    for img in att.images:
-                        images.append(f"/download/{img.file_path}")
-                if att.anomaly_images:
-                    for img in att.anomaly_images:
-                        images.append(f"/download/{img.file_path}")
-                if att.anomaly_damageds:
-                    for d in att.anomaly_damageds:
-                        paths = [d.file_path_front, d.file_path_on, d.file_path_below, d.file_path_left, d.file_path_right, d.file_path_number]
-                        for p in paths:
-                            if p:
-                                images.append(f"/download/{p}")
+                if att.anomaly_reasons:
+                    reason = att.anomaly_reasons[0].value
+                if att.anomaly_positions:
+                    pos = att.anomaly_positions[0]
+                    pos_parts = []
+                    if pos.inv is not None:
+                        pos_parts.append(f"逆變器:{pos.inv}")
+                    if pos.mppt is not None:
+                        pos_parts.append(f"MPPT:{pos.mppt}")
+                    if pos.string is not None:
+                        pos_parts.append(f"串:{pos.string}")
+                    if pos.panel is not None:
+                        pos_parts.append(f"模組:{pos.panel}")
+                    if pos_parts:
+                        position = ", ".join(pos_parts)
 
             output.append({
                 "checklist_uid": r.checklist_uid,
                 "option_uid": r.option_uid,
                 "site_name": r.site_name,
                 "option_name": r.option_name,
-                "note": note,
-                "images": images
+                "reason": reason,
+                "position": position
             })
 
     return jsonify(output)
