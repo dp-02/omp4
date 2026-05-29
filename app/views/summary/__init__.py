@@ -7,7 +7,8 @@ from app.models import (
     Site,
     ChecklistTableOption,
     OptionAttachment,
-    OptionAttachmentForChecklist
+    OptionAttachmentForChecklist,
+    OptionAttachmentAnomalyReasonSetting
 )
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import selectinload
@@ -171,7 +172,23 @@ def detail():
             
             for att in attachments:
                 if att.anomaly_reasons:
-                    reason = att.anomaly_reasons[0].value
+                    reason_val_str = att.anomaly_reasons[0].value
+                    if reason_val_str:
+                        try:
+                            reason_val_int = int(reason_val_str)
+                            stmt_reason_setting = select(OptionAttachmentAnomalyReasonSetting).where(
+                                and_(
+                                    OptionAttachmentAnomalyReasonSetting.checklist_option_uid == r.option_uid,
+                                    OptionAttachmentAnomalyReasonSetting.value == reason_val_int
+                                )
+                            )
+                            reason_setting = session.scalar(stmt_reason_setting)
+                            if reason_setting:
+                                reason = reason_setting.name
+                            else:
+                                reason = reason_val_str
+                        except ValueError:
+                            reason = reason_val_str
                 if att.anomaly_positions:
                     pos = att.anomaly_positions[0]
                     pos_parts = []
