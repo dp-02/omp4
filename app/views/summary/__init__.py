@@ -193,13 +193,13 @@ def detail():
                     pos = att.anomaly_positions[0]
                     pos_parts = []
                     if pos.inv is not None:
-                        pos_parts.append(f"逆變器:{pos.inv}")
+                        pos_parts.append(f"inv:{pos.inv}")
                     if pos.mppt is not None:
-                        pos_parts.append(f"MPPT:{pos.mppt}")
+                        pos_parts.append(f"mppt:{pos.mppt}")
                     if pos.string is not None:
-                        pos_parts.append(f"串:{pos.string}")
+                        pos_parts.append(f"string:{pos.string}")
                     if pos.panel is not None:
-                        pos_parts.append(f"模組:{pos.panel}")
+                        pos_parts.append(f"panel:{pos.panel}")
                     if pos_parts:
                         position = ", ".join(pos_parts)
 
