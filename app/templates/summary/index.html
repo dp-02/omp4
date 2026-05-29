@@ -38,6 +38,10 @@
         other: { count: 0, percentage: 0 },
         building: { count: 0, percentage: 0 }
     },
+    modalOpen: false,
+    detailLoading: false,
+    detailTitle: '',
+    detailList: [],
     async doQuery() {
         this.loading = true;
         try {
@@ -54,6 +58,26 @@
             console.error(e);
         } finally {
             this.loading = false;
+        }
+    },
+    async showDetail(category, title) {
+        if (!this.hasSearched) return;
+        this.detailTitle = title;
+        this.detailLoading = true;
+        this.modalOpen = true;
+        try {
+            const res = await fetch(`/summary/detail?year=${this.displayYear}&category=${category}`);
+            if (res.ok) {
+                this.detailList = await res.json();
+            } else {
+                console.error('取得明細失敗');
+                this.detailList = [];
+            }
+        } catch (e) {
+            console.error(e);
+            this.detailList = [];
+        } finally {
+            this.detailLoading = false;
         }
     }
 }">
@@ -171,7 +195,9 @@
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <!-- 1. 模組 -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('module', '模組')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-sun-fill text-yellow-500"></i></span>
@@ -197,7 +223,9 @@
                     </div>
                     
                     <!-- 2. 支架(C鋼、H鋼) -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('support', '支架 (C鋼、H鋼)')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-bricks text-neutral-500"></i></span>
@@ -223,7 +251,9 @@
                     </div>
                     
                     <!-- 3. 逆變器(優化器) -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('inverter', '逆變器 (優化器)')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-cpu text-primary"></i></span>
@@ -249,7 +279,9 @@
                     </div>
                     
                     <!-- 4. DC箱 -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('dc_box', 'DC 箱')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-box-fill text-warning"></i></span>
@@ -275,7 +307,9 @@
                     </div>
                     
                     <!-- 5. AC箱 -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('ac_box', 'AC 箱')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-box-fill text-info"></i></span>
@@ -301,7 +335,9 @@
                     </div>
                     
                     <!-- 6. 電表箱 -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('meter_box', '電表箱')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-speedometer2 text-success"></i></span>
@@ -327,7 +363,9 @@
                     </div>
                     
                     <!-- 7. 直流線 -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('dc_line', '直流線')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-bezier2 text-orange-500"></i></span>
@@ -353,7 +391,9 @@
                     </div>
                     
                     <!-- 8. 交流線 -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('ac_line', '交流線')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-activity text-error"></i></span>
@@ -379,7 +419,9 @@
                     </div>
                     
                     <!-- 9. 變壓器 -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('transformer', '變壓器')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-lightning-charge-fill text-amber-500"></i></span>
@@ -405,7 +447,9 @@
                     </div>
                     
                     <!-- 10. 升壓設備 -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('booster', '升壓設備')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-graph-up-arrow text-secondary"></i></span>
@@ -431,7 +475,9 @@
                     </div>
                     
                     <!-- 11. 監控 -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('monitor', '監控')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-camera-video-fill text-indigo-500"></i></span>
@@ -457,7 +503,9 @@
                     </div>
                     
                     <!-- 12. 其他(走道爬梯) -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('other', '其他 (走道爬梯)')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-tools text-violet-500"></i></span>
@@ -483,7 +531,9 @@
                     </div>
                     
                     <!-- 13. 建物(漏水) -->
-                    <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm transition-all duration-200"
+                         :class="hasSearched ? 'cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-md' : 'opacity-70'"
+                         @click="hasSearched && showDetail('building', '建物 (漏水)')">
                         <div class="card-body p-4 flex flex-col items-center justify-between text-center min-h-[190px]">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-2xl"><i class="bi bi-droplet-half text-blue-500"></i></span>
@@ -509,6 +559,85 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- 異常明細 Modal -->
+        <div class="modal modal-bottom sm:modal-middle transition-opacity duration-300" :class="{'modal-open': modalOpen}" style="z-index: 9999;">
+            <div class="modal-box max-w-4xl bg-base-100 border border-base-200 shadow-2xl relative rounded-2xl">
+                <!-- 標頭 -->
+                <div class="flex justify-between items-center border-b border-base-200 pb-3">
+                    <h3 class="font-extrabold text-xl text-base-content flex items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill text-warning floating-icon"></i>
+                        <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent" x-text="detailTitle"></span>
+                        <span class="text-sm text-base-content/60 font-normal"> - 異常明細列表 (<span x-text="displayYear"></span> 年)</span>
+                    </h3>
+                    <button class="btn btn-sm btn-circle btn-ghost text-base-content" @click="modalOpen = false">✕</button>
+                </div>
+                
+                <!-- 內容區 -->
+                <div class="py-4 overflow-y-auto max-h-[60vh]">
+                    <!-- 載入中骨架屏 -->
+                    <div x-show="detailLoading" class="space-y-4">
+                        <div class="skeleton h-12 w-full"></div>
+                        <div class="skeleton h-12 w-full"></div>
+                        <div class="skeleton h-12 w-full"></div>
+                    </div>
+
+                    <!-- 載入完畢且有資料 -->
+                    <div x-show="!detailLoading && detailList.length > 0" class="overflow-x-auto">
+                        <table class="table table-zebra w-full text-base-content">
+                            <thead>
+                                <tr class="border-b border-base-200 text-sm">
+                                    <th class="w-1/4">案場名稱</th>
+                                    <th class="w-1/3">小項原因</th>
+                                    <th>備註說明</th>
+                                    <th class="w-1/4">異常附件</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="item in detailList" :key="item.checklist_uid + '-' + item.option_uid">
+                                    <tr class="hover border-b border-base-100">
+                                        <td class="font-semibold text-primary" x-text="item.site_name"></td>
+                                        <td class="text-base-content/85 font-medium" x-text="item.option_name"></td>
+                                        <td class="text-xs text-base-content/75 max-w-[200px] break-words" x-text="item.note || '無備註'"></td>
+                                        <td>
+                                            <div class="flex flex-wrap gap-2">
+                                                <template x-for="imgUrl in item.images">
+                                                    <div class="avatar">
+                                                        <div class="w-12 h-12 rounded-lg ring ring-primary ring-offset-base-100 ring-offset-1 cursor-pointer hover:scale-110 transition-transform duration-150">
+                                                            <a :href="imgUrl" target="_blank" title="點擊在新分頁開啟原圖">
+                                                                <img :src="imgUrl" alt="異常圖片" class="object-cover w-full h-full" onerror="this.src='/static/images/no-image.png'" />
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                                <template x-if="item.images.length === 0">
+                                                    <span class="text-xs text-base-content/40">無照片附件</span>
+                                                </template>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 無資料狀態 -->
+                    <div x-show="!detailLoading && detailList.length === 0" class="text-center py-12">
+                        <div class="text-5xl text-base-content/20 mb-3">
+                            <i class="bi bi-patch-check-fill text-success"></i>
+                        </div>
+                        <p class="text-base-content/50 font-medium">該年份此設備無任何異常數據記錄</p>
+                    </div>
+                </div>
+                
+                <!-- 底部按鈕 -->
+                <div class="modal-action border-t border-base-200 pt-3">
+                    <button class="btn btn-primary shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all" @click="modalOpen = false">關閉</button>
+                </div>
+            </div>
+            <!-- 點擊背景也可關閉 Modal -->
+            <div class="modal-backdrop" @click="modalOpen = false"></div>
         </div>
 
     </div>

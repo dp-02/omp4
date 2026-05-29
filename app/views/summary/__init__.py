@@ -1,7 +1,14 @@
 from flask import Blueprint, render_template, request, jsonify
 from app.auth import login_required
 from app.database import session_scope
-from app.models import Checklist, ChecklistTableOptionData
+from app.models import (
+    Checklist, 
+    ChecklistTableOptionData,
+    Site,
+    ChecklistTableOption,
+    OptionAttachment,
+    OptionAttachmentForChecklist
+)
 from sqlalchemy import select, func, and_
 from datetime import date
 
@@ -83,3 +90,104 @@ def query():
             }
 
     return jsonify(results)
+
+@blueprint.route('/detail')
+@login_required
+def detail():
+    ''' 異常明細查詢 API '''
+    year_str = request.args.get('year', '2026')
+    category = request.args.get('category', 'module')
+    try:
+        year = int(year_str)
+    except ValueError:
+        year = 2026
+
+    start_date = date(year, 1, 1)
+    end_date = date(year, 12, 31)
+
+    categories = {
+        "module": [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19],
+        "support": [16, 17, 18],
+        "inverter": [20, 21, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 118],
+        "dc_box": [30, 31, 32, 33, 34, 36, 40, 43],
+        "ac_box": [44, 45, 46, 47, 48, 50, 55, 56],
+        "meter_box": [88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 105],
+        "dc_line": [22, 23, 24, 25, 26, 27, 28, 35, 37, 38, 39, 41, 42],
+        "ac_line": [22, 23, 24, 25, 26, 27, 28, 29, 49, 51, 52, 53, 54],
+        "transformer": [57, 58, 59, 60],
+        "booster": [],
+        "monitor": [76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87],
+        "other": [102, 103, 104],
+        "building": [1, 2, 3]
+    }
+
+    uids = categories.get(category, [])
+    if not uids:
+        return jsonify([])
+
+    with session_scope() as session:
+        # 1. 查詢符合條件的 ChecklistTableOptionData 以及相關關聯表
+        stmt = select(
+            ChecklistTableOptionData.checklist_uid,
+            ChecklistTableOptionData.option_uid,
+            Site.name.label('site_name'),
+            ChecklistTableOption.name.label('option_name')
+        ).join(
+            Checklist, ChecklistTableOptionData.checklist_uid == Checklist.uid
+        ).join(
+            Site, Checklist.site_uid == Site.uid
+        ).join(
+            ChecklistTableOption, ChecklistTableOptionData.option_uid == ChecklistTableOption.uid
+        ).where(
+            and_(
+                ChecklistTableOptionData.option_uid.in_(uids),
+                ChecklistTableOptionData.value == '異常',
+                Checklist.check_date.between(start_date, end_date)
+            )
+        ).order_by(Checklist.check_date.desc())
+
+        rows = session.execute(stmt).all()
+
+        output = []
+        for r in rows:
+            # 2. 針對每筆異常資料，查詢對應的 OptionAttachment 記錄
+            stmt_attachment = select(OptionAttachment).join(
+                OptionAttachmentForChecklist, OptionAttachmentForChecklist.option_attachment_uid == OptionAttachment.uid
+            ).where(
+                and_(
+                    OptionAttachment.option_uid == r.option_uid,
+                    OptionAttachmentForChecklist.checklist_uid == r.checklist_uid,
+                    OptionAttachment.table_type == 'checklist'
+                )
+            )
+            attachments = session.scalars(stmt_attachment).all()
+
+            note = ""
+            images = []
+            
+            for att in attachments:
+                if att.notes:
+                    note = att.notes[0].value
+                if att.images:
+                    for img in att.images:
+                        images.append(f"/download/{img.file_path}")
+                if att.anomaly_images:
+                    for img in att.anomaly_images:
+                        images.append(f"/download/{img.file_path}")
+                if att.anomaly_damageds:
+                    for d in att.anomaly_damageds:
+                        paths = [d.file_path_front, d.file_path_on, d.file_path_below, d.file_path_left, d.file_path_right, d.file_path_number]
+                        for p in paths:
+                            if p:
+                                images.append(f"/download/{p}")
+
+            output.append({
+                "checklist_uid": r.checklist_uid,
+                "option_uid": r.option_uid,
+                "site_name": r.site_name,
+                "option_name": r.option_name,
+                "note": note,
+                "images": images
+            })
+
+    return jsonify(output)
