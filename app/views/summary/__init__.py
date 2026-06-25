@@ -48,7 +48,7 @@ def query():
         "transformer": [57, 58, 59, 60],
         "booster": [],
         "monitor": [76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87],
-        "other": [102, 103, 104],
+        "other": [102, 103, 104, 117],
         "building": [1, 2, 3]
     }
 
@@ -69,12 +69,14 @@ def query():
                 }
                 continue
 
-            stmt_count = select(func.count(ChecklistTableOptionData.uid))\
-                .join(Checklist, ChecklistTableOptionData.checklist_uid == Checklist.uid)\
+            stmt_count = select(func.count(OptionAttachment.uid))\
+                .join(OptionAttachmentForChecklist, OptionAttachmentForChecklist.option_attachment_uid == OptionAttachment.uid)\
+                .join(Checklist, OptionAttachmentForChecklist.checklist_uid == Checklist.uid)\
                 .where(
                     and_(
-                        ChecklistTableOptionData.option_uid.in_(uids),
-                        ChecklistTableOptionData.value == '異常',
+                        OptionAttachment.option_uid.in_(uids),
+                        OptionAttachment.type == 'anomaly',
+                        OptionAttachment.table_type == 'checklist',
                         Checklist.check_date.between(start_date, end_date)
                     )
                 )
@@ -119,7 +121,7 @@ def detail():
         "transformer": [57, 58, 59, 60],
         "booster": [],
         "monitor": [76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87],
-        "other": [102, 103, 104],
+        "other": [102, 103, 104, 117],
         "building": [1, 2, 3]
     }
 
@@ -128,22 +130,28 @@ def detail():
         return jsonify([])
 
     with session_scope() as session:
-        # 1. 查詢符合條件的 ChecklistTableOptionData 以及相關關聯表
+        # 1. 查詢符合條件的 OptionAttachment 以及相關關聯表
         stmt = select(
-            ChecklistTableOptionData.checklist_uid,
-            ChecklistTableOptionData.option_uid,
+            OptionAttachment,
+            OptionAttachmentForChecklist.checklist_uid,
             Site.name.label('site_name'),
             ChecklistTableOption.name.label('option_name')
+        ).options(
+            selectinload(OptionAttachment.anomaly_reasons),
+            selectinload(OptionAttachment.anomaly_positions)
         ).join(
-            Checklist, ChecklistTableOptionData.checklist_uid == Checklist.uid
+            OptionAttachmentForChecklist, OptionAttachmentForChecklist.option_attachment_uid == OptionAttachment.uid
+        ).join(
+            Checklist, OptionAttachmentForChecklist.checklist_uid == Checklist.uid
         ).join(
             Site, Checklist.site_uid == Site.uid
         ).join(
-            ChecklistTableOption, ChecklistTableOptionData.option_uid == ChecklistTableOption.uid
+            ChecklistTableOption, OptionAttachment.option_uid == ChecklistTableOption.uid
         ).where(
             and_(
-                ChecklistTableOptionData.option_uid.in_(uids),
-                ChecklistTableOptionData.value == '異常',
+                OptionAttachment.option_uid.in_(uids),
+                OptionAttachment.type == 'anomaly',
+                OptionAttachment.table_type == 'checklist',
                 Checklist.check_date.between(start_date, end_date)
             )
         ).order_by(Checklist.check_date.desc())
@@ -151,63 +159,48 @@ def detail():
         rows = session.execute(stmt).all()
 
         output = []
-        for r in rows:
-            # 2. 針對每筆異常資料，查詢對應的 OptionAttachment 記錄
-            stmt_attachment = select(OptionAttachment).options(
-                selectinload(OptionAttachment.anomaly_reasons),
-                selectinload(OptionAttachment.anomaly_positions)
-            ).join(
-                OptionAttachmentForChecklist, OptionAttachmentForChecklist.option_attachment_uid == OptionAttachment.uid
-            ).where(
-                and_(
-                    OptionAttachment.option_uid == r.option_uid,
-                    OptionAttachmentForChecklist.checklist_uid == r.checklist_uid,
-                    OptionAttachment.table_type == 'checklist'
-                )
-            )
-            attachments = session.scalars(stmt_attachment).all()
-
+        for att, checklist_uid, site_name, option_name in rows:
             reason = ""
             position = ""
             
-            for att in attachments:
-                if att.anomaly_reasons:
-                    reason_val_str = att.anomaly_reasons[0].value
-                    if reason_val_str:
-                        try:
-                            reason_val_int = int(reason_val_str)
-                            stmt_reason_setting = select(OptionAttachmentAnomalyReasonSetting).where(
-                                and_(
-                                    OptionAttachmentAnomalyReasonSetting.checklist_option_uid == r.option_uid,
-                                    OptionAttachmentAnomalyReasonSetting.value == reason_val_int
-                                )
+            if att.anomaly_reasons:
+                reason_val_str = att.anomaly_reasons[0].value
+                if reason_val_str:
+                    try:
+                        reason_val_int = int(reason_val_str)
+                        stmt_reason_setting = select(OptionAttachmentAnomalyReasonSetting).where(
+                            and_(
+                                OptionAttachmentAnomalyReasonSetting.checklist_option_uid == att.option_uid,
+                                OptionAttachmentAnomalyReasonSetting.value == reason_val_int
                             )
-                            reason_setting = session.scalar(stmt_reason_setting)
-                            if reason_setting:
-                                reason = reason_setting.name
-                            else:
-                                reason = reason_val_str
-                        except ValueError:
+                        )
+                        reason_setting = session.scalar(stmt_reason_setting)
+                        if reason_setting:
+                            reason = reason_setting.name
+                        else:
                             reason = reason_val_str
-                if att.anomaly_positions:
-                    pos = att.anomaly_positions[0]
-                    pos_parts = []
-                    if pos.inv is not None:
-                        pos_parts.append(f"inv:{pos.inv}")
-                    if pos.mppt is not None:
-                        pos_parts.append(f"mppt:{pos.mppt}")
-                    if pos.string is not None:
-                        pos_parts.append(f"string:{pos.string}")
-                    if pos.panel is not None:
-                        pos_parts.append(f"panel:{pos.panel}")
-                    if pos_parts:
-                        position = ", ".join(pos_parts)
+                    except ValueError:
+                        reason = reason_val_str
+                        
+            if att.anomaly_positions:
+                pos = att.anomaly_positions[0]
+                pos_parts = []
+                if pos.inv is not None:
+                    pos_parts.append(f"inv:{pos.inv}")
+                if pos.mppt is not None:
+                    pos_parts.append(f"mppt:{pos.mppt}")
+                if pos.string is not None:
+                    pos_parts.append(f"string:{pos.string}")
+                if pos.panel is not None:
+                    pos_parts.append(f"panel:{pos.panel}")
+                if pos_parts:
+                    position = ", ".join(pos_parts)
 
             output.append({
-                "checklist_uid": r.checklist_uid,
-                "option_uid": r.option_uid,
-                "site_name": r.site_name,
-                "option_name": r.option_name,
+                "checklist_uid": checklist_uid,
+                "option_uid": att.option_uid,
+                "site_name": site_name,
+                "option_name": option_name,
                 "reason": reason,
                 "position": position
             })
