@@ -595,7 +595,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="item in detailList" :key="item.checklist_uid + '-' + item.option_uid">
+                                <template x-for="(item, idx) in detailList" :key="item.attachment_uid ? item.attachment_uid : (item.checklist_uid + '-' + item.option_uid + '-' + idx)">
                                     <tr class="hover border-b border-base-100">
                                         <td class="font-semibold text-primary" x-text="item.site_name"></td>
                                         <td class="text-base-content/85 font-medium" x-text="item.option_name"></td>

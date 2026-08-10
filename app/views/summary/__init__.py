@@ -160,43 +160,48 @@ def detail():
 
         output = []
         for att, checklist_uid, site_name, option_name in rows:
-            reason = ""
-            position = ""
+            reasons_list = []
+            positions_list = []
             
             if att.anomaly_reasons:
-                reason_val_str = att.anomaly_reasons[0].value
-                if reason_val_str:
-                    try:
-                        reason_val_int = int(reason_val_str)
-                        stmt_reason_setting = select(OptionAttachmentAnomalyReasonSetting).where(
-                            and_(
-                                OptionAttachmentAnomalyReasonSetting.checklist_option_uid == att.option_uid,
-                                OptionAttachmentAnomalyReasonSetting.value == reason_val_int
+                for r_item in att.anomaly_reasons:
+                    reason_val_str = r_item.value
+                    if reason_val_str:
+                        try:
+                            reason_val_int = int(reason_val_str)
+                            stmt_reason_setting = select(OptionAttachmentAnomalyReasonSetting).where(
+                                and_(
+                                    OptionAttachmentAnomalyReasonSetting.checklist_option_uid == att.option_uid,
+                                    OptionAttachmentAnomalyReasonSetting.value == reason_val_int
+                                )
                             )
-                        )
-                        reason_setting = session.scalar(stmt_reason_setting)
-                        if reason_setting:
-                            reason = reason_setting.name
-                        else:
-                            reason = reason_val_str
-                    except ValueError:
-                        reason = reason_val_str
-                        
+                            reason_setting = session.scalar(stmt_reason_setting)
+                            if reason_setting:
+                                reasons_list.append(reason_setting.name)
+                            else:
+                                reasons_list.append(reason_val_str)
+                        except ValueError:
+                            reasons_list.append(reason_val_str)
+
             if att.anomaly_positions:
-                pos = att.anomaly_positions[0]
-                pos_parts = []
-                if pos.inv is not None:
-                    pos_parts.append(f"inv:{pos.inv}")
-                if pos.mppt is not None:
-                    pos_parts.append(f"mppt:{pos.mppt}")
-                if pos.string is not None:
-                    pos_parts.append(f"string:{pos.string}")
-                if pos.panel is not None:
-                    pos_parts.append(f"panel:{pos.panel}")
-                if pos_parts:
-                    position = ", ".join(pos_parts)
+                for pos in att.anomaly_positions:
+                    pos_parts = []
+                    if pos.inv is not None:
+                        pos_parts.append(f"inv:{pos.inv}")
+                    if pos.mppt is not None:
+                        pos_parts.append(f"mppt:{pos.mppt}")
+                    if pos.string is not None:
+                        pos_parts.append(f"string:{pos.string}")
+                    if pos.panel is not None:
+                        pos_parts.append(f"panel:{pos.panel}")
+                    if pos_parts:
+                        positions_list.append(", ".join(pos_parts))
+
+            reason = " / ".join(reasons_list)
+            position = "; ".join(positions_list)
 
             output.append({
+                "attachment_uid": att.uid,
                 "checklist_uid": checklist_uid,
                 "option_uid": att.option_uid,
                 "site_name": site_name,
@@ -206,3 +211,6 @@ def detail():
             })
 
     return jsonify(output)
+
+
+
