@@ -1,7 +1,7 @@
 {% extends 'global/base.html' %}
 
 {% block title %}
-未處理事項
+{% if data.site_uid == 'all' or data.site_uid == '0' %}全區未處理事項{% else %}未處理事項{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -10,63 +10,33 @@
         <div class="card-body">
             
             <h1 class="card-title text-3xl font-bold mb-6 pb-2 border-b border-base-200 flex items-center gap-2">
-                <i class="bi bi-list-task text-primary"></i>
-                未處理事項
+                <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                {% if data.site_uid == 'all' or data.site_uid == '0' %}全區未處理事項{% else %}未處理事項{% endif %}
             </h1>
 
-            <div class="mb-6">
-                <h6 class="font-bold mb-2 text-base-content/70">顯示篩選</h6>
-                
-                <div class="join w-full md:w-auto grid grid-cols-2 md:grid-cols-4">
-                    <input class="join-item btn btn-sm md:btn-md" 
-                           type="radio" 
-                           name="filter_state" 
-                           aria-label="全部" 
-                           value="All"
-                           checked
-                           hx-get="/api/checklist/anomaly_state/get_partial/{{data.site_uid}}"
-                           hx-target="#listContainer"
-                           hx-trigger="load, change" /> <input class="join-item btn btn-sm md:btn-md" 
-                           type="radio" 
-                           name="filter_state" 
-                           aria-label="未處理" 
-                           value="0"
-                           hx-get="/api/checklist/anomaly_state/get_partial/{{data.site_uid}}"
-                           hx-target="#listContainer"
-                           hx-trigger="change" />
-
-                    <input class="join-item btn btn-sm md:btn-md" 
-                           type="radio" 
-                           name="filter_state" 
-                           aria-label="已處理" 
-                           value="1"
-                           hx-get="/api/checklist/anomaly_state/get_partial/{{data.site_uid}}"
-                           hx-target="#listContainer"
-                           hx-trigger="change" />
-
-                    <input class="join-item btn btn-sm md:btn-md" 
-                           type="radio" 
-                           name="filter_state" 
-                           aria-label="不可處理" 
-                           value="2"
-                           hx-get="/api/checklist/anomaly_state/get_partial/{{data.site_uid}}"
-                           hx-target="#listContainer"
-                           hx-trigger="change" />
-                </div>
-            </div>
-
             <h6 class="font-bold mb-2 text-base-content/70">列表內容</h6>
-            <div id="listContainer" class="flex flex-col gap-3 min-h-[200px]">
-                <div class="flex justify-center items-center h-full text-base-content/50">
+            <div id="listContainer" 
+                 class="flex flex-col gap-3 min-h-[200px]"
+                 hx-get="/api/checklist/anomaly_state/get_partial/{{data.site_uid}}?filter_state=0"
+                 hx-target="#listContainer"
+                 hx-trigger="load">
+                <div class="flex justify-center items-center h-full text-base-content/50 py-12">
                     <span class="loading loading-spinner loading-lg"></span>
                 </div>
             </div>
 
             <div class="card-actions mt-8">
+                {% if data.site_uid == 'all' or data.site_uid == '0' %}
+                <a class="btn btn-neutral btn-outline gap-2" href="/choose_region/" role="button">
+                    <i class="bi bi-arrow-return-left"></i>
+                    返回首頁
+                </a>
+                {% else %}
                 <a class="btn btn-neutral btn-outline gap-2" href="/site/{{data.site_uid}}/" role="button">
                     <i class="bi bi-arrow-return-left"></i>
                     返回
                 </a>
+                {% endif %}
             </div>
 
         </div>

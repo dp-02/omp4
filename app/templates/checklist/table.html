@@ -4,6 +4,19 @@
 {{data.table_name}}
 {% endblock %}
 
+{% block style %}
+<style>
+    :target {
+        animation: highlight 3s ease-in-out;
+        scroll-margin-top: 5rem;
+    }
+    @keyframes highlight {
+        0%, 30% { background-color: rgba(250, 204, 21, 0.25); border-color: rgba(250, 204, 21, 0.8); }
+        100% { background-color: transparent; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 {% set table_uid = data.table_uid %}
 
@@ -77,8 +90,8 @@
                     {% for data_o in data.options %}
                     {% set current_val = data.saved.get(data_o.uid) %}
                     {% if data.table_name == "熱影像檢測紀錄表" %}
-                    <div class="form-control py-4 border-b border-base-200 last:border-none hover:bg-base-[var(--b2,hex)] transition-colors px-2 rounded-lg">
-                        <div class="mb-3" id="option{{loop.index}}">
+                    <div class="form-control py-4 border-b border-base-200 last:border-none hover:bg-base-[var(--b2,hex)] transition-colors px-2 rounded-lg" id="option{{data_o.sort if data_o.sort else loop.index}}">
+                        <div class="mb-3" id="option_num{{loop.index}}">
                             <span class="font-bold text-lg text-base-content">
                                 <span class="badge badge-neutral mr-2">{{ loop.index }}</span>
                                 {{data_o.name}}
@@ -113,8 +126,8 @@
                         {% endwith %}
                     </div>
                     {% else %}
-                    <div class="form-control py-4 border-b border-base-200 last:border-none hover:bg-base-[var(--b2,hex)] transition-colors px-2 rounded-lg">
-                        <div class="mb-3" id="option{{loop.index}}">
+                    <div class="form-control py-4 border-b border-base-200 last:border-none hover:bg-base-[var(--b2,hex)] transition-colors px-2 rounded-lg" id="option{{data_o.sort if data_o.sort else loop.index}}">
+                        <div class="mb-3" id="option_num{{loop.index}}">
                             <span class="font-bold text-lg text-base-content">
                                 <span class="badge badge-neutral mr-2">{{ loop.index }}</span>
                                 {{data_o.name}}

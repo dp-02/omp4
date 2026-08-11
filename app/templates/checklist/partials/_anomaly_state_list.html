@@ -33,9 +33,13 @@
                     </span>
                 </div>
 
-                {# 內容路徑：表名 > 選項名 #}
+                {# 內容路徑：案場 > 表名 > 選項名 #}
                 <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-sm md:text-base font-medium truncate">
                     <i class="bi bi-chevron-right text-xs opacity-40 hidden md:block"></i>
+                    {% if item.site_name %}
+                    <span class="font-bold text-primary opacity-90">{{ item.site_name }}</span>
+                    <i class="bi bi-chevron-right text-xs opacity-40 hidden md:block"></i>
+                    {% endif %}
                     <span class="opacity-75">{{ item.table_name }}</span>
                     <i class="bi bi-chevron-right text-xs opacity-40 hidden md:block"></i>
                     <span class="font-bold opacity-100 truncate">{{ item.option_name }}</span>

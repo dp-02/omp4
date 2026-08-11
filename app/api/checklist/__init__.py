@@ -11,7 +11,8 @@ from app.models import (
     ChecklistTableOptionData,
     OptionAttachment,
     OptionAttachmentAnomalyState,
-    OptionAttachmentForChecklist
+    OptionAttachmentForChecklist,
+    Site
 )
 
 blueprint = Blueprint('api_checklist', __name__)
@@ -120,78 +121,66 @@ def api_delete_checklist(checklist_uid):
 def get_anomaly_state_list_partial(site_uid):
     '''未處理事項'''
     data_options = []
-    filter_state = request.args.get('filter_state', 'All') 
+    filter_state = request.args.get('filter_state', '0') 
+
+    is_all_sites = str(site_uid).lower() in ['all', '0']
 
     with session_scope() as session:
-        stmt = None
-        if filter_state == 'All':
-            stmt = select(OptionAttachment,
-                          OptionAttachmentAnomalyState.value,
-                          ChecklistTableOption.name,
-                          ChecklistTableOption.sort,
-                          ChecklistTable.uid,
-                          ChecklistTable.name,
-                          Checklist.uid,
-                          Checklist.check_date,
-                          Checklist.check_type,
-                          ).join(
-                ChecklistTableOptionData, OptionAttachment.option_uid == ChecklistTableOptionData.option_uid
-            ).join(
-                OptionAttachmentAnomalyState, OptionAttachmentAnomalyState.option_attachment_uid == OptionAttachment.uid
-            ).join(
-                ChecklistTableOption, ChecklistTableOption.uid == ChecklistTableOptionData.option_uid
-            ).join(
-                ChecklistTable, ChecklistTable.uid == ChecklistTableOption.table_uid
-            ).join(
-                Checklist, Checklist.uid == ChecklistTableOptionData.checklist_uid
-            ).join(
-                OptionAttachmentForChecklist, OptionAttachment.uid == OptionAttachmentForChecklist.option_attachment_uid
-            ).where(
-                Checklist.uid == OptionAttachmentForChecklist.checklist_uid,
-                Checklist.site_uid == site_uid,
-                OptionAttachment.type == "anomaly"
-            ).order_by(Checklist.check_date.desc())
-        else:
-            stmt = select(OptionAttachment,
-                          OptionAttachmentAnomalyState.value,
-                          ChecklistTableOption.name,
-                          ChecklistTableOption.sort,
-                          ChecklistTable.uid,
-                          ChecklistTable.name,
-                          Checklist.uid,
-                          Checklist.check_date,
-                          Checklist.check_type,
-                          ).join(
-                ChecklistTableOptionData, OptionAttachment.option_uid == ChecklistTableOptionData.option_uid
-            ).join(
-                OptionAttachmentAnomalyState, OptionAttachmentAnomalyState.option_attachment_uid == OptionAttachment.uid
-            ).join(
-                ChecklistTableOption, ChecklistTableOption.uid == ChecklistTableOptionData.option_uid
-            ).join(
-                ChecklistTable, ChecklistTable.uid == ChecklistTableOption.table_uid
-            ).join(
-                Checklist, Checklist.uid == ChecklistTableOptionData.checklist_uid
-            ).where(
-                OptionAttachmentAnomalyState.value == filter_state
-            ).join(
-                OptionAttachmentForChecklist, OptionAttachment.uid == OptionAttachmentForChecklist.option_attachment_uid
-            ).where(
-                Checklist.uid == OptionAttachmentForChecklist.checklist_uid,
-                Checklist.site_uid == site_uid,
-                OptionAttachment.type == "anomaly"
-            ).order_by(Checklist.check_date.desc())
-        options = session.execute(stmt).all()
+        base_query = select(
+            OptionAttachment,
+            OptionAttachmentAnomalyState.value,
+            ChecklistTableOption.name,
+            ChecklistTableOption.sort,
+            ChecklistTable.uid,
+            ChecklistTable.name,
+            Checklist.uid,
+            Checklist.check_date,
+            Checklist.check_type,
+            Site.name.label('site_name'),
+            Site.uid.label('item_site_uid')
+        ).join(
+            ChecklistTableOptionData, OptionAttachment.option_uid == ChecklistTableOptionData.option_uid
+        ).join(
+            OptionAttachmentAnomalyState, OptionAttachmentAnomalyState.option_attachment_uid == OptionAttachment.uid
+        ).join(
+            ChecklistTableOption, ChecklistTableOption.uid == ChecklistTableOptionData.option_uid
+        ).join(
+            ChecklistTable, ChecklistTable.uid == ChecklistTableOption.table_uid
+        ).join(
+            Checklist, Checklist.uid == ChecklistTableOptionData.checklist_uid
+        ).join(
+            Site, Checklist.site_uid == Site.uid
+        ).join(
+            OptionAttachmentForChecklist, OptionAttachment.uid == OptionAttachmentForChecklist.option_attachment_uid
+        ).where(
+            Checklist.uid == OptionAttachmentForChecklist.checklist_uid,
+            OptionAttachment.type == "anomaly"
+        )
+
+        if not is_all_sites:
+            try:
+                base_query = base_query.where(Checklist.site_uid == int(site_uid))
+            except ValueError:
+                pass
+
+        if filter_state != 'All':
+            base_query = base_query.where(OptionAttachmentAnomalyState.value == filter_state)
+
+        base_query = base_query.order_by(Checklist.check_date.desc())
+        options = session.execute(base_query).all()
+
         for data_o in options:
             data_options.append({
-                "site_uid":site_uid,
-                "check_type":data_o[8],
-                "checklist_uid":data_o[6],
-                "table_uid":data_o[4],
-                "table_name":data_o[5],
-                "state":data_o[1],
-                "check_date":data_o[7],
-                "option_sort":data_o[3],
-                "option_name":data_o[2]
+                "site_uid": data_o[10],
+                "site_name": data_o[9],
+                "check_type": data_o[8],
+                "checklist_uid": data_o[6],
+                "table_uid": data_o[4],
+                "table_name": data_o[5],
+                "state": data_o[1],
+                "check_date": data_o[7],
+                "option_sort": data_o[3],
+                "option_name": data_o[2]
             })
 
     return render_template('checklist/partials/_anomaly_state_list.html', data_options=data_options)

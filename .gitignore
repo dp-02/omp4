@@ -1,5 +1,7 @@
-# 上傳檔案與資料（避免照片、說明文字進入 Git）
+# 雲端/本地數據庫與資料
 /uploads/
+instance/
+*.db
 
 # Python 編譯暫存檔
 __pycache__/

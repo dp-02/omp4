@@ -597,7 +597,9 @@
                             <tbody>
                                 <template x-for="(item, idx) in detailList" :key="item.attachment_uid ? item.attachment_uid : (item.checklist_uid + '-' + item.option_uid + '-' + idx)">
                                     <tr class="hover border-b border-base-100">
-                                        <td class="font-semibold text-primary" x-text="item.site_name"></td>
+                                        <td class="font-semibold text-primary">
+                                            <a :href="item.target_url" class="hover:underline hover:text-primary-focus transition-colors inline-block" title="點擊前往該檢測項目位置" x-text="item.site_name"></a>
+                                        </td>
                                         <td class="text-base-content/85 font-medium" x-text="item.option_name"></td>
                                         <td class="text-xs text-base-content/80 break-words" x-text="item.reason || '-'"></td>
                                         <td class="text-xs text-base-content/80 break-words" x-text="item.position || '-'"></td>

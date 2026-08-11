@@ -288,7 +288,7 @@ def create_rport(site_uid, check_type, checklist_uid):
                     data['table'][checklist_table.uid]['options'][checklist_table_option.uid]['attachment'].append(option_attachment.uid)
     return render_template('checklist/createReport.html', data = data)
 
-@blueprint.route('/<int:site_uid>/anomaly_state/')
+@blueprint.route('/<site_uid>/anomaly_state/')
 @login_required
 def anomaly_state(site_uid):
     ''' 未處裡事項 '''

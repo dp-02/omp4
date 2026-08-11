@@ -135,10 +135,15 @@ def detail():
             OptionAttachment,
             OptionAttachmentForChecklist.checklist_uid,
             Site.name.label('site_name'),
-            ChecklistTableOption.name.label('option_name')
+            ChecklistTableOption.name.label('option_name'),
+            ChecklistTableOption.table_uid.label('table_uid'),
+            ChecklistTableOption.sort.label('option_sort'),
+            Checklist.check_type.label('check_type'),
+            Checklist.site_uid.label('site_uid')
         ).options(
             selectinload(OptionAttachment.anomaly_reasons),
-            selectinload(OptionAttachment.anomaly_positions)
+            selectinload(OptionAttachment.anomaly_positions),
+            selectinload(OptionAttachment.notes)
         ).join(
             OptionAttachmentForChecklist, OptionAttachmentForChecklist.option_attachment_uid == OptionAttachment.uid
         ).join(
@@ -159,9 +164,10 @@ def detail():
         rows = session.execute(stmt).all()
 
         output = []
-        for att, checklist_uid, site_name, option_name in rows:
+        for att, checklist_uid, site_name, option_name, table_uid, option_sort, check_type, site_uid in rows:
             reasons_list = []
             positions_list = []
+            notes_list = []
             
             if att.anomaly_reasons:
                 for r_item in att.anomaly_reasons:
@@ -197,17 +203,37 @@ def detail():
                     if pos_parts:
                         positions_list.append(", ".join(pos_parts))
 
-            reason = " / ".join(reasons_list)
+            if att.notes:
+                for note_item in att.notes:
+                    if note_item.value and note_item.value.strip():
+                        notes_list.append(note_item.value.strip())
+
+            reason = " / ".join(reasons_list).strip()
+            note_str = " / ".join(notes_list).strip()
+
+            # 若「原因」欄位沒有資料，則自動填寫「說明」內的文字描述
+            if not reason and note_str:
+                reason = note_str
+
             position = "; ".join(positions_list)
+
+            opt_sort = option_sort if option_sort is not None else 1
+            target_url = f"/checklist/{site_uid}/{check_type}/{checklist_uid}/{table_uid}/#option{opt_sort}"
 
             output.append({
                 "attachment_uid": att.uid,
                 "checklist_uid": checklist_uid,
                 "option_uid": att.option_uid,
+                "site_uid": site_uid,
+                "check_type": check_type,
+                "table_uid": table_uid,
+                "option_sort": opt_sort,
                 "site_name": site_name,
                 "option_name": option_name,
                 "reason": reason,
-                "position": position
+                "note": note_str,
+                "position": position,
+                "target_url": target_url
             })
 
     return jsonify(output)
