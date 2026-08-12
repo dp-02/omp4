@@ -9,6 +9,13 @@ WORKDIR /app
 # 3. 複製 requirements.txt 到容器中
 COPY requirements.txt .
 
+RUN apt-get update && apt-get install -y \
+    gcc \
+    pkg-config \
+    default-libmysqlclient-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 # 4. 安裝依賴套件
 # --no-cache-dir 可以減少 Image 的體積
 RUN pip install --no-cache-dir -r requirements.txt
