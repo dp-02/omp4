@@ -27,7 +27,14 @@
 
 {% macro render_sld(phase_idx, inverter_idx, sld_idx, data) %}
 {% set p, inv, s = phase_idx, inverter_idx, sld_idx %}
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-2 p-2 rounded-lg bg-base-200/50 border border-base-300 text-sm">
+{% set raw_watt = data.get('sld_module_wattage' ~ p ~ '_' ~ inv ~ '_' ~ s, '') %}
+{% if raw_watt != '' and raw_watt is not none %}
+    {% set raw_watt_str = raw_watt|string %}
+    {% if raw_watt_str.endswith('.0') %}
+        {% set raw_watt = raw_watt_str[:-2] %}
+    {% endif %}
+{% endif %}
+<div class="grid grid-cols-7 gap-3 mb-2 p-3 rounded-lg bg-base-200/50 border border-base-300 text-sm">
     <div class="form-control">
         <label class="label py-0"><span class="label-text text-xs">inv</span></label>
         <input type="text" class="input input-bordered input-xs w-full" name="sld_inv{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_inv' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}">
@@ -50,7 +57,7 @@
     </div>
     <div class="form-control">
         <label class="label py-0"><span class="label-text text-xs">模組瓦數</span></label>
-        <input type="number" class="input input-bordered input-xs w-full" name="sld_module_wattage{{ p }}_{{ inv }}_{{ s }}" value="{{ data.get('sld_module_wattage' ~ p ~ '_' ~ inv ~ '_' ~ s, '') }}" step="0.01">
+        <input type="number" class="input input-bordered input-xs w-full" name="sld_module_wattage{{ p }}_{{ inv }}_{{ s }}" value="{{ raw_watt }}" step="1">
     </div>
     <div class="form-control">
         <label class="label py-0"><span class="label-text text-xs">模組片數</span></label>

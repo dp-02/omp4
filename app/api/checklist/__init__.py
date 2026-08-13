@@ -121,7 +121,7 @@ def api_delete_checklist(checklist_uid):
 def get_anomaly_state_list_partial(site_uid):
     '''未處理事項'''
     data_options = []
-    filter_state = request.args.get('filter_state', '0') 
+    filter_state = request.args.get('filter_state', 'All') 
 
     is_all_sites = str(site_uid).lower() in ['all', '0']
 

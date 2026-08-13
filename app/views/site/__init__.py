@@ -90,7 +90,11 @@ def update(site_uid):
                     form_data[f'sld_string{i}_{j}_{k}'] = sld.string or ''
                     form_data[f'sld_orientation{i}_{j}_{k}'] = sld.orientation or ''
                     form_data[f'sld_tilt_angle{i}_{j}_{k}'] = sld.tilt_angle if sld.tilt_angle is not None else ''
-                    form_data[f'sld_module_wattage{i}_{j}_{k}'] = sld.module_wattage if sld.module_wattage is not None else ''
+                    watt_val = sld.module_wattage
+                    if watt_val is not None:
+                        form_data[f'sld_module_wattage{i}_{j}_{k}'] = int(watt_val) if watt_val == int(watt_val) else watt_val
+                    else:
+                        form_data[f'sld_module_wattage{i}_{j}_{k}'] = ''
                     form_data[f'sld_module_count{i}_{j}_{k}'] = sld.module_count if sld.module_count is not None else ''
             stmt_mod = select(SitePhaseModule).where(SitePhaseModule.phase_uid == phase.uid)
             modules = session.scalars(stmt_mod).all()
